@@ -2,6 +2,7 @@
 <PageTitle>Workouts</PageTitle>
 
 @inject IViewWorkoutsByUserIdUseCase ViewWorkoutsByUserIdUseCase
+@inject IDeleteWorkoutUseCase DeleteWorkoutUseCase
 
 <div style="margin-bottom: 25px;">
     <MudCard>
@@ -33,7 +34,7 @@
                                     @{
                                         <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open workout options">
                                              <MudMenuItem Href="@($"workouts/editworkout/{workout.Id}")">Edit</MudMenuItem>
-                                            <MudMenuItem>Delete</MudMenuItem>
+                                            <MudMenuItem OnClick="() => DeleteWorkout(workout.Id)">Delete</MudMenuItem>
                                         </MudMenu>
                                     }
                                 </td>
@@ -57,5 +58,13 @@
     protected override async Task OnInitializedAsync()
     {
         UserWorkouts = (await ViewWorkoutsByUserIdUseCase.ExecuteAsync(1)).ToList();
+    }
+
+    private async Task DeleteWorkout(int workoutId)
+    {
+        var workoutToDelete = UserWorkouts.First(x => x.Id == workoutId);
+        UserWorkouts.Remove(workoutToDelete);
+
+        await DeleteWorkoutUseCase.ExecuteAsync(workoutId);
     }
 }

@@ -19,6 +19,8 @@ builder.Services.AddTransient<IAddWorkoutUseCase, AddWorkoutUseCase>();
 builder.Services.AddTransient<IEditWorkoutUseCase, EditWorkoutUseCase>();
 builder.Services.AddTransient<IViewWorkoutsByUserIdUseCase, ViewWorkoutsByUserIdUseCase>();
 builder.Services.AddTransient<IViewWorkoutUseCase, ViewWorkoutUseCase>();
+builder.Services.AddTransient<IDeleteWorkoutUseCase, DeleteWorkoutUseCase>();
+
 
 var app = builder.Build();
 

@@ -44,51 +44,44 @@ public class WorkoutRepository : IWorkoutRepository
         return Task.CompletedTask;
     }
 
-    public async Task<Workout> GetWorkoutAsync(int id)
+    public Task DeleteWorkoutAsync(int workoutId)
     {
-        var UserWorkouts = (await GetWorkoutsByUserIdAsync(id)).ToList();
-
-        return UserWorkouts.First(w => w.Id == id);
+        var workoutToDelete = _workouts.First(x => x.Id == workoutId);
+        _workouts.Remove(workoutToDelete);
+        return Task.CompletedTask;
     }
 
-    public async Task<IEnumerable<Workout>> GetWorkoutsByUserIdAsync(int userId)
+    public Task<Workout> GetWorkoutAsync(int id)
     {
-        return _workouts.Where(x => x.UserId == userId);
+        var userWorkouts = GetWorkoutsByUserIdAsync(id).Result.ToList();
+        return Task.FromResult(userWorkouts.First(w => w.Id == id));
     }
 
-    public async Task UpdateWorkoutAsync(Workout workout)
+    public Task<IEnumerable<Workout>> GetWorkoutsByUserIdAsync(int userId)
+    {
+        return Task.FromResult(_workouts.Where(x => x.UserId == userId));
+    }
+
+    public Task UpdateWorkoutAsync(Workout workout)
     {
         var workoutToUpdate = _workouts.FirstOrDefault(x => x.Id == workout.Id);
         if (workoutToUpdate is not null)
         {
             workoutToUpdate.Name = workout.Name;
-
             // Update the exercises
             foreach (var exercise in workoutToUpdate.Exercises)
             {
                 var exerciseToUpdate = workout.Exercises.FirstOrDefault(e => e.Id == exercise.Id);
                 if (exerciseToUpdate is not null)
                 {
-                    exercise.Name = exerciseToUpdate.Name;
-                    exercise.Sets = exerciseToUpdate.Sets;
-                    exercise.Reps = exerciseToUpdate.Reps;
-                    exercise.Weight = exerciseToUpdate.Weight;
-                    exercise.Notes = exerciseToUpdate.Notes;
+                    exerciseToUpdate.Name = exercise.Name;
+                    exerciseToUpdate.Sets = exercise.Sets;
+                    exerciseToUpdate.Reps = exercise.Reps;
+                    exerciseToUpdate.Weight = exercise.Weight;
+                    exerciseToUpdate.Notes = exercise.Notes;
                 }
             }
-
-            // Add new exercises
-            foreach (var newExercise in workout.Exercises.Where(e => e.Id > workout.Exercises.Count()))
-            {
-                workoutToUpdate.Exercises.Add(newExercise);
-            }
-
-            // Remove deleted exercises
-            var deletedExercises = workoutToUpdate.Exercises.Where(e => !workout.Exercises.Any(x => x.Id == e.Id)).ToList();
-            foreach (var deletedExercise in deletedExercises)
-            {
-                workoutToUpdate.Exercises.Remove(deletedExercise);
-            }
         }
+        return Task.CompletedTask;
     }
 }
