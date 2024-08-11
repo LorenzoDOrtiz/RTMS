@@ -1,0 +1,61 @@
+﻿@page "/workouts"
+<PageTitle>Workouts</PageTitle>
+
+@inject IViewWorkoutsByUserIdUseCase ViewWorkoutsByUserIdUseCase
+
+<div style="margin-bottom: 25px;">
+    <MudCard>
+        <MudCardContent>
+            <MudStack Spacing="5">
+                <MudSimpleTable Style="overflow-x: auto;">
+                    <thead>
+                        <tr>
+                            <th>Workout Name</th>
+                            <th></th>
+                            <th></th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var workout in UserWorkouts)
+                        {
+                            <tr>
+
+                                <td>@workout.Name</td>
+
+                                <td>
+                                    @{
+                                        <MudButton Class="mud-theme-primary" Variant="Variant.Filled">Start</MudButton>
+                                    }
+                                </td>
+
+                                <td>
+                                    @{
+                                        <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open workout options">
+                                             <MudMenuItem Href="@($"workouts/editworkout/{workout.Id}")">Edit</MudMenuItem>
+                                            <MudMenuItem>Delete</MudMenuItem>
+                                        </MudMenu>
+                                    }
+                                </td>
+
+                            </tr>
+                        }
+                    </tbody>
+                </MudSimpleTable>
+                <MudButton Href="workouts/addworkout" Class="mud-theme-primary" Variant="Variant.Filled" Style="width: 150px;">
+                    Add Workout
+                </MudButton>
+            </MudStack>
+        </MudCardContent>
+    </MudCard>
+</div>
+
+
+@code {
+    private List<Workout>? UserWorkouts { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        UserWorkouts = (await ViewWorkoutsByUserIdUseCase.ExecuteAsync(1)).ToList();
+    }
+}

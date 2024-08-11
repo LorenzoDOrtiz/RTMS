@@ -1,4 +1,8 @@
 using MudBlazor.Services;
+using RTMS.Plugins.InMemory;
+using RTMS.UseCases.PluginInterfaces;
+using RTMS.UseCases.Workouts;
+using RTMS.UseCases.Workouts.Interfaces;
 using RTMS.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +12,13 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddMudServices();
+
+builder.Services.AddSingleton<IWorkoutRepository, WorkoutRepository>();
+
+builder.Services.AddTransient<IAddWorkoutUseCase, AddWorkoutUseCase>();
+builder.Services.AddTransient<IEditWorkoutUseCase, EditWorkoutUseCase>();
+builder.Services.AddTransient<IViewWorkoutsByUserIdUseCase, ViewWorkoutsByUserIdUseCase>();
+builder.Services.AddTransient<IViewWorkoutUseCase, ViewWorkoutUseCase>();
 
 var app = builder.Build();
 

@@ -10,4 +10,13 @@
     <PackageReference Include="MudBlazor" Version="7.5.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\RTMS.CoreBusiness\RTMS.CoreBusiness.csproj" />
+    <ProjectReference Include="..\RTMS.Plugins\RTMS.Plugins.InMemory\RTMS.Plugins.InMemory.csproj" />
+    <ProjectReference Include="..\RTMS.UseCases\RTMS.UseCases.csproj" />
+  </ItemGroup>
+	
+	<Target Name="CollectMudBlazorStaticAssets" DependsOnTargets="ResolveStaticWebAssetsInputs" AfterTargets="Build" Condition=" '$(Configuration)' == 'Debug' ">
+		<Copy SourceFiles="%(StaticWebAsset.Identity)" DestinationFolder="wwwroot/temp" Condition="$([System.String]::Copy(%(StaticWebAsset.Identity)).Contains('mudblazor'))" />
+	</Target>
 </Project>

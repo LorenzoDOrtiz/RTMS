@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\RTMS.UseCases\RTMS.UseCases.csproj" />
+  </ItemGroup>
+
 </Project>
