@@ -53,7 +53,8 @@ public class WorkoutRepository : IWorkoutRepository
 
     public Task<Workout> GetWorkoutAsync(int id)
     {
-        var userWorkouts = GetWorkoutsByUserIdAsync(id).Result.ToList();
+        // userId is set to 1 for now until identity is added.
+        var userWorkouts = GetWorkoutsByUserIdAsync(1).Result.ToList();
         return Task.FromResult(userWorkouts.First(w => w.Id == id));
     }
 
@@ -69,18 +70,25 @@ public class WorkoutRepository : IWorkoutRepository
         {
             workoutToUpdate.Name = workout.Name;
             // Update the exercises
-            foreach (var exercise in workoutToUpdate.Exercises)
+            foreach (var incomingExercise in workout.Exercises)
             {
-                var exerciseToUpdate = workout.Exercises.FirstOrDefault(e => e.Id == exercise.Id);
-                if (exerciseToUpdate is not null)
+                var existingExercise = workoutToUpdate.Exercises.FirstOrDefault(e => e.Id == incomingExercise.Id);
+                if (existingExercise is not null)
                 {
-                    exerciseToUpdate.Name = exercise.Name;
-                    exerciseToUpdate.Sets = exercise.Sets;
-                    exerciseToUpdate.Reps = exercise.Reps;
-                    exerciseToUpdate.Weight = exercise.Weight;
-                    exerciseToUpdate.Notes = exercise.Notes;
+                    existingExercise.Name = incomingExercise.Name;
+                    existingExercise.Sets = incomingExercise.Sets;
+                    existingExercise.Reps = incomingExercise.Reps;
+                    existingExercise.Weight = incomingExercise.Weight;
+                    existingExercise.Notes = incomingExercise.Notes;
+                }
+                else
+                {
+                    // This is a new exercise, add it to the workout
+                    workoutToUpdate.Exercises.Add(incomingExercise);
                 }
             }
+            // Remove exercises that are no longer in the incoming workout
+            workoutToUpdate.Exercises.RemoveAll(e => !workout.Exercises.Any(incomingE => incomingE.Id == e.Id));
         }
         return Task.CompletedTask;
     }

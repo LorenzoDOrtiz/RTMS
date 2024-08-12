@@ -1,0 +1,43 @@
+﻿@inject IViewWorkoutsByUserIdUseCase ViewWorkoutsByUserIdUseCase
+
+<MudCard>
+    <MudCardContent>
+        <MudStack Spacing="5">
+            <MudSimpleTable Style="overflow-x: auto;">
+                <thead>
+                    <tr>
+                        <th>Workout Name</th>
+                        <th></th>
+                        <th></th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (userWorkouts is not null && userWorkouts.Count > 0)
+                    {
+                        @foreach (var workout in userWorkouts)
+                        {
+                            <WorkoutTemplatesItemComponent Workout="workout" />
+                        }
+                    }
+
+                </tbody>
+            </MudSimpleTable>
+            <MudButton Href="workouts/addworkout" Class="mud-theme-primary" Variant="Variant.Filled" Style="width: 150px;">
+                Add Workout
+            </MudButton>
+        </MudStack>
+    </MudCardContent>
+</MudCard>
+
+@code {
+
+    private List<Workout>? userWorkouts;
+
+    private int userId = 1;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        userWorkouts = (await ViewWorkoutsByUserIdUseCase.ExecuteAsync(userId)).ToList();
+    }
+}

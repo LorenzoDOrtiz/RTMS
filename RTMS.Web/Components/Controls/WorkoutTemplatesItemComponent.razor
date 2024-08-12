@@ -1,0 +1,39 @@
+﻿@inject IDeleteWorkoutUseCase DeleteWorkoutUseCase
+@inject NavigationManager NavigationManager
+
+@if (Workout is not null)
+{
+
+    <tr>
+
+        <td>@Workout.Name</td>
+
+        <td>
+            @{
+                <MudButton Class="mud-theme-primary" Variant="Variant.Filled">Start</MudButton>
+            }
+        </td>
+
+        <td>
+            @{
+                <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open workout options">
+                    <MudMenuItem Href="@($"workouts/editworkout/{Workout.Id}")">Edit</MudMenuItem>
+                    <MudMenuItem OnClick="async () => { await HandleDelete(Workout.Id); }">Delete</MudMenuItem>
+                </MudMenu>
+            }
+        </td>
+
+    </tr>
+
+}
+
+@code {
+    [Parameter]
+    public Workout? Workout { get; set; }
+
+    private async Task HandleDelete(int workoutId)
+    {
+        await DeleteWorkoutUseCase.ExecuteAsync(workoutId);
+        Workout = null;
+    }
+}

@@ -1,12 +1,10 @@
-﻿@page "/workouts/editworkout/{Id:int}"
+﻿@page "/workouts/addworkout"
 
-@inject IViewWorkoutUseCase ViewWorkoutUseCase
-@inject IEditWorkoutUseCase EditWorkoutUseCase
+@inject IAddWorkoutUseCase AddWorkoutUseCase
 @inject NavigationManager NavigationManager
 
-<PageTitle>Edit Workout</PageTitle>
-
-<h3>Edit Workout</h3>
+<PageTitle>Add Workout</PageTitle>
+<h3>Add Workout</h3>
 
 <MudCard>
     <MudCardContent>
@@ -35,25 +33,12 @@
             {
                 <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="mt-4">Save Workout</MudButton>
             }
-            
-            <MudButton Href="/workouts" Variant="Variant.Filled" Color="Color.Primary" Class="mt-4">Cancel</MudButton>
-
         </EditForm>
     </MudCardContent>
 </MudCard>
 
 @code {
-    [Parameter]
-    public int Id { get; set; }
-
-    private Workout? workout;
-
-    protected override async Task OnInitializedAsync()
-    {
-        // Use the Id to fetch the workout details and populate the form
-        workout = await ViewWorkoutUseCase.ExecuteAsync(Id);
-        // Set the workout details to the form fields
-    }
+    private Workout workout = new();
 
     private void AddExercise()
     {
@@ -63,7 +48,7 @@
 
     private async Task SaveWorkout()
     {
-        await EditWorkoutUseCase.ExecuteAsync(workout);
+        await AddWorkoutUseCase.ExecuteAsync(workout);
         NavigationManager.NavigateTo("/workouts");
     }
 }
