@@ -1,12 +1,12 @@
-﻿@inject IDeleteWorkoutUseCase DeleteWorkoutUseCase
+﻿@inject IDeleteWorkoutTemplateUseCase DeleteWorkoutUseCase
 @inject NavigationManager NavigationManager
 
-@if (Workout is not null)
+@if (WorkoutTemplate is not null)
 {
 
     <tr>
 
-        <td>@Workout.Name</td>
+        <td>@WorkoutTemplate.Name</td>
 
         <td>
             @{
@@ -17,8 +17,8 @@
         <td>
             @{
                 <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open workout options">
-                    <MudMenuItem Href="@($"workouts/editworkout/{Workout.Id}")">Edit</MudMenuItem>
-                    <MudMenuItem OnClick="async () => { await HandleDelete(Workout.Id); }">Delete</MudMenuItem>
+                    <MudMenuItem Href="@($"workouts/editworkouttemplate/{WorkoutTemplate.Id}")">Edit</MudMenuItem>
+                    <MudMenuItem OnClick="async () => { await HandleDelete(WorkoutTemplate.Id); }">Delete</MudMenuItem>
                 </MudMenu>
             }
         </td>
@@ -29,11 +29,11 @@
 
 @code {
     [Parameter]
-    public Workout? Workout { get; set; }
+    public WorkoutTemplate? WorkoutTemplate { get; set; }
 
     private async Task HandleDelete(int workoutId)
     {
         await DeleteWorkoutUseCase.ExecuteAsync(workoutId);
-        Workout = null;
+        WorkoutTemplate = null;
     }
 }

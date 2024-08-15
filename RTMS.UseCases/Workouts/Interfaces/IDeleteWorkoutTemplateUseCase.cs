@@ -1,7 +1,7 @@
 ﻿
 namespace RTMS.UseCases.Workouts.Interfaces;
 
-public interface IDeleteWorkoutUseCase
+public interface IDeleteWorkoutTemplateUseCase
 {
     Task ExecuteAsync(int workoutId);
 }

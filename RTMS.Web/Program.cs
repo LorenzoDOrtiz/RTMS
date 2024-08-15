@@ -15,11 +15,11 @@ builder.Services.AddMudServices();
 
 builder.Services.AddSingleton<IWorkoutRepository, WorkoutRepository>();
 
-builder.Services.AddTransient<IAddWorkoutUseCase, AddWorkoutUseCase>();
-builder.Services.AddTransient<IEditWorkoutUseCase, EditWorkoutUseCase>();
-builder.Services.AddTransient<IViewWorkoutsByUserIdUseCase, ViewWorkoutsByUserIdUseCase>();
-builder.Services.AddTransient<IViewWorkoutUseCase, ViewWorkoutUseCase>();
-builder.Services.AddTransient<IDeleteWorkoutUseCase, DeleteWorkoutUseCase>();
+builder.Services.AddTransient<IAddWorkoutTemplateUseCase, AddWorkoutTemplateUseCase>();
+builder.Services.AddTransient<IEditWorkoutTemlateUseCase, EditWorkoutTemlateUseCase>();
+builder.Services.AddTransient<IViewWorkoutTemplatesByUserIdUseCase, ViewWorkoutTemplatesByUserIdUseCase>();
+builder.Services.AddTransient<IViewWorkoutTemplateUseCase, ViewWorkoutTemplateUseCase>();
+builder.Services.AddTransient<IDeleteWorkoutTemplateUseCase, DeleteWorkoutTemplateUseCase>();
 
 
 var app = builder.Build();

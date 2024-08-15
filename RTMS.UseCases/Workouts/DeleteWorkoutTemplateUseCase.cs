@@ -2,11 +2,11 @@
 using RTMS.UseCases.Workouts.Interfaces;
 
 namespace RTMS.UseCases.Workouts;
-public class DeleteWorkoutUseCase : IDeleteWorkoutUseCase
+public class DeleteWorkoutTemplateUseCase : IDeleteWorkoutTemplateUseCase
 {
     private readonly IWorkoutRepository _workoutRepository;
 
-    public DeleteWorkoutUseCase(IWorkoutRepository workoutRepository)
+    public DeleteWorkoutTemplateUseCase(IWorkoutRepository workoutRepository)
     {
         _workoutRepository = workoutRepository;
     }

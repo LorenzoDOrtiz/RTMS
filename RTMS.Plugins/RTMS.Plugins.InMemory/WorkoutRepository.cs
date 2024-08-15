@@ -4,24 +4,24 @@ using RTMS.UseCases.PluginInterfaces;
 namespace RTMS.Plugins.InMemory;
 public class WorkoutRepository : IWorkoutRepository
 {
-    private List<Workout> _workouts;
+    private List<WorkoutTemplate> _workouts;
     public WorkoutRepository()
     {
-        _workouts = new List<Workout>
+        _workouts = new List<WorkoutTemplate>
         {
-            new Workout {
+            new WorkoutTemplate {
                 UserId = 1,
                 Id = 1,
                 Name = "Workout ZZZZ",
-                Exercises = new List<Exercise>()
+                Exercises = new List<ExerciseTemplate>()
                 {
-                    new Exercise { Id = 2, Name = "Flat Bench Press", Reps = 10, Sets = 3, Weight = 225, Notes = "Shoulder blades up, back, and down." }
+                    new ExerciseTemplate { Id = 2, Name = "Flat Bench Press", DefaultReps = 10, DefaultSets = 3, DefaultWeight = 225, Note = "Shoulder blades up, back, and down." }
                 }
             }
         };
     }
 
-    public Task AddWorkoutAsync(Workout workout)
+    public Task AddWorkoutAsync(WorkoutTemplate workout)
     {
         // Get the maxId
         var maxId = _workouts.Max(x => x.Id);
@@ -35,7 +35,7 @@ public class WorkoutRepository : IWorkoutRepository
         // Set the Workout Id in each exercise to the passed in Workout Id
         foreach (var exercise in workout.Exercises)
         {
-            exercise.WorkoutId = workout.Id;
+            exercise.WorkoutTemplateId = workout.Id;
         }
 
         // Add to in memory "table"
@@ -51,19 +51,19 @@ public class WorkoutRepository : IWorkoutRepository
         return Task.CompletedTask;
     }
 
-    public Task<Workout> GetWorkoutAsync(int id)
+    public Task<WorkoutTemplate> GetWorkoutAsync(int id)
     {
         // userId is set to 1 for now until identity is added.
         var userWorkouts = GetWorkoutsByUserIdAsync(1).Result.ToList();
         return Task.FromResult(userWorkouts.First(w => w.Id == id));
     }
 
-    public Task<IEnumerable<Workout>> GetWorkoutsByUserIdAsync(int userId)
+    public Task<IEnumerable<WorkoutTemplate>> GetWorkoutsByUserIdAsync(int userId)
     {
         return Task.FromResult(_workouts.Where(x => x.UserId == userId));
     }
 
-    public Task UpdateWorkoutAsync(Workout workout)
+    public Task UpdateWorkoutAsync(WorkoutTemplate workout)
     {
         var workoutToUpdate = _workouts.FirstOrDefault(x => x.Id == workout.Id);
         if (workoutToUpdate is not null)
@@ -76,10 +76,10 @@ public class WorkoutRepository : IWorkoutRepository
                 if (existingExercise is not null)
                 {
                     existingExercise.Name = incomingExercise.Name;
-                    existingExercise.Sets = incomingExercise.Sets;
-                    existingExercise.Reps = incomingExercise.Reps;
-                    existingExercise.Weight = incomingExercise.Weight;
-                    existingExercise.Notes = incomingExercise.Notes;
+                    existingExercise.DefaultSets = incomingExercise.DefaultSets;
+                    existingExercise.DefaultReps = incomingExercise.DefaultReps;
+                    existingExercise.DefaultWeight = incomingExercise.DefaultWeight;
+                    existingExercise.Note = incomingExercise.Note;
                 }
                 else
                 {

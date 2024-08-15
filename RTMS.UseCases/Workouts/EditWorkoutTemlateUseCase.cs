@@ -3,16 +3,17 @@ using RTMS.UseCases.PluginInterfaces;
 using RTMS.UseCases.Workouts.Interfaces;
 
 namespace RTMS.UseCases.Workouts;
-public class AddWorkoutUseCase : IAddWorkoutUseCase
+public class EditWorkoutTemlateUseCase : IEditWorkoutTemlateUseCase
 {
     private readonly IWorkoutRepository _workoutRepository;
 
-    public AddWorkoutUseCase(IWorkoutRepository workoutRepository)
+    public EditWorkoutTemlateUseCase(IWorkoutRepository workoutRepository)
     {
         _workoutRepository = workoutRepository;
     }
-    public async Task ExecuteAsync(Workout workout)
+
+    public async Task ExecuteAsync(WorkoutTemplate workout)
     {
-        await _workoutRepository.AddWorkoutAsync(workout);
+        await _workoutRepository.UpdateWorkoutAsync(workout);
     }
 }

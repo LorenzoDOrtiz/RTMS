@@ -1,4 +1,4 @@
-﻿@inject IViewWorkoutsByUserIdUseCase ViewWorkoutsByUserIdUseCase
+﻿@inject IViewWorkoutTemplatesByUserIdUseCase ViewWorkoutsByUserIdUseCase
 
 <MudCard>
     <MudCardContent>
@@ -6,25 +6,25 @@
             <MudSimpleTable Style="overflow-x: auto;">
                 <thead>
                     <tr>
-                        <th>Workout Name</th>
+                        <th>Workout Template Name</th>
                         <th></th>
                         <th></th>
 
                     </tr>
                 </thead>
                 <tbody>
-                    @if (userWorkouts is not null && userWorkouts.Count > 0)
+                    @if (userWorkoutTemplates is not null && userWorkoutTemplates.Count > 0)
                     {
-                        @foreach (var workout in userWorkouts)
+                        @foreach (var workout in userWorkoutTemplates)
                         {
-                            <WorkoutTemplatesItemComponent Workout="workout" />
+                            <WorkoutTemplatesItemComponent WorkoutTemplate="workout" />
                         }
                     }
 
                 </tbody>
             </MudSimpleTable>
-            <MudButton Href="workouts/addworkout" Class="mud-theme-primary" Variant="Variant.Filled" Style="width: 150px;">
-                Add Workout
+            <MudButton Href="workouts/addworkouttemplate" Class="mud-theme-primary" Variant="Variant.Filled" Style="width: 150px;">
+                Add Workout Template
             </MudButton>
         </MudStack>
     </MudCardContent>
@@ -32,12 +32,12 @@
 
 @code {
 
-    private List<Workout>? userWorkouts;
+    private List<WorkoutTemplate>? userWorkoutTemplates;
 
     private int userId = 1;
 
     protected override async Task OnParametersSetAsync()
     {
-        userWorkouts = (await ViewWorkoutsByUserIdUseCase.ExecuteAsync(userId)).ToList();
+        userWorkoutTemplates = (await ViewWorkoutsByUserIdUseCase.ExecuteAsync(userId)).ToList();
     }
 }

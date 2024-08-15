@@ -1,0 +1,90 @@
+﻿@page "/workouts/editworkouttemplate/{Id:int}"
+
+@inject IViewWorkoutTemplateUseCase ViewWorkoutUseCase
+@inject IEditWorkoutTemlateUseCase EditWorkoutUseCase
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit Workout Template</PageTitle>
+
+<h3>Edit Workout Template</h3>
+
+<MudCard>
+    <MudCardContent>
+        <EditForm Model="@workoutTemplate" OnValidSubmit="SaveWorkout">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <MudTextField @bind-Value="workoutTemplate.Name" Label="Workout Template Name" Variant="Variant.Outlined" Margin="Margin.Dense" />
+
+            @for (int i = 0; i < workoutTemplate.Exercises.Count; i++)
+            {
+                int index = i;
+                <MudCard Class="mt-4">
+                    <MudCardHeader>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="() => DeleteExercise(index)"></MudIconButton>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudStack Spacing="2" Style="width: 300px;">
+                            <MudTextField @bind-Value="workoutTemplate.Exercises[index].Name" Label="Exercise Name" Variant="Variant.Outlined" AutoFocus />
+                            <MudNumericField @bind-Value="workoutTemplate.Exercises[index].DefaultSets" Label="Sets" Variant="Variant.Outlined" />
+                            <MudNumericField @bind-Value="workoutTemplate.Exercises[index].DefaultReps" Label="Reps" Variant="Variant.Outlined" />
+                            <MudNumericField @bind-Value="workoutTemplate.Exercises[index].DefaultWeight" Label="Weight" Variant="Variant.Outlined" />
+                            <MudTextField @bind-Value="workoutTemplate.Exercises[index].Note" Label="Notes" Variant="Variant.Outlined" Lines="3" />
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            }
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddExercise" Class="mt-4 mb-4">Add Exercise</MudButton>
+            <br />
+
+            @if (workoutTemplate.Exercises.Any())
+            {
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="mt-4">Save Workout</MudButton>
+            }
+            
+        </EditForm>        
+        <br />
+        <MudButton Href="/workouts" Variant="Variant.Filled" Color="Color.Primary" Class="mt-4">Cancel</MudButton>
+    </MudCardContent>
+
+</MudCard>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private WorkoutTemplate? workoutTemplate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Use the Id to fetch the workout details and populate the form
+        workoutTemplate = await ViewWorkoutUseCase.ExecuteAsync(Id);
+    }
+
+    private void AddExercise()
+    {
+        if (workoutTemplate is not null)
+        {
+            workoutTemplate.Exercises.Add(new ExerciseTemplate());
+            StateHasChanged();
+        }
+    }
+
+    private void DeleteExercise(int index)
+    {
+        if (index >= 0 && index < workoutTemplate.Exercises.Count)
+        {
+            workoutTemplate.Exercises.RemoveAt(index);
+            //StateHasChanged();
+        }
+    }
+
+    private async Task SaveWorkout()
+    {
+        if (workoutTemplate is not null)
+        {
+            await EditWorkoutUseCase.ExecuteAsync(workoutTemplate);
+            NavigationManager.NavigateTo("/workouts");
+        }
+    }
+}
