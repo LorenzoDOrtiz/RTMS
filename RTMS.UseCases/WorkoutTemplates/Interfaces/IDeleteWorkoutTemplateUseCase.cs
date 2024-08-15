@@ -1,5 +1,5 @@
 ﻿
-namespace RTMS.UseCases.Workouts.Interfaces;
+namespace RTMS.UseCases.WorkoutTemplates.Interfaces;
 
 public interface IDeleteWorkoutTemplateUseCase
 {

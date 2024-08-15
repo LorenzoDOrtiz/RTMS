@@ -2,10 +2,10 @@
 using RTMS.UseCases.PluginInterfaces;
 
 namespace RTMS.Plugins.InMemory;
-public class WorkoutRepository : IWorkoutRepository
+public class WorkoutTemplateRepository : IWorkoutTemplateRepository
 {
     private List<WorkoutTemplate> _workouts;
-    public WorkoutRepository()
+    public WorkoutTemplateRepository()
     {
         _workouts = new List<WorkoutTemplate>
         {
@@ -21,7 +21,7 @@ public class WorkoutRepository : IWorkoutRepository
         };
     }
 
-    public Task AddWorkoutAsync(WorkoutTemplate workout)
+    public Task AddWorkoutTemplateAsync(WorkoutTemplate workout)
     {
         // Get the maxId
         var maxId = _workouts.Max(x => x.Id);
@@ -44,14 +44,14 @@ public class WorkoutRepository : IWorkoutRepository
         return Task.CompletedTask;
     }
 
-    public Task DeleteWorkoutAsync(int workoutId)
+    public Task DeleteWorkoutTemplateAsync(int workoutId)
     {
         var workoutToDelete = _workouts.First(x => x.Id == workoutId);
         _workouts.Remove(workoutToDelete);
         return Task.CompletedTask;
     }
 
-    public Task<WorkoutTemplate> GetWorkoutAsync(int id)
+    public Task<WorkoutTemplate> GetWorkoutTemplateAsync(int id)
     {
         // userId is set to 1 for now until identity is added.
         var userWorkouts = GetWorkoutsByUserIdAsync(1).Result.ToList();
@@ -63,7 +63,7 @@ public class WorkoutRepository : IWorkoutRepository
         return Task.FromResult(_workouts.Where(x => x.UserId == userId));
     }
 
-    public Task UpdateWorkoutAsync(WorkoutTemplate workout)
+    public Task UpdateWorkoutTemplateAsync(WorkoutTemplate workout)
     {
         var workoutToUpdate = _workouts.FirstOrDefault(x => x.Id == workout.Id);
         if (workoutToUpdate is not null)

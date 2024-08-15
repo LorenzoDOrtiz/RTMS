@@ -13,7 +13,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddMudServices();
 
-builder.Services.AddSingleton<IWorkoutRepository, WorkoutRepository>();
+builder.Services.AddSingleton<IWorkoutTemplateRepository, WorkoutTemplateRepository>();
 
 builder.Services.AddTransient<IAddWorkoutTemplateUseCase, AddWorkoutTemplateUseCase>();
 builder.Services.AddTransient<IEditWorkoutTemlateUseCase, EditWorkoutTemlateUseCase>();

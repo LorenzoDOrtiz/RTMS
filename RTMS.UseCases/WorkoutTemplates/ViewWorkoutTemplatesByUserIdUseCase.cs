@@ -1,13 +1,13 @@
 ﻿using RTMS.CoreBusiness;
 using RTMS.UseCases.PluginInterfaces;
-using RTMS.UseCases.Workouts.Interfaces;
+using RTMS.UseCases.WorkoutTemplates.Interfaces;
 
-namespace RTMS.UseCases.Workouts;
+namespace RTMS.UseCases.WorkoutTemplates;
 public class ViewWorkoutTemplatesByUserIdUseCase : IViewWorkoutTemplatesByUserIdUseCase
 {
-    private readonly IWorkoutRepository _workoutRepository;
+    private readonly IWorkoutTemplateRepository _workoutRepository;
 
-    public ViewWorkoutTemplatesByUserIdUseCase(IWorkoutRepository workoutRepository)
+    public ViewWorkoutTemplatesByUserIdUseCase(IWorkoutTemplateRepository workoutRepository)
     {
         _workoutRepository = workoutRepository;
     }
