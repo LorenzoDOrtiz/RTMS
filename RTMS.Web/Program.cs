@@ -16,7 +16,7 @@ builder.Services.AddMudServices();
 builder.Services.AddSingleton<IWorkoutTemplateRepository, WorkoutTemplateRepository>();
 
 builder.Services.AddTransient<IAddWorkoutTemplateUseCase, AddWorkoutTemplateUseCase>();
-builder.Services.AddTransient<IEditWorkoutTemlateUseCase, EditWorkoutTemlateUseCase>();
+builder.Services.AddTransient<IEditWorkoutTemplateUseCase, EditWorkoutTemplateUseCase>();
 builder.Services.AddTransient<IViewWorkoutTemplatesByUserIdUseCase, ViewWorkoutTemplatesByUserIdUseCase>();
 builder.Services.AddTransient<IViewWorkoutTemplateUseCase, ViewWorkoutTemplateUseCase>();
 builder.Services.AddTransient<IDeleteWorkoutTemplateUseCase, DeleteWorkoutTemplateUseCase>();

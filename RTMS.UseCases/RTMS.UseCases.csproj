@@ -10,4 +10,8 @@
     <ProjectReference Include="..\RTMS.CoreBusiness\RTMS.CoreBusiness.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Workout\" />
+  </ItemGroup>
+
 </Project>

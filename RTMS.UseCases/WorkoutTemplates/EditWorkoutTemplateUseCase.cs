@@ -3,11 +3,11 @@ using RTMS.UseCases.PluginInterfaces;
 using RTMS.UseCases.WorkoutTemplates.Interfaces;
 
 namespace RTMS.UseCases.WorkoutTemplates;
-public class EditWorkoutTemlateUseCase : IEditWorkoutTemlateUseCase
+public class EditWorkoutTemplateUseCase : IEditWorkoutTemplateUseCase
 {
     private readonly IWorkoutTemplateRepository _workoutRepository;
 
-    public EditWorkoutTemlateUseCase(IWorkoutTemplateRepository workoutRepository)
+    public EditWorkoutTemplateUseCase(IWorkoutTemplateRepository workoutRepository)
     {
         _workoutRepository = workoutRepository;
     }
