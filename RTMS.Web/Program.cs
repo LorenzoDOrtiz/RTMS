@@ -1,8 +1,8 @@
 using MudBlazor.Services;
 using RTMS.Plugins.InMemory;
 using RTMS.UseCases.PluginInterfaces;
-using RTMS.UseCases.Workouts;
-using RTMS.UseCases.Workouts.Interfaces;
+using RTMS.UseCases.WorkoutTemplates;
+using RTMS.UseCases.WorkoutTemplates.Interfaces;
 using RTMS.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
