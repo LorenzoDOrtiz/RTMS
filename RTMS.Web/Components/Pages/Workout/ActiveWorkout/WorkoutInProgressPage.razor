@@ -10,6 +10,7 @@
         <CardHeaderContent>
             <MudText Typo="Typo.h4">@_activeWorkout.Name</MudText>
             <MudText Typo="Typo.body1">Duration: @_duration.ToString(@"hh\:mm\:ss")</MudText>
+            <MudText Type="Type.body1">Rest Timer: 3:00</MudText>
         </CardHeaderContent>
     </MudCardHeader>
 
@@ -29,19 +30,19 @@
 
                 <MudCard Elevation="0">
                     <MudCardContent>
-                        <MudSimpleTable Elevation="3">
+                        <MudSimpleTable Dense Elevation="3">
                             <thead>
                                 <tr>
                                     <th>@exercise.Name</th>
                                     <th>Reps</th>
                                     <th>Weight</th>
                                     <th></th>
-
                                     <th>
 
                                         <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open workout options">
-                                            <MudMenuItem>Edit</MudMenuItem>
-                                            <MudMenuItem>Delete</MudMenuItem>
+                                            <MudMenuItem Icon="@Icons.Material.Filled.AddCircle" IconColor="Color.Success">Add Set</MudMenuItem>
+                                            <MudMenuItem Icon="@Icons.Material.Filled.Timer" IconColor="Color.Secondary">Rest Timer</MudMenuItem>
+                                            <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error">Delete Exercise</MudMenuItem>
                                         </MudMenu>
 
                                     </th>
@@ -55,7 +56,7 @@
                                         <td>@($"Set {j + 1}")</td>
                                         <td><MudNumericField @bind-Value="set.Reps" Variant="Variant.Outlined"></MudNumericField></td>
                                         <td><MudNumericField @bind-Value="set.Weight" Variant="Variant.Outlined"></MudNumericField></td>
-                                        <td></td>
+                                        <td><MudIconButton Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success"></MudIconButton></td>
                                         <td><MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIconButton></td>
                                     </tr>
                                 }
