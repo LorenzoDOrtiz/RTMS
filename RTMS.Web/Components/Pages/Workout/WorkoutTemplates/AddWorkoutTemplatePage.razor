@@ -1,5 +1,4 @@
 ﻿@page "/workouts/add-workout-template"
-@using System.ComponentModel.DataAnnotations
 
 @inject IAddWorkoutTemplateUseCase AddWorkoutUseCase
 @inject NavigationManager NavigationManager
@@ -18,9 +17,9 @@
         {
             for (int i = 0; i < workoutTemplate.Exercises.Count; i++)
             {
-                var localIndex = i; // Capture the loop variable in a local variable
-                var exercise = workoutTemplate.Exercises[localIndex];
-                
+                var exerciseIndex = i; // Capture the loop variable in a local variable
+                var exercise = workoutTemplate.Exercises[exerciseIndex];
+
 
                 <MudCard Elevation="0">
                     <MudCardContent>
@@ -32,13 +31,12 @@
                                     </th>
                                     <th>Reps</th>
                                     <th>Weight</th>
-
                                     <th>
 
                                         <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open workout options">
-                                            <MudMenuItem OnClick="() => AddSet(localIndex)" Icon="@Icons.Material.Filled.AddCircle" IconColor="Color.Success">Add Set</MudMenuItem>
+                                            <MudMenuItem OnClick="() => AddSet(exerciseIndex)" Icon="@Icons.Material.Filled.AddCircle" IconColor="Color.Success">Add Set</MudMenuItem>
                                             <MudMenuItem Icon="@Icons.Material.Filled.Timer" IconColor="Color.Secondary">Rest Timer</MudMenuItem>
-                                            <MudMenuItem OnClick="() => DeleteExercise(localIndex)" Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error">Delete Exercise</MudMenuItem>
+                                            <MudMenuItem OnClick="() => DeleteExercise(exerciseIndex)" Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error">Delete Exercise</MudMenuItem>
                                         </MudMenu>
 
                                     </th>
@@ -49,12 +47,14 @@
                                 {
                                     @for (int j = 0; j < exercise.Sets.Count; j++)
                                     {
-                                        var set = exercise.Sets[j];
+                                        var setIndex = j;
+                                        var set = exercise.Sets[setIndex];
+
                                         <tr>
                                             <td>@($"Set {j + 1}")</td>
                                             <td><MudNumericField @bind-Value="set.Reps" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField></td>
                                             <td><MudNumericField @bind-Value="set.Weight" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField></td>
-                                            <td><MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIconButton></td>
+                                            <td><MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteSet(exerciseIndex, setIndex)"></MudIconButton></td>
                                         </tr>
                                     }
                                 }
@@ -94,28 +94,29 @@
                 new ExerciseTemplateSet { Reps = 10, Weight = 0 }
             }
             });
-
-        StateHasChanged(); // Force UI update
-
     }
 
-    private void DeleteExercise(int localIndex)
+    private void DeleteExercise(int exerciseIndex)
     {
-        if (localIndex >= 0 && localIndex < workoutTemplate.Exercises.Count)
+        if (exerciseIndex >= 0 && exerciseIndex < workoutTemplate.Exercises.Count)
         {
-            workoutTemplate.Exercises.RemoveAt(localIndex);
-            StateHasChanged(); // Force UI update
-
+            workoutTemplate.Exercises.RemoveAt(exerciseIndex);
         }
     }
 
-    private void AddSet(int localIndex)
+    private void AddSet(int exerciseIndex)
     {
-        if (localIndex >= 0 && localIndex < workoutTemplate.Exercises.Count)
+        if (exerciseIndex >= 0 && exerciseIndex < workoutTemplate.Exercises.Count)
         {
-            workoutTemplate.Exercises[localIndex].Sets?.Add(new ExerciseTemplateSet { Reps = 10, Weight = 0 });
-            StateHasChanged(); // Force UI update
+            workoutTemplate.Exercises[exerciseIndex].Sets?.Add(new ExerciseTemplateSet { Reps = 10, Weight = 0 });
+        }
+    }
 
+    private void DeleteSet(int exerciseIndex, int setIndex)
+    {
+        if (exerciseIndex >= 0 && setIndex >= 0 && workoutTemplate.Exercises[exerciseIndex].Sets.Count > 0)
+        {
+            workoutTemplate.Exercises[exerciseIndex].Sets.RemoveAt(setIndex);
         }
     }
 

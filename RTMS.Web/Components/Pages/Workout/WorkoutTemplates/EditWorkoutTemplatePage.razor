@@ -7,43 +7,75 @@
 <PageTitle>Edit Workout</PageTitle>
 
 <MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudTextField @bind-Value="workoutTemplate.Name" Label="Workout Name" Variant="Variant.Outlined" Margin="Margin.Dense" AutoFocus />
+        </CardHeaderContent>
+    </MudCardHeader>
+
     <MudCardContent>
-        <EditForm Model="@workoutTemplate" OnValidSubmit="SaveWorkout">
 
-            <MudTextField @bind-Value="workoutTemplate.Name" Label="Workout Template Name" Variant="Variant.Outlined" Margin="Margin.Dense" />
+        @for (int i = 0; i < workoutTemplate.Exercises.Count; i++)
+        {
+            int exerciseIndex = i;
+            var exercise = workoutTemplate.Exercises[exerciseIndex];
 
-            @for (int i = 0; i < workoutTemplate.Exercises.Count; i++)
-            {
-                int index = i;
-                <MudCard Class="mt-4">
-                    <MudCardHeader>
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="() => DeleteExercise(index)"></MudIconButton>
-                    </MudCardHeader>
-                    <MudCardContent>
-                        <MudStack Spacing="2" Style="width: 300px;">
-                            <MudTextField @bind-Value="workoutTemplate.Exercises[index].Name" Label="Exercise Name" Variant="Variant.Outlined" AutoFocus />
-                            <MudNumericField @bind-Value="workoutTemplate.Exercises[index].DefaultSets" Label="Sets" Variant="Variant.Outlined" />
-                            <MudNumericField @bind-Value="workoutTemplate.Exercises[index].DefaultReps" Label="Reps" Variant="Variant.Outlined" />
-                            <MudNumericField @bind-Value="workoutTemplate.Exercises[index].DefaultWeight" Label="Weight" Variant="Variant.Outlined" />
-                            <MudTextField @bind-Value="workoutTemplate.Exercises[index].Note" Label="Notes" Variant="Variant.Outlined" Lines="3" />
-                        </MudStack>
-                    </MudCardContent>
-                </MudCard>
-            }
+            <MudCard Elevation="0">
+                <MudCardContent>
+                    <MudSimpleTable Dense Elevation="3">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <MudTextField @bind-Value="workoutTemplate.Exercises[exerciseIndex].Name" Label="Exercise Name" Variant="Variant.Outlined" Margin="Margin.Dense" AutoFocus />
+                                </th>
+                                <th>Reps</th>
+                                <th>Weight</th>
+                                <th>
+                                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open workout options">
+                                        <MudMenuItem OnClick="() => AddSet(exerciseIndex)" Icon="@Icons.Material.Filled.AddCircle" IconColor="Color.Success">Add Set</MudMenuItem>
+                                        <MudMenuItem Icon="@Icons.Material.Filled.Timer" IconColor="Color.Secondary">Rest Timer</MudMenuItem>
+                                        <MudMenuItem OnClick="() => DeleteExercise(exerciseIndex)" Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error">Delete Exercise</MudMenuItem>
+                                    </MudMenu>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (exercise.Sets != null && exercise.Sets.Any())
+                            {
+                                @for (int j = 0; j < exercise.Sets.Count; j++)
+                                {
+                                    var setIndex = j;
+                                    var set = exercise.Sets[setIndex];
 
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddExercise" Class="mt-4 mb-4">Add Exercise</MudButton>
-            <br />
+                                    <tr>
+                                        <td>@($"Set {j + 1}")</td>
+                                        <td><MudNumericField @bind-Value="set.Reps" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField></td>
+                                        <td><MudNumericField @bind-Value="set.Weight" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField></td>
+                                        <td><MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteSet(exerciseIndex, setIndex)"></MudIconButton></td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </MudSimpleTable>
+                </MudCardContent>
+            </MudCard>
+        }
 
-            @if (workoutTemplate.Exercises.Any())
-            {
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="mt-4">Save Workout</MudButton>
-            }
-            
-        </EditForm>        
-        <br />
-        <MudButton Href="/workouts" Variant="Variant.Filled" Color="Color.Primary" Class="mt-4">Cancel</MudButton>
+        <MudCardActions>
+            <MudGrid>
+                <MudItem>
+                    @if (workoutTemplate.Exercises.Any())
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="ValidateAndSave" Class="mr-4">Save Workout</MudButton>
+                    }
+                    <MudButton Href="/workouts" Variant="Variant.Filled" Color="Color.Error">Cancel</MudButton>
+                </MudItem>
+                <MudItem Class="ml-auto">
+                    <MudButton Variant="Variant.Filled" Color="Color.Info" OnClick="AddExercise">Add Exercise</MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudCardActions>
     </MudCardContent>
-
 </MudCard>
 
 @code {
@@ -60,19 +92,37 @@
 
     private void AddExercise()
     {
-        if (workoutTemplate is not null)
+        workoutTemplate.Exercises.Add(new ExerciseTemplate
+            {
+                Name = "",
+                Sets = new List<ExerciseTemplateSet>() // Initialize with an empty list
+            {
+                new ExerciseTemplateSet { Reps = 10, Weight = 0 }
+            }
+            });
+    }
+
+    private void DeleteExercise(int exerciseIndex)
+    {
+        if (exerciseIndex >= 0 && exerciseIndex < workoutTemplate.Exercises.Count)
         {
-            workoutTemplate.Exercises.Add(new ExerciseTemplate());
-            StateHasChanged();
+            workoutTemplate.Exercises.RemoveAt(exerciseIndex);
         }
     }
 
-    private void DeleteExercise(int index)
+    private void AddSet(int exerciseIndex)
     {
-        if (index >= 0 && index < workoutTemplate.Exercises.Count)
+        if (exerciseIndex >= 0 && exerciseIndex < workoutTemplate.Exercises.Count)
         {
-            workoutTemplate.Exercises.RemoveAt(index);
-            //StateHasChanged();
+            workoutTemplate.Exercises[exerciseIndex].Sets?.Add(new ExerciseTemplateSet { Reps = 10, Weight = 0 });
+        }
+    }
+
+    private void DeleteSet(int exerciseIndex, int setIndex)
+    {
+        if (exerciseIndex >= 0 && setIndex >= 0 && workoutTemplate.Exercises[exerciseIndex].Sets.Count > 0)
+        {
+            workoutTemplate.Exercises[exerciseIndex].Sets.RemoveAt(setIndex);
         }
     }
 
@@ -82,6 +132,28 @@
         {
             await EditWorkoutUseCase.ExecuteAsync(workoutTemplate);
             NavigationManager.NavigateTo("/workouts");
+        }
+    }
+
+    private async Task ValidateAndSave()
+    {
+        // Perform manual validation
+        var validationResults = new List<ValidationResult>();
+        var context = new ValidationContext(workoutTemplate, null, null);
+        bool isValid = Validator.TryValidateObject(workoutTemplate, context, validationResults, true);
+
+        if (isValid)
+        {
+            // Call SaveWorkout if validation passes
+            await SaveWorkout();
+        }
+        else
+        {
+            // Handle validation errors (e.g., display errors)
+            foreach (var error in validationResults)
+            {
+                Console.WriteLine(error.ErrorMessage); // Or use MudBlazor components to display errors
+            }
         }
     }
 }

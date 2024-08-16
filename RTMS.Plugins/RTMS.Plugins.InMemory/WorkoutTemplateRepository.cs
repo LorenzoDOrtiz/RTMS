@@ -120,33 +120,35 @@ public class WorkoutTemplateRepository : IWorkoutTemplateRepository
         return Task.FromResult(_workoutTemplates.Where(x => x.UserId == userId));
     }
 
-    //public Task UpdateWorkoutTemplateAsync(WorkoutTemplate workout)
-    //{
-    //    var workoutToUpdate = _workoutTemplates.FirstOrDefault(x => x.Id == workout.Id);
-    //    if (workoutToUpdate is not null)
-    //    {
-    //        workoutToUpdate.Name = workout.Name;
-    //        // Update the exercises
-    //        foreach (var incomingExercise in workout.Exercises)
-    //        {
-    //            var existingExercise = workoutToUpdate.Exercises.FirstOrDefault(e => e.Id == incomingExercise.Id);
-    //            if (existingExercise is not null)
-    //            {
-    //                existingExercise.Name = incomingExercise.Name;
-    //                existingExercise.DefaultSets = incomingExercise.DefaultSets;
-    //                existingExercise.Reps = incomingExercise.Reps;
-    //                existingExercise.DefaultWeight = incomingExercise.DefaultWeight;
-    //                existingExercise.Note = incomingExercise.Note;
-    //            }
-    //            else
-    //            {
-    //                // This is a new exercise, add it to the workout
-    //                workoutToUpdate.Exercises.Add(incomingExercise);
-    //            }
-    //        }
-    //        // Remove exercises that are no longer in the incoming workout
-    //        workoutToUpdate.Exercises.RemoveAll(e => !workout.Exercises.Any(incomingE => incomingE.Id == e.Id));
-    //    }
-    //    return Task.CompletedTask;
-    //}
+    public Task UpdateWorkoutTemplateAsync(WorkoutTemplate workout)
+    {
+        var workoutToUpdate = _workoutTemplates.FirstOrDefault(x => x.Id == workout.Id);
+
+        if (workoutToUpdate is not null)
+        {
+            workoutToUpdate.Name = workout.Name;
+
+            // Update the exercises
+            foreach (var updatedExercise in workout.Exercises)
+            {
+                var existingExercise = workoutToUpdate.Exercises.FirstOrDefault(e => e.Id == updatedExercise.Id);
+
+                if (existingExercise is not null)
+                {
+                    existingExercise.Name = updatedExercise.Name;
+                    existingExercise.Sets = updatedExercise.Sets;
+                    existingExercise.Note = updatedExercise.Note;
+                }
+                else
+                {
+                    // This is a new exercise, add it to the workout
+                    workoutToUpdate.Exercises.Add(updatedExercise);
+                }
+            }
+
+            // Remove exercises that are no longer in the incoming workout
+            workoutToUpdate.Exercises.RemoveAll(e => !workout.Exercises.Any(updatedE => updatedE.Id == e.Id));
+        }
+        return Task.CompletedTask;
+    }
 }
