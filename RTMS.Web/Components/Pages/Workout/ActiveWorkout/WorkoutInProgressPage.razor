@@ -59,8 +59,8 @@
                                     var set = exercise.Sets[j];
                                     <tr>
                                         <td>@($"Set {j + 1}")</td>
-                                        <td><MudNumericField @bind-Value="set.Reps" Variant="Variant.Outlined"></MudNumericField></td>
-                                        <td><MudNumericField @bind-Value="set.Weight" Variant="Variant.Outlined"></MudNumericField></td>
+                                        <td><MudNumericField @bind-Value="set.Reps" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField></td>
+                                        <td><MudNumericField @bind-Value="set.Weight" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField></td>
                                         <td><MudIconButton Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success"></MudIconButton></td>
                                         <td><MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIconButton></td>
                                     </tr>

@@ -1,10 +1,10 @@
-﻿@page "/workouts/addworkouttemplate"
+﻿@page "/workouts/add-workout-template"
 @using System.ComponentModel.DataAnnotations
 
 @inject IAddWorkoutTemplateUseCase AddWorkoutUseCase
 @inject NavigationManager NavigationManager
 
-<PageTitle>Add Workout Template</PageTitle>
+<PageTitle>Add Workout</PageTitle>
 
 <MudCard>
     <MudCardHeader>
@@ -18,8 +18,9 @@
         {
             for (int i = 0; i < workoutTemplate.Exercises.Count; i++)
             {
-                var exercise = workoutTemplate.Exercises[i];
                 var localIndex = i; // Capture the loop variable in a local variable
+                var exercise = workoutTemplate.Exercises[localIndex];
+                
 
                 <MudCard Elevation="0">
                     <MudCardHeader>
