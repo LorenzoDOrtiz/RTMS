@@ -1,18 +1,15 @@
-﻿@* @page "/workouts/editworkouttemplate/{Id:int}"
+﻿@page "/workouts/edit-workout-template/{Id:int}"
 
 @inject IViewWorkoutTemplateUseCase ViewWorkoutUseCase
 @inject IEditWorkoutTemplateUseCase EditWorkoutUseCase
 @inject NavigationManager NavigationManager
 
-<PageTitle>Edit Workout Template</PageTitle>
-
-<h3>Edit Workout Template</h3>
+<PageTitle>Edit Workout</PageTitle>
 
 <MudCard>
     <MudCardContent>
         <EditForm Model="@workoutTemplate" OnValidSubmit="SaveWorkout">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
+
             <MudTextField @bind-Value="workoutTemplate.Name" Label="Workout Template Name" Variant="Variant.Outlined" Margin="Margin.Dense" />
 
             @for (int i = 0; i < workoutTemplate.Exercises.Count; i++)
@@ -87,4 +84,4 @@
             NavigationManager.NavigateTo("/workouts");
         }
     }
-} *@
+}

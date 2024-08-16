@@ -19,7 +19,7 @@ builder.Services.AddSingleton<IWorkoutTemplateRepository, WorkoutTemplateReposit
 builder.Services.AddSingleton<IWorkoutRepository, WorkoutRepository>();
 
 builder.Services.AddTransient<IAddWorkoutTemplateUseCase, AddWorkoutTemplateUseCase>();
-//builder.Services.AddTransient<IEditWorkoutTemplateUseCase, EditWorkoutTemplateUseCase>();
+builder.Services.AddTransient<IEditWorkoutTemplateUseCase, EditWorkoutTemplateUseCase>();
 builder.Services.AddTransient<IViewWorkoutTemplatesByUserIdUseCase, ViewWorkoutTemplatesByUserIdUseCase>();
 builder.Services.AddTransient<IViewWorkoutTemplateUseCase, ViewWorkoutTemplateByIdUseCase>();
 builder.Services.AddTransient<IDeleteWorkoutTemplateUseCase, DeleteWorkoutTemplateUseCase>();

@@ -12,7 +12,7 @@
                     Start
                 </MudButton>
                 <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open workout options">
-                    <MudMenuItem Href="@($"workouts/editworkouttemplate/{WorkoutTemplate.Id}")">Edit</MudMenuItem>
+                    <MudMenuItem Href="@($"workouts/edit-workout-template/{WorkoutTemplate.Id}")">Edit</MudMenuItem>
                     <MudMenuItem OnClick="async () => await DeleteWorkoutTemplate(WorkoutTemplate.Id)">Delete</MudMenuItem>
                 </MudMenu>
             </MudCardActions>
