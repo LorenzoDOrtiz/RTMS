@@ -11,5 +11,5 @@ public class WorkoutTemplate
     public string Name { get; set; }
 
     [Required]
-    public List<ExerciseTemplate> Exercises { get; set; } = new List<ExerciseTemplate>();
+    public List<ExerciseTemplate> Exercises { get; set; } = new();
 }

@@ -4,18 +4,31 @@ using RTMS.UseCases.PluginInterfaces;
 namespace RTMS.Plugins.InMemory;
 public class WorkoutTemplateRepository : IWorkoutTemplateRepository
 {
-    private List<WorkoutTemplate> _workouts;
+    private List<WorkoutTemplate> _workoutTemplates;
     public WorkoutTemplateRepository()
     {
-        _workouts = new List<WorkoutTemplate>
+        _workoutTemplates = new List<WorkoutTemplate>
         {
             new WorkoutTemplate {
                 UserId = 1,
                 Id = 1,
-                Name = "Workout ZZZZ",
+                Name = "Workout A",
                 Exercises = new List<ExerciseTemplate>()
                 {
-                    new ExerciseTemplate { Id = 2, Name = "Flat Bench Press", DefaultReps = 10, DefaultSets = 3, DefaultWeight = 225, Note = "Shoulder blades up, back, and down." }
+                    new ExerciseTemplate { Id = 11, Name = "Barbell Flat Bench Press", DefaultReps = 10, DefaultSets = 3, DefaultWeight = 225, Note = "Shoulder blades up, back, and down." },
+                    new ExerciseTemplate { Id = 12, Name = "Barbell Incline Bench Press", DefaultReps = 10, DefaultSets = 3, DefaultWeight = 185, Note = "Shoulder blades up, back, and down." }
+
+                }
+            },
+            new WorkoutTemplate {
+                UserId = 1,
+                Id = 2,
+                Name = "Workout B",
+                Exercises = new List<ExerciseTemplate>()
+                {
+                    new ExerciseTemplate { Id = 21, Name = "Barbell Dead Lift", DefaultReps = 10, DefaultSets = 3, DefaultWeight = 425, Note = "Feet shoulder width apart." },
+                    new ExerciseTemplate { Id = 22, Name = "Barbell Squats", DefaultReps = 10, DefaultSets = 3, DefaultWeight = 385, Note = "Watch for butt wink." }
+
                 }
             }
         };
@@ -24,7 +37,7 @@ public class WorkoutTemplateRepository : IWorkoutTemplateRepository
     public Task AddWorkoutTemplateAsync(WorkoutTemplate workout)
     {
         // Get the maxId
-        var maxId = _workouts.Max(x => x.Id);
+        var maxId = _workoutTemplates.Max(x => x.Id);
 
         // Increment
         workout.Id = maxId + 1;
@@ -39,15 +52,15 @@ public class WorkoutTemplateRepository : IWorkoutTemplateRepository
         }
 
         // Add to in memory "table"
-        _workouts.Add(workout);
+        _workoutTemplates.Add(workout);
 
         return Task.CompletedTask;
     }
 
     public Task DeleteWorkoutTemplateAsync(int workoutId)
     {
-        var workoutToDelete = _workouts.First(x => x.Id == workoutId);
-        _workouts.Remove(workoutToDelete);
+        var workoutToDelete = _workoutTemplates.First(x => x.Id == workoutId);
+        _workoutTemplates.Remove(workoutToDelete);
         return Task.CompletedTask;
     }
 
@@ -60,12 +73,12 @@ public class WorkoutTemplateRepository : IWorkoutTemplateRepository
 
     public Task<IEnumerable<WorkoutTemplate>> GetWorkoutsByUserIdAsync(int userId)
     {
-        return Task.FromResult(_workouts.Where(x => x.UserId == userId));
+        return Task.FromResult(_workoutTemplates.Where(x => x.UserId == userId));
     }
 
     public Task UpdateWorkoutTemplateAsync(WorkoutTemplate workout)
     {
-        var workoutToUpdate = _workouts.FirstOrDefault(x => x.Id == workout.Id);
+        var workoutToUpdate = _workoutTemplates.FirstOrDefault(x => x.Id == workout.Id);
         if (workoutToUpdate is not null)
         {
             workoutToUpdate.Name = workout.Name;

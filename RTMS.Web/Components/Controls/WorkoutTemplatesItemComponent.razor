@@ -1,37 +1,40 @@
-﻿@inject IDeleteWorkoutTemplateUseCase DeleteWorkoutUseCase
+﻿@using RTMS.UseCases.WorkoutTemplates.Interfaces
+@inject IAddWorkoutUseCase StartWorkoutFromTemplateUseCase
+@inject IDeleteWorkoutTemplateUseCase DeleteWorkoutUseCase
 @inject NavigationManager NavigationManager
 
-@if (WorkoutTemplate is not null)
+@if (WorkoutTemplate != null)
 {
-
     <tr>
-
         <td>@WorkoutTemplate.Name</td>
-
         <td>
-            @{
-                <MudButton Class="mud-theme-primary" Variant="Variant.Filled">Start</MudButton>
-            }
-        </td>
-
-        <td>
-            @{
+            <MudCardActions>
+                <MudButton OnClick="StartWorkout" Color="Color.Primary" Variant="Variant.Filled">
+                    Start
+                </MudButton>
                 <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open workout options">
                     <MudMenuItem Href="@($"workouts/editworkouttemplate/{WorkoutTemplate.Id}")">Edit</MudMenuItem>
-                    <MudMenuItem OnClick="async () => { await HandleDelete(WorkoutTemplate.Id); }">Delete</MudMenuItem>
+                    <MudMenuItem OnClick="async () => await DeleteWorkoutTemplate(WorkoutTemplate.Id)">Delete</MudMenuItem>
                 </MudMenu>
-            }
+            </MudCardActions>
         </td>
-
     </tr>
-
 }
 
 @code {
     [Parameter]
     public WorkoutTemplate? WorkoutTemplate { get; set; }
 
-    private async Task HandleDelete(int workoutId)
+    private async Task StartWorkout()
+    {
+        if (WorkoutTemplate != null)
+        {
+            await StartWorkoutFromTemplateUseCase.ExecuteAsync(WorkoutTemplate);
+            NavigationManager.NavigateTo("/workout-in-progress");
+        }
+    }
+
+    private async Task DeleteWorkoutTemplate(int workoutId)
     {
         await DeleteWorkoutUseCase.ExecuteAsync(workoutId);
         WorkoutTemplate = null;

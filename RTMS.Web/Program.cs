@@ -1,6 +1,8 @@
 using MudBlazor.Services;
 using RTMS.Plugins.InMemory;
 using RTMS.UseCases.PluginInterfaces;
+using RTMS.UseCases.Workouts;
+using RTMS.UseCases.Workouts.Interfaces;
 using RTMS.UseCases.WorkoutTemplates;
 using RTMS.UseCases.WorkoutTemplates.Interfaces;
 using RTMS.Web.Components;
@@ -14,13 +16,18 @@ builder.Services.AddRazorComponents()
 builder.Services.AddMudServices();
 
 builder.Services.AddSingleton<IWorkoutTemplateRepository, WorkoutTemplateRepository>();
+builder.Services.AddSingleton<IWorkoutRepository, WorkoutRepository>();
 
 builder.Services.AddTransient<IAddWorkoutTemplateUseCase, AddWorkoutTemplateUseCase>();
 builder.Services.AddTransient<IEditWorkoutTemplateUseCase, EditWorkoutTemplateUseCase>();
 builder.Services.AddTransient<IViewWorkoutTemplatesByUserIdUseCase, ViewWorkoutTemplatesByUserIdUseCase>();
-builder.Services.AddTransient<IViewWorkoutTemplateUseCase, ViewWorkoutTemplateUseCase>();
+builder.Services.AddTransient<IViewWorkoutTemplateUseCase, ViewWorkoutTemplateByIdUseCase>();
 builder.Services.AddTransient<IDeleteWorkoutTemplateUseCase, DeleteWorkoutTemplateUseCase>();
 
+builder.Services.AddTransient<IAddWorkoutUseCase, AddWorkoutUseCase>();
+builder.Services.AddTransient<IViewWorkoutByIdUseCase, ViewWorkoutByIdUseCase>();
+builder.Services.AddTransient<IGetActiveWorkoutUseCase, GetActiveWorkoutUseCase>();
+builder.Services.AddTransient<IEndWorkoutUseCase, EndWorkoutUseCase>();
 
 var app = builder.Build();
 

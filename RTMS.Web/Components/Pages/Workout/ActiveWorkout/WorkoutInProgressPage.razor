@@ -1,0 +1,111 @@
+﻿@page "/workout-in-progress"
+@inject NavigationManager NavigationManager
+@inject IGetActiveWorkoutUseCase GetActiveWorkoutUseCase
+@inject IEndWorkoutUseCase EndWorkoutUseCase
+
+<PageTitle>@_activeWorkout.Name</PageTitle>
+
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h4">@_activeWorkout.Name</MudText>
+            <MudText Typo="Typo.body1">Duration: @_duration.ToString(@"hh\:mm\:ss")</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+
+    <MudCardContent>
+        @if (_activeWorkout == null)
+        {
+            <MudText Typo="Typo.h5">No workout in progress.</MudText>
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/workouts">Back to Workouts</MudButton>
+            </MudCardActions>
+        }
+        else
+        {
+            @for (int i = 0; i < _activeWorkout.Exercises.Count; i++)
+            {
+                var exercise = _activeWorkout.Exercises[i];
+
+                <MudCard Elevation="0">
+                    <MudCardContent>
+                        <MudSimpleTable Elevation="3">
+                            <thead>
+                                <tr>
+                                    <th>@exercise.Name</th>
+                                    <th>Reps</th>
+                                    <th>Weight</th>
+                                    <th></th>
+
+                                    <th>
+
+                                        <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open workout options">
+                                            <MudMenuItem>Edit</MudMenuItem>
+                                            <MudMenuItem>Delete</MudMenuItem>
+                                        </MudMenu>
+
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int j = 0; j < exercise.Sets.Count; j++)
+                                {
+                                    var set = exercise.Sets[j];
+                                    <tr>
+                                        <td>@($"Set {j + 1}")</td>
+                                        <td><MudNumericField @bind-Value="set.Reps" Variant="Variant.Outlined"></MudNumericField></td>
+                                        <td><MudNumericField @bind-Value="set.Weight" Variant="Variant.Outlined"></MudNumericField></td>
+                                        <td></td>
+                                        <td><MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIconButton></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </MudSimpleTable>
+                    </MudCardContent>
+                </MudCard>
+
+            }
+
+            <br />
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="EndWorkout">End Workout</MudButton>
+            </MudCardActions>
+        }
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private Workout _activeWorkout;
+    private TimeSpan _duration;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _activeWorkout = await GetActiveWorkoutUseCase.ExecuteAsync();
+        if (_activeWorkout != null)
+        {
+            // Start the timer if a workout is in progress
+            _ = TimerLoop();
+        }
+    }
+
+    private async Task TimerLoop()
+    {
+        while (_activeWorkout != null && !_activeWorkout.IsCompleted)
+        {
+            _duration = DateTime.Now - _activeWorkout.StartTime;
+            StateHasChanged();
+            await Task.Delay(1000); // Update every second
+        }
+    }
+
+    private async Task EndWorkout()
+    {
+        if (_activeWorkout != null)
+        {
+            await EndWorkoutUseCase.ExecuteAsync(_activeWorkout.Id);
+            _activeWorkout = null;
+            _duration = TimeSpan.Zero;
+            NavigationManager.NavigateTo("/workouts");
+        }
+    }
+}
