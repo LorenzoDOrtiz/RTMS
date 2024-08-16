@@ -1,4 +1,4 @@
-﻿using RTMS.CoreBusiness;
+﻿using RTMS.CoreBusiness.Template;
 using RTMS.UseCases.PluginInterfaces;
 
 namespace RTMS.Plugins.InMemory;
@@ -8,30 +8,74 @@ public class WorkoutTemplateRepository : IWorkoutTemplateRepository
     public WorkoutTemplateRepository()
     {
         _workoutTemplates = new List<WorkoutTemplate>
+    {
+        new WorkoutTemplate
         {
-            new WorkoutTemplate {
-                UserId = 1,
-                Id = 1,
-                Name = "Workout A",
-                Exercises = new List<ExerciseTemplate>()
+            UserId = 1,
+            Id = 1,
+            Name = "Workout A",
+            Exercises = new List<ExerciseTemplate>
+            {
+                new ExerciseTemplate
                 {
-                    new ExerciseTemplate { Id = 11, Name = "Barbell Flat Bench Press", DefaultReps = 10, DefaultSets = 3, DefaultWeight = 225, Note = "Shoulder blades up, back, and down." },
-                    new ExerciseTemplate { Id = 12, Name = "Barbell Incline Bench Press", DefaultReps = 10, DefaultSets = 3, DefaultWeight = 185, Note = "Shoulder blades up, back, and down." }
-
-                }
-            },
-            new WorkoutTemplate {
-                UserId = 1,
-                Id = 2,
-                Name = "Workout B",
-                Exercises = new List<ExerciseTemplate>()
+                    Id = 11,
+                    Name = "Barbell Flat Bench Press",
+                    Sets = new List<ExerciseTemplateSet>
+                    {
+                        new ExerciseTemplateSet { Reps = 10, Weight = 225 },
+                        new ExerciseTemplateSet { Reps = 10, Weight = 225 },
+                        new ExerciseTemplateSet { Reps = 10, Weight = 225 }
+                    },
+                    Note = "Shoulder blades up, back, and down."
+                },
+                new ExerciseTemplate
                 {
-                    new ExerciseTemplate { Id = 21, Name = "Barbell Dead Lift", DefaultReps = 10, DefaultSets = 3, DefaultWeight = 425, Note = "Feet shoulder width apart." },
-                    new ExerciseTemplate { Id = 22, Name = "Barbell Squats", DefaultReps = 10, DefaultSets = 3, DefaultWeight = 385, Note = "Watch for butt wink." }
-
+                    Id = 12,
+                    Name = "Barbell Incline Bench Press",
+                    Sets = new List<ExerciseTemplateSet>
+                    {
+                        new ExerciseTemplateSet { Reps = 10, Weight = 185 },
+                        new ExerciseTemplateSet { Reps = 10, Weight = 185 },
+                        new ExerciseTemplateSet { Reps = 10, Weight = 185 }
+                    },
+                    Note = "Shoulder blades up, back, and down."
                 }
             }
-        };
+        },
+        new WorkoutTemplate
+        {
+            UserId = 1,
+            Id = 2,
+            Name = "Workout B",
+            Exercises = new List<ExerciseTemplate>
+            {
+                new ExerciseTemplate
+                {
+                    Id = 21,
+                    Name = "Barbell Dead Lift",
+                    Sets = new List<ExerciseTemplateSet>
+                    {
+                        new ExerciseTemplateSet { Reps = 10, Weight = 425 },
+                        new ExerciseTemplateSet { Reps = 10, Weight = 425 },
+                        new ExerciseTemplateSet { Reps = 10, Weight = 425 }
+                    },
+                    Note = "Feet shoulder width apart."
+                },
+                new ExerciseTemplate
+                {
+                    Id = 22,
+                    Name = "Barbell Squats",
+                    Sets = new List<ExerciseTemplateSet>
+                    {
+                        new ExerciseTemplateSet { Reps = 10, Weight = 385 },
+                        new ExerciseTemplateSet { Reps = 10, Weight = 385 },
+                        new ExerciseTemplateSet { Reps = 10, Weight = 385 }
+                    },
+                    Note = "Watch for butt wink."
+                }
+            }
+        }
+    };
     }
 
     public Task AddWorkoutTemplateAsync(WorkoutTemplate workout)
@@ -76,33 +120,33 @@ public class WorkoutTemplateRepository : IWorkoutTemplateRepository
         return Task.FromResult(_workoutTemplates.Where(x => x.UserId == userId));
     }
 
-    public Task UpdateWorkoutTemplateAsync(WorkoutTemplate workout)
-    {
-        var workoutToUpdate = _workoutTemplates.FirstOrDefault(x => x.Id == workout.Id);
-        if (workoutToUpdate is not null)
-        {
-            workoutToUpdate.Name = workout.Name;
-            // Update the exercises
-            foreach (var incomingExercise in workout.Exercises)
-            {
-                var existingExercise = workoutToUpdate.Exercises.FirstOrDefault(e => e.Id == incomingExercise.Id);
-                if (existingExercise is not null)
-                {
-                    existingExercise.Name = incomingExercise.Name;
-                    existingExercise.DefaultSets = incomingExercise.DefaultSets;
-                    existingExercise.DefaultReps = incomingExercise.DefaultReps;
-                    existingExercise.DefaultWeight = incomingExercise.DefaultWeight;
-                    existingExercise.Note = incomingExercise.Note;
-                }
-                else
-                {
-                    // This is a new exercise, add it to the workout
-                    workoutToUpdate.Exercises.Add(incomingExercise);
-                }
-            }
-            // Remove exercises that are no longer in the incoming workout
-            workoutToUpdate.Exercises.RemoveAll(e => !workout.Exercises.Any(incomingE => incomingE.Id == e.Id));
-        }
-        return Task.CompletedTask;
-    }
+    //public Task UpdateWorkoutTemplateAsync(WorkoutTemplate workout)
+    //{
+    //    var workoutToUpdate = _workoutTemplates.FirstOrDefault(x => x.Id == workout.Id);
+    //    if (workoutToUpdate is not null)
+    //    {
+    //        workoutToUpdate.Name = workout.Name;
+    //        // Update the exercises
+    //        foreach (var incomingExercise in workout.Exercises)
+    //        {
+    //            var existingExercise = workoutToUpdate.Exercises.FirstOrDefault(e => e.Id == incomingExercise.Id);
+    //            if (existingExercise is not null)
+    //            {
+    //                existingExercise.Name = incomingExercise.Name;
+    //                existingExercise.DefaultSets = incomingExercise.DefaultSets;
+    //                existingExercise.Reps = incomingExercise.Reps;
+    //                existingExercise.DefaultWeight = incomingExercise.DefaultWeight;
+    //                existingExercise.Note = incomingExercise.Note;
+    //            }
+    //            else
+    //            {
+    //                // This is a new exercise, add it to the workout
+    //                workoutToUpdate.Exercises.Add(incomingExercise);
+    //            }
+    //        }
+    //        // Remove exercises that are no longer in the incoming workout
+    //        workoutToUpdate.Exercises.RemoveAll(e => !workout.Exercises.Any(incomingE => incomingE.Id == e.Id));
+    //    }
+    //    return Task.CompletedTask;
+    //}
 }

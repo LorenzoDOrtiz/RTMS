@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RTMS.CoreBusiness;
+namespace RTMS.CoreBusiness.Active;
 public class Exercise
 {
     public int Id { get; set; }

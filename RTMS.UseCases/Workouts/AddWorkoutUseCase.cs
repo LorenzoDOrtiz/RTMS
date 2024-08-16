@@ -1,4 +1,5 @@
-﻿using RTMS.CoreBusiness;
+﻿using RTMS.CoreBusiness.Active;
+using RTMS.CoreBusiness.Template;
 using RTMS.Plugins.InMemory;
 using RTMS.UseCases.Workouts.Interfaces;
 
@@ -18,15 +19,15 @@ public class AddWorkoutUseCase : IAddWorkoutUseCase
         {
             Name = workoutTemplate.Name,
             TemplateId = workoutTemplate.Id,
-            StartTime = DateTime.Now,  // Set the start time when workout begins
+            StartTime = DateTime.Now,  // Set the start time when the workout begins
             Exercises = workoutTemplate.Exercises.Select(e => new Exercise
             {
                 Name = e.Name,
                 Note = e.Note,
-                Sets = Enumerable.Range(0, e.DefaultSets).Select(_ => new ExerciseSet
+                Sets = e.Sets.Select(s => new ExerciseSet
                 {
-                    Reps = e.DefaultReps,
-                    Weight = e.DefaultWeight
+                    Reps = s.Reps,
+                    Weight = s.Weight
                 }).ToList()
             }).ToList()
         };

@@ -1,4 +1,4 @@
-﻿using RTMS.CoreBusiness;
+﻿using RTMS.CoreBusiness.Active;
 using RTMS.Plugins.InMemory;
 using RTMS.UseCases.Workouts.Interfaces;
 

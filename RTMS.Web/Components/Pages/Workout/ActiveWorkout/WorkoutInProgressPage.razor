@@ -6,11 +6,16 @@
 <PageTitle>@_activeWorkout.Name</PageTitle>
 
 <MudCard>
-    <MudCardHeader>
+    <MudCardHeader >
         <CardHeaderContent>
-            <MudText Typo="Typo.h4">@_activeWorkout.Name</MudText>
-            <MudText Typo="Typo.body1">Duration: @_duration.ToString(@"hh\:mm\:ss")</MudText>
-            <MudText Type="Type.body1">Rest Timer: 3:00</MudText>
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h4">@_activeWorkout.Name</MudText>
+                    <MudText Typo="Typo.body1">Duration: @_duration.ToString(@"hh\:mm\:ss")</MudText>
+                    <MudText Type="Type.body1">Rest Timer: 3:00</MudText>
+                </MudCardContent>
+            </MudCard>
+            
         </CardHeaderContent>
     </MudCardHeader>
 
@@ -64,16 +69,12 @@
                         </MudSimpleTable>
                     </MudCardContent>
                 </MudCard>
-
             }
-
-            <br />
-            <MudCardActions>
-                <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="EndWorkout">End Workout</MudButton>
-            </MudCardActions>
         }
     </MudCardContent>
 </MudCard>
+<br />
+<MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="EndWorkout">End Workout</MudButton>
 
 @code {
     private Workout _activeWorkout;

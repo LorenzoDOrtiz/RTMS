@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RTMS.CoreBusiness;
+namespace RTMS.CoreBusiness.Active;
 public class Workout
 {
     public int Id { get; set; }  // Unique identifier for the workout

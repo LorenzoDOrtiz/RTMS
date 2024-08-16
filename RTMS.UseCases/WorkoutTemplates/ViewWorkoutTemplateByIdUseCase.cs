@@ -1,4 +1,4 @@
-﻿using RTMS.CoreBusiness;
+﻿using RTMS.CoreBusiness.Template;
 using RTMS.UseCases.PluginInterfaces;
 using RTMS.UseCases.WorkoutTemplates.Interfaces;
 

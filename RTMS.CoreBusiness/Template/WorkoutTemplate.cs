@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RTMS.CoreBusiness;
+namespace RTMS.CoreBusiness.Template;
 
 public class WorkoutTemplate
 {
