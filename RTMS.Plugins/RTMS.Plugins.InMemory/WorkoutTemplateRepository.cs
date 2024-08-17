@@ -136,6 +136,7 @@ public class WorkoutTemplateRepository : IWorkoutTemplateRepository
                 if (existingExercise is not null)
                 {
                     existingExercise.Name = updatedExercise.Name;
+                    existingExercise.RestTimeBetweenSets = updatedExercise.RestTimeBetweenSets;
                     existingExercise.Sets = updatedExercise.Sets;
                     existingExercise.Note = updatedExercise.Note;
                 }

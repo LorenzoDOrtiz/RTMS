@@ -1,21 +1,20 @@
 ﻿@page "/workout-in-progress"
+
 @inject NavigationManager NavigationManager
 @inject IGetActiveWorkoutUseCase GetActiveWorkoutUseCase
 @inject IEndWorkoutUseCase EndWorkoutUseCase
 
-<PageTitle>@_activeWorkout.Name</PageTitle>
+<PageTitle>@_activeWorkout?.Name</PageTitle>
 
 <MudCard>
-    <MudCardHeader >
+    <MudCardHeader>
         <CardHeaderContent>
             <MudCard>
                 <MudCardContent>
-                    <MudText Typo="Typo.h4">@_activeWorkout.Name</MudText>
-                    <MudText Typo="Typo.body1">Duration: @_duration.ToString(@"hh\:mm\:ss")</MudText>
-                    <MudText Type="Type.body1">Rest Timer: 3:00</MudText>
+                    <MudText Typo="Typo.h4">@_activeWorkout?.Name</MudText>
+                    <MudText Typo="Typo.body1">Duration: @_exerciseDuration.ToString(@"hh\:mm\:ss")</MudText>
                 </MudCardContent>
             </MudCard>
-            
         </CardHeaderContent>
     </MudCardHeader>
 
@@ -24,14 +23,19 @@
         {
             <MudText Typo="Typo.h5">No workout in progress.</MudText>
             <MudCardActions>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/workouts">Back to Workouts</MudButton>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Href="/workouts">
+                    Back to Workouts
+                </MudButton>
             </MudCardActions>
         }
         else
         {
             @for (int i = 0; i < _activeWorkout.Exercises.Count; i++)
             {
-                var exercise = _activeWorkout.Exercises[i];
+                var exerciseIndex = i;
+                var exercise = _activeWorkout.Exercises[exerciseIndex];
 
                 <MudCard Elevation="0">
                     <MudCardContent>
@@ -41,28 +45,76 @@
                                     <th>@exercise.Name</th>
                                     <th>Reps</th>
                                     <th>Weight</th>
-                                    <th></th>
+                                    <th>Set Status</th>
+                                    <th>Rest Timer</th>
                                     <th>
-
-                                        <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open workout options">
-                                            <MudMenuItem Icon="@Icons.Material.Filled.AddCircle" IconColor="Color.Success">Add Set</MudMenuItem>
-                                            <MudMenuItem Icon="@Icons.Material.Filled.Timer" IconColor="Color.Secondary">Rest Timer</MudMenuItem>
-                                            <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error">Delete Exercise</MudMenuItem>
+                                        <MudMenu Icon="@Icons.Material.Filled.MoreVert"
+                                                 AriaLabel="Open workout options"
+                                                 ActivationEvent="@MouseEvent.MouseOver"
+                                                 AnchorOrigin="Origin.BottomCenter"
+                                                 TransformOrigin="Origin.TopCenter"
+                                                 Ripple="false">
+                                            <MudMenuItem Icon="@Icons.Material.Filled.AddCircle"
+                                                         IconColor="Color.Success">
+                                                Add Set
+                                            </MudMenuItem>
+                                            <MudMenuItem Icon="@Icons.Material.Filled.Delete"
+                                                         IconColor="Color.Error">
+                                                Delete Exercise
+                                            </MudMenuItem>
                                         </MudMenu>
-
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @for (int j = 0; j < exercise.Sets.Count; j++)
                                 {
-                                    var set = exercise.Sets[j];
+                                    var setIndex = j;
+                                    var set = exercise.Sets[setIndex];
+                                    var hasRestTimer = exercise.InitialRestTimeBetweenSets > 0;
+
                                     <tr>
                                         <td>@($"Set {j + 1}")</td>
-                                        <td><MudNumericField @bind-Value="set.Reps" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField></td>
-                                        <td><MudNumericField @bind-Value="set.Weight" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField></td>
-                                        <td><MudIconButton Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success"></MudIconButton></td>
-                                        <td><MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIconButton></td>
+                                        <td>
+                                            <MudNumericField @bind-Value="set.Reps"
+                                                             Variant="Variant.Filled"
+                                                             Margin="Margin.Dense" />
+                                        </td>
+                                        <td>
+                                            <MudNumericField @bind-Value="set.Weight"
+                                                             Variant="Variant.Filled"
+                                                             Margin="Margin.Dense" />
+                                        </td>
+                                        <td>
+                                            @if (!set.IsCompleted)
+                                            {
+                                                <MudTooltip Text="Mark Set Complete">
+                                                    <MudIconButton Icon="@Icons.Material.Filled.CheckCircle"
+                                                                   Color="Color.Dark"
+                                                                   Size="Size.Medium"
+                                                                   OnClick="() => CompleteSet(exerciseIndex, setIndex)" />
+                                                </MudTooltip>
+                                            }
+                                            else
+                                            {
+                                                <MudTooltip Text="Set Complete">
+                                                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle"
+                                                             Size="Size.Medium"
+                                                             Color="Color.Success" />
+                                                </MudTooltip>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (hasRestTimer && set.RemainingRestTime > 0)
+                                            {
+                                            <MudText>@TimeSpan.FromSeconds(set.RemainingRestTime).ToString(@"mm\:ss")</MudText>
+                                            }
+                                        </td>
+                                        <td>
+                                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                                           Color="Color.Error"
+                                                           OnClick="() => DeleteSet(exerciseIndex, setIndex)" />
+                                        </td>
                                     </tr>
                                 }
                             </tbody>
@@ -73,12 +125,18 @@
         }
     </MudCardContent>
 </MudCard>
+
 <br />
-<MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="EndWorkout">End Workout</MudButton>
+
+<MudButton Variant="Variant.Text"
+           Color="Color.Secondary"
+           OnClick="EndWorkout">
+           End Workout
+</MudButton>
 
 @code {
-    private Workout _activeWorkout;
-    private TimeSpan _duration;
+    private Workout? _activeWorkout;
+    private TimeSpan _exerciseDuration;
 
     protected override async Task OnInitializedAsync()
     {
@@ -94,10 +152,45 @@
     {
         while (_activeWorkout != null && !_activeWorkout.IsCompleted)
         {
-            _duration = DateTime.Now - _activeWorkout.StartTime;
+            _exerciseDuration = DateTime.Now - _activeWorkout.StartTime;
             StateHasChanged();
             await Task.Delay(1000); // Update every second
         }
+    }
+
+    private void CompleteSet(int exerciseIndex, int setIndex)
+    {
+        if (_activeWorkout is not null)
+        {
+            var set = _activeWorkout.Exercises[exerciseIndex].Sets[setIndex];
+            set.IsCompleted = true;
+
+            // Set the remaining rest time based on exercise's initial rest time
+            if (exerciseIndex >= 0 && exerciseIndex < _activeWorkout.Exercises.Count)
+            {
+                var exercise = _activeWorkout.Exercises[exerciseIndex];
+                if (exercise.InitialRestTimeBetweenSets > 0)
+                {
+                    set.RemainingRestTime = exercise.InitialRestTimeBetweenSets;
+                    _ = RestTimerLoop(exerciseIndex, setIndex); // Start rest timer
+                }
+            }
+        }
+    }
+
+    private async Task RestTimerLoop(int exerciseIndex, int setIndex)
+    {
+        var set = _activeWorkout?.Exercises[exerciseIndex].Sets[setIndex];
+        if (set == null) return;
+
+        while (_activeWorkout != null && !_activeWorkout.IsCompleted && set.RemainingRestTime > 0)
+        {
+            set.RemainingRestTime -= 1;
+            StateHasChanged(); // Notify the UI to update
+            await Task.Delay(1000); // Update every second
+        }
+        set.IsCompleted = true; // Mark as completed after rest timer ends
+        StateHasChanged(); // Notify the UI to update
     }
 
     private async Task EndWorkout()
@@ -106,8 +199,15 @@
         {
             await EndWorkoutUseCase.ExecuteAsync(_activeWorkout.Id);
             _activeWorkout = null;
-            _duration = TimeSpan.Zero;
+            _exerciseDuration = TimeSpan.Zero;
             NavigationManager.NavigateTo("/workouts");
         }
+    }
+
+    private void DeleteSet(int exerciseIndex, int setIndex)
+    {
+        // Implement the logic to delete a set
+        _activeWorkout?.Exercises[exerciseIndex].Sets.RemoveAt(setIndex);
+        StateHasChanged(); // Notify the UI to update
     }
 }

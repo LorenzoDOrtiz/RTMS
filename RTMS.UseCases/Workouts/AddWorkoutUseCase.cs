@@ -19,20 +19,24 @@ public class AddWorkoutUseCase : IAddWorkoutUseCase
         {
             Name = workoutTemplate.Name,
             TemplateId = workoutTemplate.Id,
-            StartTime = DateTime.Now,  // Set the start time when the workout begins
+            StartTime = DateTime.Now,
             Exercises = workoutTemplate.Exercises.Select(e => new Exercise
             {
                 Name = e.Name,
                 Note = e.Note,
+                InitialRestTimeBetweenSets = e.RestTimeBetweenSets,
+                RemainingRestTime = e.RestTimeBetweenSets, // Initialize remaining rest time
                 Sets = e.Sets.Select(s => new ExerciseSet
                 {
                     Reps = s.Reps,
-                    Weight = s.Weight
+                    Weight = s.Weight,
+                    IsCompleted = false
+                    // Ensure that IsCompleted and RemainingRestTime are initialized
                 }).ToList()
             }).ToList()
         };
 
-        // Store the workout in the repository
         await _workoutRepository.AddWorkoutAsync(workout);
     }
+
 }
