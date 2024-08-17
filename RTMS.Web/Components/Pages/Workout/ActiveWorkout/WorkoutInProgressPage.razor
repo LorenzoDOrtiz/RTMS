@@ -77,37 +77,38 @@
                                         <td>@($"Set {j + 1}")</td>
                                         <td>
                                             <MudNumericField @bind-Value="set.Reps"
-                                                             Variant="Variant.Filled"
+                                                             Variant="Variant.Outlined"
                                                              Margin="Margin.Dense" />
                                         </td>
                                         <td>
                                             <MudNumericField @bind-Value="set.Weight"
-                                                             Variant="Variant.Filled"
+                                                             Variant="Variant.Outlined"
                                                              Margin="Margin.Dense" />
                                         </td>
                                         <td>
                                             @if (!set.IsCompleted)
                                             {
                                                 <MudTooltip Text="Mark Set Complete">
-                                                    <MudIconButton Icon="@Icons.Material.Filled.CheckCircle"
+                                                    <MudIconButton Icon="@Icons.Material.Outlined.CheckCircleOutline"
                                                                    Color="Color.Dark"
                                                                    Size="Size.Medium"
-                                                                   OnClick="() => CompleteSet(exerciseIndex, setIndex)" />
+                                                                   OnClick="() => CompleteSet(exerciseIndex, setIndex)"  />
                                                 </MudTooltip>
                                             }
                                             else
                                             {
                                                 <MudTooltip Text="Set Complete">
-                                                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle"
-                                                             Size="Size.Medium"
-                                                             Color="Color.Success" />
+                                                    <MudIconButton Icon="@Icons.Material.Outlined.CheckCircleOutline"
+                                                                   Color="Color.Success"
+                                                                   Size="Size.Medium"
+                                                                   OnClick="() => ResetSet(exerciseIndex, setIndex)" />
                                                 </MudTooltip>
                                             }
                                         </td>
                                         <td>
-                                            @if (hasRestTimer && set.RemainingRestTime > 0)
+                                            @if (set.IsCompleted && hasRestTimer && set.RemainingRestTime >= 0)
                                             {
-                                            <MudText>@TimeSpan.FromSeconds(set.RemainingRestTime).ToString(@"mm\:ss")</MudText>
+                                                <MudText>@TimeSpan.FromSeconds(set.RemainingRestTime).ToString(@"mm\:ss")</MudText>
                                             }
                                         </td>
                                         <td>
@@ -144,17 +145,18 @@
         if (_activeWorkout != null)
         {
             // Start the timer if a workout is in progress
-            _ = TimerLoop();
+            _ = ExerciseTimerLoop();
         }
     }
 
-    private async Task TimerLoop()
+    private async Task EndWorkout()
     {
-        while (_activeWorkout != null && !_activeWorkout.IsCompleted)
+        if (_activeWorkout != null)
         {
-            _exerciseDuration = DateTime.Now - _activeWorkout.StartTime;
-            StateHasChanged();
-            await Task.Delay(1000); // Update every second
+            await EndWorkoutUseCase.ExecuteAsync(_activeWorkout.Id);
+            _activeWorkout = null;
+            _exerciseDuration = TimeSpan.Zero;
+            NavigationManager.NavigateTo("/workouts");
         }
     }
 
@@ -178,29 +180,12 @@
         }
     }
 
-    private async Task RestTimerLoop(int exerciseIndex, int setIndex)
+    private void ResetSet(int exerciseIndex, int setIndex)
     {
-        var set = _activeWorkout?.Exercises[exerciseIndex].Sets[setIndex];
-        if (set == null) return;
-
-        while (_activeWorkout != null && !_activeWorkout.IsCompleted && set.RemainingRestTime > 0)
+        if (_activeWorkout is not null)
         {
-            set.RemainingRestTime -= 1;
-            StateHasChanged(); // Notify the UI to update
-            await Task.Delay(1000); // Update every second
-        }
-        set.IsCompleted = true; // Mark as completed after rest timer ends
-        StateHasChanged(); // Notify the UI to update
-    }
-
-    private async Task EndWorkout()
-    {
-        if (_activeWorkout != null)
-        {
-            await EndWorkoutUseCase.ExecuteAsync(_activeWorkout.Id);
-            _activeWorkout = null;
-            _exerciseDuration = TimeSpan.Zero;
-            NavigationManager.NavigateTo("/workouts");
+            var set = _activeWorkout.Exercises[exerciseIndex].Sets[setIndex];
+            set.IsCompleted = false;
         }
     }
 
@@ -209,5 +194,37 @@
         // Implement the logic to delete a set
         _activeWorkout?.Exercises[exerciseIndex].Sets.RemoveAt(setIndex);
         StateHasChanged(); // Notify the UI to update
+    }
+
+    private async Task ExerciseTimerLoop()
+    {
+        while (_activeWorkout != null && !_activeWorkout.IsCompleted)
+        {
+            _exerciseDuration = DateTime.Now - _activeWorkout.StartTime;
+            StateHasChanged();
+            await Task.Delay(1000); // Update every second
+        }
+    }
+
+    private async Task RestTimerLoop(int exerciseIndex, int setIndex)
+    {
+        var set = _activeWorkout?.Exercises[exerciseIndex].Sets[setIndex];
+        if (set == null) return;
+
+        // Display initial time
+        StateHasChanged();
+
+        while (_activeWorkout != null && !_activeWorkout.IsCompleted && set.RemainingRestTime >= 0)
+        {
+            await Task.Delay(1000); // Wait first, then update
+            set.RemainingRestTime -= 1;
+            StateHasChanged(); // Notify the UI to update
+        }
+
+        // Add a small delay after reaching 0
+        await Task.Delay(1000);
+
+        set.RemainingRestTime = -1; // Set to -1 to hide the timer
+        StateHasChanged(); // Final UI update
     }
 }

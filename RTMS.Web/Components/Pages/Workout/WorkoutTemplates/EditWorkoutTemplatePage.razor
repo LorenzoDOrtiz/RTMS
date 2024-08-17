@@ -54,7 +54,7 @@
                                         <MudMenuItem OnClick="@(() => @exercise.IsRestTimerOpen = true)"
                                                      Icon="@Icons.Material.Filled.Timer"
                                                      IconColor="Color.Secondary">
-                                            Rest Timer
+                                                     Rest Timer
                                         </MudMenuItem>
                                         <MudMenuItem Icon="@Icons.Material.Filled.Note" 
                                                      IconColor="Color.Tertiary">
@@ -120,12 +120,12 @@
                                         <td>@($"Set {j + 1}")</td>
                                         <td>
                                             <MudNumericField @bind-Value="set.Reps" 
-                                                             Variant="Variant.Filled" 
+                                                             Variant="Variant.Outlined" 
                                                              Margin="Margin.Dense" />
                                         </td>
                                         <td>
-                                            <MudNumericField @bind-Value="set.Weight" 
-                                                             Variant="Variant.Filled" 
+                                            <MudNumericField @bind-Value="set.Weight"
+                                                             Variant="Variant.Outlined"
                                                              Margin="Margin.Dense" />
                                         </td>
                                         <td>

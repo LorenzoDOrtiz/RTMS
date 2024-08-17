@@ -30,6 +30,7 @@ public class AddWorkoutUseCase : IAddWorkoutUseCase
                 {
                     Reps = s.Reps,
                     Weight = s.Weight,
+                    InitialRestTime = e.RestTimeBetweenSets,
                     IsCompleted = false
                     // Ensure that IsCompleted and RemainingRestTime are initialized
                 }).ToList()

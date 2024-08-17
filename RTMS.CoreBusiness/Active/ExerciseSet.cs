@@ -13,5 +13,7 @@ public class ExerciseSet
 
     public bool IsCompleted { get; set; }  // Flag to indicate if the set is completed
 
+    public int InitialRestTime { get; set; } // Total rest time for each set in seconds
+
     public int RemainingRestTime { get; set; } // Tracks remaining rest time for the set
 }
