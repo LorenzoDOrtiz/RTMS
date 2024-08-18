@@ -4,6 +4,7 @@ using RTMS.Plugins.InMemory;
 using RTMS.UseCases.Workouts.Interfaces;
 
 namespace RTMS.UseCases.Workouts;
+
 public class AddWorkoutUseCase : IAddWorkoutUseCase
 {
     private readonly IWorkoutRepository _workoutRepository;
@@ -25,19 +26,15 @@ public class AddWorkoutUseCase : IAddWorkoutUseCase
                 Name = e.Name,
                 Note = e.Note,
                 InitialRestTimeBetweenSets = e.RestTimeBetweenSets,
-                RemainingRestTime = e.RestTimeBetweenSets, // Initialize remaining rest time
                 Sets = e.Sets.Select(s => new ExerciseSet
                 {
                     Reps = s.Reps,
                     Weight = s.Weight,
                     InitialRestTime = e.RestTimeBetweenSets,
-                    IsCompleted = false
-                    // Ensure that IsCompleted and RemainingRestTime are initialized
                 }).ToList()
             }).ToList()
         };
 
         await _workoutRepository.AddWorkoutAsync(workout);
     }
-
 }

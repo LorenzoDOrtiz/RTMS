@@ -11,9 +11,5 @@ public class ExerciseSet
     [Range(0, double.MaxValue, ErrorMessage = "Weight must be non-negative.")]
     public double Weight { get; set; }
 
-    public bool IsCompleted { get; set; }  // Flag to indicate if the set is completed
-
-    public int InitialRestTime { get; set; } // Total rest time for each set in seconds
-
-    public int RemainingRestTime { get; set; } // Tracks remaining rest time for the set
+    public int InitialRestTime { get; set; } // Keep this if it’s part of business logic
 }

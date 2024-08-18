@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace RTMS.CoreBusiness.Template;
+
 public class ExerciseTemplate
 {
     public int Id { get; set; }
