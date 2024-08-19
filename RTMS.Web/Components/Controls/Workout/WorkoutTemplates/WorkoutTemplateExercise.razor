@@ -14,45 +14,13 @@
                                              OnRestTimerOpened="HandleRestTimerOpened"
                                              OnExerciseDeleted="HandleExerciseDeleted" />
 
-                <MudPopover Open="@Exercise.IsRestTimerOpen" Class="px-4 pt-2 pb-2">
-                    <MudText Typo="Typo.body1" Class="mb-2">Set Rest Timer</MudText>
-                    <MudGrid>
-                        <MudItem xs="6">
-                            <MudNumericField @bind-Value="Exercise.RestTimerValue"
-                                             Label="Duration"
-                                             Variant="Variant.Filled"
-                                             Min="1"
-                                             Max="@(Exercise.RestTimerUnit == "minutes" ? 60 : 3600)"
-                                             Margin="Margin.Dense" />
-                        </MudItem>
-                        <MudItem xs="6">
-                            <MudSelect T="string"
-                                       @bind-Value="Exercise.RestTimerUnit"
-                                       Label="Unit"
-                                       Variant="Variant.Filled"
-                                       Margin="Margin.Dense"
-                                       Dense>
-                                <MudSelectItem Value="@("seconds")">Seconds</MudSelectItem>
-                                <MudSelectItem Value="@("minutes")">Minutes</MudSelectItem>
-                            </MudSelect>
-                        </MudItem>
-                    </MudGrid>
-                    <MudGrid Justify="Justify.FlexEnd" Class="mt-0">
-                        <MudItem>
-                            <MudButton Color="Color.Error"
-                                       OnClick="@(() => Exercise.IsRestTimerOpen = false)"
-                                       Class="mr-2"
-                                       Variant="Variant.Text">
-                                Cancel
-                            </MudButton>
-                            <MudButton Color="Color.Success"
-                                       OnClick="SetRestTimer"
-                                       Variant="Variant.Filled">
-                                Set Timer
-                            </MudButton>
-                        </MudItem>
-                    </MudGrid>
-                </MudPopover>
+                <WorkoutTemplateRestTimerMenu IsRestTimerOpen="@Exercise.IsRestTimerOpen"
+                                              RestTimerValue="@Exercise.RestTimerValue"
+                                              RestTimerUnit="@Exercise.RestTimerUnit"
+                                              OnRestTimerUnitChanged="HandleRestTimerUnitChanged"
+                                              OnRestTimerValueChanged="HandleRestTimerValueChanged"
+                                              OnRestTimerCancel="HandleRestTimerCancel"
+                                              OnRestTimerSet="HandleRestTimerSet" />
             </th>
         </tr>
     </thead>
@@ -65,7 +33,7 @@
 
                 <WorkoutTemplateSet Set="set" 
                                     SetIndex="i"
-                                    OnSetDelete="HandleSetDelete"/>
+                                    OnSetDelete="HandleSetDelete" />
             }
         }
     </tbody>
@@ -73,7 +41,7 @@
 
 @code {
     [Parameter]
-    public ExerciseTemplate? Exercise { get; set; }
+    public ExerciseTemplate Exercise { get; set; }
 
     [Parameter]
     public EventCallback<int> OnExerciseDeleted { get; set; }
@@ -89,9 +57,19 @@
             });
     }
 
+    private void HandleRestTimerValueChanged(int restTimerValue)
+    {
+        Exercise.RestTimerValue = restTimerValue;
+    }
+
     private void HandleRestTimerOpened()
     {
         Exercise.IsRestTimerOpen = true;
+    }
+
+    private void HandleRestTimerUnitChanged(string restTimerUnit)
+    {
+        Exercise.RestTimerUnit = restTimerUnit;
     }
 
     private void HandleExerciseDeleted()
@@ -99,14 +77,14 @@
         OnExerciseDeleted.InvokeAsync(Exercise.Id);
     }
 
-    private void SetRestTimer()
+    private void HandleRestTimerCancel()
     {
-        int durationInSeconds = Exercise.RestTimerUnit == "minutes" ? Exercise.RestTimerValue * 60 : Exercise.RestTimerValue;
+        Exercise.IsRestTimerOpen = false;
+    }
 
-        if (durationInSeconds != 0)
-        {
-            Exercise.RestTimeBetweenSets = durationInSeconds;
-        }
+    private void HandleRestTimerSet(int durationInSeconds)
+    {
+        Exercise.RestTimeBetweenSets = durationInSeconds;
         Exercise.IsRestTimerOpen = false;
     }
 
