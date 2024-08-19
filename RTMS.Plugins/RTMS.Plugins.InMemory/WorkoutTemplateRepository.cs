@@ -80,11 +80,7 @@ public class WorkoutTemplateRepository : IWorkoutTemplateRepository
 
     public Task AddWorkoutTemplateAsync(WorkoutTemplate workout)
     {
-        // Get the maxId
-        var maxId = _workoutTemplates.Max(x => x.Id);
-
-        // Increment
-        workout.Id = maxId + 1;
+        workout.Id = _workoutTemplates.Any() ? _workoutTemplates.Max(w => w.Id) + 1 : 1;
 
         // Set UserId to 1 until Identity is added
         workout.UserId = 1;

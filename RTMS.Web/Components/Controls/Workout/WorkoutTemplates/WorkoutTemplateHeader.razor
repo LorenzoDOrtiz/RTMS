@@ -1,18 +1,18 @@
-﻿<MudCardHeader>
-    <CardHeaderContent>
+﻿<MudCard>
+    <MudCardContent>
         <MudTextField Value="WorkoutName"
-                      ValueChanged="OnWorkoutNameChange"
+                      ValueChanged="OnWorkoutNameChanged"
                       Label="Workout Name"
                       Variant="Variant.Filled"
                       Margin="Margin.Dense"
                       AutoFocus />
-    </CardHeaderContent>
-</MudCardHeader>
+    </MudCardContent>
+</MudCard>
 
 @code {
     [Parameter]
     public string WorkoutName { get; set; }
 
     [Parameter]
-    public EventCallback<string> OnWorkoutNameChange { get; set; }
+    public EventCallback<string> OnWorkoutNameChanged { get; set; }
 }

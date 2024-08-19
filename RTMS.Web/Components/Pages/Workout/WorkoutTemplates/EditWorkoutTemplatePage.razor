@@ -6,165 +6,45 @@
 
 <PageTitle>Edit Workout</PageTitle>
 
-<MudCard>
+<MudStack Spacing="4">
     <WorkoutTemplateHeader WorkoutName="@workoutTemplate.Name"
-                           OnWorkoutNameChange="HandleWorkoutNameChange" />
+                           OnWorkoutNameChanged="HandleWorkoutNameChange" />
 
-    <MudCardContent>
-
-        @for (int i = 0; i < workoutTemplate.Exercises.Count; i++)
+    @if (workoutTemplate.Exercises != null && workoutTemplate.Exercises.Any())
+    {
+        foreach (var exercise in workoutTemplate.Exercises)
         {
-            int exerciseIndex = i;
-            var exercise = workoutTemplate.Exercises[exerciseIndex];
-
-            <MudCard Elevation="0">
-                <MudCardContent>
-                    <MudSimpleTable Dense Elevation="3">
-                        <thead>
-                            <tr>
-                                <th>
-                                    <MudTextField @bind-Value="workoutTemplate.Exercises[exerciseIndex].Name" 
-                                                  Label="Exercise Name" 
-                                                  Variant="Variant.Filled" 
-                                                  Margin="Margin.Dense" 
-                                                  AutoFocus />
-                                </th>
-                                <th>Reps</th>
-                                <th>Weight</th>
-                                <th>
-                                    <MudMenu Icon="@Icons.Material.Filled.MoreVert"
-                                             AriaLabel="Open workout options"
-                                             AnchorOrigin="Origin.BottomCenter"
-                                             TransformOrigin="Origin.TopCenter" >
-
-                                        <MudMenuItem OnClick="() => AddSet(exerciseIndex)" 
-                                                     Icon="@Icons.Material.Filled.AddCircle" 
-                                                     IconColor="Color.Success">
-                                                     Add Set
-                                        </MudMenuItem>
-                                        <MudMenuItem OnClick="@(() => @exercise.IsRestTimerOpen = true)"
-                                                     Icon="@Icons.Material.Filled.Timer"
-                                                     IconColor="Color.Secondary">
-                                                     Rest Timer
-                                        </MudMenuItem>
-                                        <MudMenuItem Icon="@Icons.Material.Filled.Note" 
-                                                     IconColor="Color.Tertiary">
-                                                     Note
-                                        </MudMenuItem>
-                                        <MudMenuItem OnClick="() => DeleteExercise(exerciseIndex)" 
-                                                     Icon="@Icons.Material.Filled.Delete" 
-                                                     IconColor="Color.Error">
-                                                     Delete Exercise
-                                        </MudMenuItem>
-                                    </MudMenu>
-                                    <MudPopover Open="@exercise.IsRestTimerOpen" Class="px-4 pt-2 pb-2">
-                                        <MudText Typo="Typo.body1" Class="mb-2">Set Rest Timer</MudText>
-                                        <MudGrid>
-                                            <MudItem xs="6">
-                                                <MudNumericField @bind-Value="exercise.RestTimerValue"
-                                                                 Label="Duration"
-                                                                 Variant="Variant.Filled"
-                                                                 Min="1"
-                                                                 Max="@(exercise.RestTimerUnit == "minutes" ? 60 : 3600)"
-                                                                 Margin="Margin.Dense" />
-                                            </MudItem>
-                                            <MudItem xs="6">
-                                                <MudSelect T="string"
-                                                           @bind-Value="exercise.RestTimerUnit"
-                                                           Label="Unit"
-                                                           Variant="Variant.Filled"
-                                                           Margin="Margin.Dense"
-                                                           Dense>
-                                                    <MudSelectItem Value="@("seconds")">Seconds</MudSelectItem>
-                                                    <MudSelectItem Value="@("minutes")">Minutes</MudSelectItem>
-                                                </MudSelect>
-                                            </MudItem>
-                                        </MudGrid>
-                                        <MudGrid Justify="Justify.FlexEnd" Class="mt-0">
-                                            <MudItem>
-                                                <MudButton Color="Color.Error"
-                                                           OnClick="@(() => exercise.IsRestTimerOpen = false)"
-                                                           Class="mr-2"
-                                                           Variant="Variant.Text">
-                                                    Cancel
-                                                </MudButton>
-                                                <MudButton Color="Color.Success"
-                                                           OnClick="@(() => SetRestTimer(exercise, exerciseIndex))"
-                                                           Variant="Variant.Filled">
-                                                    Set Timer
-                                                </MudButton>
-                                            </MudItem>
-                                        </MudGrid>
-                                    </MudPopover>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (exercise.Sets != null && exercise.Sets.Any())
-                            {
-                                @for (int j = 0; j < exercise.Sets.Count; j++)
-                                {
-                                    var setIndex = j;
-                                    var set = exercise.Sets[setIndex];
-
-                                    <tr>
-                                        <td>@($"Set {j + 1}")</td>
-                                        <td>
-                                            <MudNumericField @bind-Value="set.Reps" 
-                                                             Variant="Variant.Outlined" 
-                                                             Margin="Margin.Dense" />
-                                        </td>
-                                        <td>
-                                            <MudNumericField @bind-Value="set.Weight"
-                                                             Variant="Variant.Outlined"
-                                                             Margin="Margin.Dense" />
-                                        </td>
-                                        <td>
-                                            <MudTooltip Text="Delete Set">
-                                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                                               Color="Color.Error"
-                                                               OnClick="() => DeleteSet(exerciseIndex, setIndex)" />
-                                            </MudTooltip>
-                                            
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </MudSimpleTable>
-                </MudCardContent>
-            </MudCard>
+            <WorkoutTemplateExercise Exercise="exercise"
+                                     OnExerciseDeleted="HandleExerciseDeleted" />
         }
+    }
 
-        <MudCardActions>
-            <MudGrid>
-                <MudItem>
-                    @if (workoutTemplate.Exercises.Any())
-                    {
-                        <MudButton Variant="Variant.Filled" 
-                                Color="Color.Success" 
-                                OnClick="ValidateAndSave" 
-                                Class="mr-4">
-                                Save Workout
-                        </MudButton>
-                    }
-                    <MudButton Href="/workouts" 
-                               Variant="Variant.Text"
-                               Color="Color.Error">
-                               Cancel
-                    </MudButton>
-                </MudItem>
-                <MudItem Class="ml-auto">
-                    <MudButton Variant="Variant.Filled" 
-                               Color="Color.Info" 
-                               OnClick="AddExercise">
-                               Add Exercise
-                    </MudButton>
-                </MudItem>
-            </MudGrid>
-        </MudCardActions>
-    </MudCardContent>
-</MudCard>
+    <MudGrid>
+        <MudItem>
+            @if (workoutTemplate.Exercises.Any())
+            {
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Success"
+                           OnClick="ValidateAndSave"
+                           Class="mr-4">
+                    Save Workout
+                </MudButton>
+            }
+            <MudButton Href="/workouts"
+                       Variant="Variant.Text"
+                       Color="Color.Error">
+                Cancel
+            </MudButton>
+        </MudItem>
+        <MudItem Class="ml-auto">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Info"
+                       OnClick="AddExercise">
+                Add Exercise
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudStack>
 
 @code {
     [Parameter]
@@ -178,15 +58,12 @@
         workoutTemplate = await ViewWorkoutUseCase.ExecuteAsync(Id);
     }
 
-    private void HandleWorkoutNameChange(string newName)
-    {
-        workoutTemplate.Name = newName;
-    }
-
     private void AddExercise()
     {
         workoutTemplate.Exercises.Add(new ExerciseTemplate
             {
+                Id = workoutTemplate.Exercises.Any() ? workoutTemplate.Exercises.Max(w => w.Id) + 1 : 1,
+                WorkoutTemplateId = workoutTemplate.Id,
                 Name = "",
                 Sets = new List<ExerciseTemplateSet>() // Initialize with an empty list
             {
@@ -194,6 +71,23 @@
             }
             });
     }
+
+    private void HandleWorkoutNameChange(string newName)
+    {
+        workoutTemplate.Name = newName;
+    }
+
+    private void HandleExerciseDeleted(int exerciseId)
+    {
+        var exerciseToDelete = workoutTemplate.Exercises.FirstOrDefault(e => e.Id == exerciseId);
+
+        if (exerciseToDelete != null)
+        {
+            workoutTemplate.Exercises.Remove(exerciseToDelete);
+        }
+    }
+
+
 
     private void DeleteExercise(int exerciseIndex)
     {
