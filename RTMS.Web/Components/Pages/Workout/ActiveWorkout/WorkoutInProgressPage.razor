@@ -6,131 +6,138 @@
 
 <PageTitle>@_activeWorkout?.Name</PageTitle>
 
-<MudCard>
-    <MudCardHeader>
-        <CardHeaderContent>
-            <MudCard>
-                <MudCardContent>
-                    <MudText Typo="Typo.h4">@_activeWorkout?.Name</MudText>
-                    <MudText Typo="Typo.body1">Duration: @_exerciseDuration.ToString(@"hh\:mm\:ss")</MudText>
-                </MudCardContent>
-            </MudCard>
-        </CardHeaderContent>
-    </MudCardHeader>
-
+<MudCard Elevation="3" Class="mb-4">
     <MudCardContent>
-        @if (_activeWorkout == null)
-        {
-            <MudText Typo="Typo.h5">No workout in progress.</MudText>
-            <MudCardActions>
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           Href="/workouts">
-                    Back to Workouts
-                </MudButton>
-            </MudCardActions>
-        }
-        else
-        {
-            @for (int i = 0; i < _exerciseViewModels.Count; i++)
-            {
-                var exerciseViewModel = _exerciseViewModels[i];
+        <MudGrid>
+            <MudItem xs="6">
+                <MudText Typo="Typo.h6">@_activeWorkout?.Name</MudText>
+            </MudItem>
 
-                <MudCard Elevation="0">
-                    <MudCardContent>
-                        <MudSimpleTable Dense Elevation="3">
-                            <thead>
-                                <tr>
-                                    <th>@exerciseViewModel.Exercise.Name</th>
-                                    <th>Reps</th>
-                                    <th>Weight</th>
-                                    <th>Set Status</th>
-                                    <th>Rest Timer</th>
-                                    <th>
-                                        <MudMenu Icon="@Icons.Material.Filled.MoreVert"
-                                                 AriaLabel="Open workout options"
-                                                 AnchorOrigin="Origin.BottomCenter"
-                                                 TransformOrigin="Origin.TopCenter" >
-                                            <MudMenuItem Icon="@Icons.Material.Filled.AddCircle"
-                                                         IconColor="Color.Success">
-                                                         Add Set
-                                            </MudMenuItem>
-                                            <MudMenuItem Icon="@Icons.Material.Filled.Delete"
-                                                         IconColor="Color.Error">
-                                                         Delete Exercise
-                                            </MudMenuItem>
-                                        </MudMenu>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for (int j = 0; j < exerciseViewModel.Sets.Count; j++)
-                                {
-                                    var setViewModel = exerciseViewModel.Sets[j];
+            <MudItem xs="6" Class="d-flex justify-end align-center">
 
-                                    <tr>
-                                        <td>@($"Set {j + 1}")</td>
-                                        <td>
-                                            <MudNumericField @bind-Value="setViewModel.ExerciseSet.Reps"
-                                                             Variant="Variant.Outlined"
-                                                             Margin="Margin.Dense" />
-                                        </td>
-                                        <td>
-                                            <MudNumericField @bind-Value="setViewModel.ExerciseSet.Weight"
-                                                             Variant="Variant.Outlined"
-                                                             Margin="Margin.Dense" />
-                                        </td>
-                                        <td>
-                                            @if (!setViewModel.IsCompleted)
-                                            {
-                                                <MudTooltip Text="Mark Set Complete">
-                                                    <MudIconButton Icon="@Icons.Material.Outlined.CheckCircleOutline"
-                                                                   Color="Color.Dark"
-                                                                   Size="Size.Medium"
-                                                                   OnClick="() => CompleteSet(exerciseViewModel, setViewModel)" />
-                                                </MudTooltip>
-                                            }
-                                            else
-                                            {
-                                                <MudTooltip Text="Set Complete">
-                                                    <MudIconButton Icon="@Icons.Material.Outlined.CheckCircleOutline"
-                                                                   Color="Color.Success"
-                                                                   Size="Size.Medium"
-                                                                   OnClick="() => ResetSet(setViewModel)" />
-                                                </MudTooltip>
-                                            }
-                                        </td>
-                                        <td>
-                                            @if (setViewModel.IsCompleted && setViewModel.InitialRestTime > 0 && setViewModel.RemainingRestTime >= 0)
-                                            {
-                                                <MudText>@TimeSpan.FromSeconds(setViewModel.RemainingRestTime).ToString(@"mm\:ss")</MudText>
-                                            }
-                                        </td>
-                                        <td> 
-                                            <MudTooltip Text="Delete Set">
-                                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                                               Color="Color.Error"
-                                                                   OnClick="() => DeleteSet(exerciseViewModel, setViewModel)" />
-                                            </MudTooltip>
+                <MudTooltip Text="Exercise Time">
+                    <MudIcon Icon="@Icons.Material.Filled.Timer" />
+                </MudTooltip>
+                <div style="width:80px;">
+                    <MudText Typo="Typo.body1" Class="ml-2">
+                        @FormatTime(_exerciseDuration)
+                    </MudText>
+                </div>
+            </MudItem>
 
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </MudSimpleTable>
-                    </MudCardContent>
-                </MudCard>
-            }
-        }
+        </MudGrid>
     </MudCardContent>
 </MudCard>
+
+
+
+
+@if (_activeWorkout == null)
+{
+    <MudText Typo="Typo.h5">No workout in progress.</MudText>
+    <MudCardActions>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Href="/workouts">
+            Back to Workouts
+        </MudButton>
+    </MudCardActions>
+}
+else
+{
+    @for (int i = 0; i < _exerciseViewModels.Count; i++)
+    {
+        var exerciseViewModel = _exerciseViewModels[i];
+
+        <MudSimpleTable Dense Elevation="1" Class="mb-4">
+            <thead>
+                <tr>
+                    <th width="300px">@exerciseViewModel.Exercise.Name</th>
+                    <th>Reps</th>
+                    <th>Weight</th>
+                    <th style="padding:0px;"></th>
+                    @* <th>Rest Timer</th> *@
+                    <th>
+                        <MudMenu Icon="@Icons.Material.Filled.MoreVert"
+                                 AriaLabel="Open workout options"
+                                 AnchorOrigin="Origin.BottomCenter"
+                                 TransformOrigin="Origin.TopCenter">
+                            <MudMenuItem Icon="@Icons.Material.Filled.AddCircle"
+                                         IconColor="Color.Success">
+                                Add Set
+                            </MudMenuItem>
+                            <MudMenuItem Icon="@Icons.Material.Filled.Delete"
+                                         IconColor="Color.Error">
+                                Delete Exercise
+                            </MudMenuItem>
+                        </MudMenu>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int j = 0; j < exerciseViewModel.Sets.Count; j++)
+                {
+                    var setViewModel = exerciseViewModel.Sets[j];
+
+                    <tr>
+                        <td>@($"Set {j + 1}")</td>
+                        <td>
+                            <MudNumericField @bind-Value="setViewModel.ExerciseSet.Reps"
+                                             Variant="Variant.Outlined"
+                                             Margin="Margin.Dense" />
+                        </td>
+                        <td>
+                            <MudNumericField @bind-Value="setViewModel.ExerciseSet.Weight"
+                                             Variant="Variant.Outlined"
+                                             Margin="Margin.Dense" />
+                        </td>
+                        <td>
+                            @if (!setViewModel.IsCompleted)
+                            {
+                                <MudTooltip Text="Complete Set">
+                                    <MudIconButton Icon="@Icons.Material.Outlined.CheckCircleOutline"
+                                                   Color="Color.Dark"
+                                                   Size="Size.Medium"
+                                                   OnClick="() => CompleteSet(exerciseViewModel, setViewModel)" />
+                                </MudTooltip>
+                            }
+                            else
+                            {
+                                <MudTooltip Text="Set Complete">
+                                    <MudIconButton Icon="@Icons.Material.Outlined.CheckCircleOutline"
+                                                   Color="Color.Success"
+                                                   Size="Size.Medium"
+                                                   OnClick="() => ResetSet(setViewModel)" />
+                                </MudTooltip>
+                            }
+                        </td>
+                        @* <td>
+                            @if (setViewModel.IsCompleted && setViewModel.InitialRestTime > 0 && setViewModel.RemainingRestTime >= 0)
+                            {
+                                <MudText>@TimeSpan.FromSeconds(setViewModel.RemainingRestTime).ToString(@"mm\:ss")</MudText>
+                            }
+                        </td> *@
+                        <td>
+                            <MudTooltip Text="Delete Set">
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                               Color="Color.Error"
+                                               OnClick="() => DeleteSet(exerciseViewModel, setViewModel)" />
+                            </MudTooltip>
+
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+    }
+}
 
 <br />
 
 <MudButton Variant="Variant.Text"
            Color="Color.Secondary"
            OnClick="EndWorkout">
-           End Workout
+    End Workout
 </MudButton>
 
 @code {
@@ -217,5 +224,29 @@
 
         setViewModel.DecrementRestTime(); // Set to -1 to hide the timer
         StateHasChanged(); // Final UI update
+    }
+
+    private string FormatTime(TimeSpan time)
+    {
+        var hours = time.Hours;
+        var minutes = time.Minutes;
+        var seconds = time.Seconds;
+
+        var timeParts = new List<string>();
+
+        if (hours > 0)
+        {
+            timeParts.Add($"{hours}h");
+        }
+        if (minutes > 0 || hours > 0) // Show minutes if there are any or hours are present
+        {
+            timeParts.Add($"{minutes}m");
+        }
+        if (seconds > 0 || timeParts.Count == 0) // Always show seconds if no other units are present
+        {
+            timeParts.Add($"{seconds}s");
+        }
+
+        return string.Join(" ", timeParts);
     }
 }

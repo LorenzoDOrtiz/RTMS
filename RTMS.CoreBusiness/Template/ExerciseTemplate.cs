@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace RTMS.CoreBusiness.Template;
+﻿namespace RTMS.CoreBusiness.Template;
 
 public class ExerciseTemplate
 {
@@ -8,7 +6,6 @@ public class ExerciseTemplate
 
     public int WorkoutTemplateId { get; set; }
 
-    [Required(ErrorMessage = "Exercise name is required.")]
     public string Name { get; set; }
 
     public int RestTimeBetweenSets { get; set; }

@@ -8,7 +8,13 @@
 <MudLayout>
     <MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudText Typo="Typo.h5" Class="ml-3">RTMS</MudText>
+        <MudText Typo="Typo.h5" Class="ml-2">RTMS</MudText>
+        <div style="margin-left: auto;">
+            <MudChipSet T="string">
+                <MudChip Icon="@Icons.Material.Filled.PlayArrow" Color="Color.Primary" Href="/workout-in-progress" Text="Workout A" />
+                @*<MudChip Icon="@Icons.Material.Filled.Timer" Color="Color.Secondary">Rest Timer</MudChip>*@
+            </MudChipSet>
+        </div>
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <MyNavMenu />

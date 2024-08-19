@@ -6,11 +6,9 @@
 <PageTitle>Add Workout</PageTitle>
 
 <MudCard>
-    <MudCardHeader>
-        <CardHeaderContent>
-            <MudTextField @bind-Value="workoutTemplate.Name" Label="Workout Name" Variant="Variant.Filled" Margin="Margin.Dense" AutoFocus />
-        </CardHeaderContent>
-    </MudCardHeader>
+
+    <WorkoutTemplateHeader WorkoutName="@workoutTemplate.Name"
+                           OnWorkoutNameChange="HandleWorkoutNameChange" />
 
     <MudCardContent>
         @if (workoutTemplate.Exercises != null && workoutTemplate.Exercises.Any())
@@ -37,10 +35,8 @@
                                     <th>
                                         <MudMenu Icon="@Icons.Material.Filled.MoreVert"
                                                  AriaLabel="Open workout options"
-                                                 ActivationEvent="@MouseEvent.MouseOver"
                                                  AnchorOrigin="Origin.BottomCenter"
-                                                 TransformOrigin="Origin.TopCenter"
-                                                 Ripple="false">
+                                                 TransformOrigin="Origin.TopCenter" >
                                             <MudMenuItem OnClick="() => AddSet(exerciseIndex)"
                                                          Icon="@Icons.Material.Filled.AddCircle"
                                                          IconColor="Color.Success">
@@ -90,7 +86,7 @@
                                                     <MudButton Color="Color.Error"
                                                                OnClick="@(() => exercise.IsRestTimerOpen = false)"
                                                                Class="mr-2"
-                                                               Variant="Variant.Filled">
+                                                               Variant="Variant.Text">
                                                                Cancel
                                                     </MudButton>
                                                     <MudButton Color="Color.Success"
@@ -115,19 +111,21 @@
                                         <tr>
                                             <td>@($"Set {j + 1}")</td>
                                             <td>
-                                                <MudNumericField @bind-Value="set.Reps" 
-                                                                 Variant="Variant.Filled" 
+                                                <MudNumericField @bind-Value="set.Reps"
+                                                                 Variant="Variant.Outlined"
                                                                  Margin="Margin.Dense" />
                                             </td>
                                             <td>
                                                 <MudNumericField @bind-Value="set.Weight" 
-                                                                 Variant="Variant.Filled" 
+                                                                 Variant="Variant.Outlined" 
                                                                  Margin="Margin.Dense" />
                                             </td>
                                             <td>
-                                                <MudIconButton Icon="@Icons.Material.Filled.Delete" 
-                                                               Color="Color.Error" 
-                                                               OnClick="() => DeleteSet(exerciseIndex, setIndex)" />
+                                                <MudTooltip Text="Delete Set">
+                                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                                                                   Color="Color.Error" 
+                                                                   OnClick="() => DeleteSet(exerciseIndex, setIndex)" />
+                                                </MudTooltip>
                                             </td>
                                         </tr>
                                     }
@@ -151,7 +149,7 @@
                         </MudButton>
                     }
                     <MudButton Href="/workouts" 
-                               Variant="Variant.Filled" 
+                               Variant="Variant.Text" 
                                Color="Color.Error">
                                Cancel
                     </MudButton>
@@ -174,6 +172,11 @@
     protected override void OnInitialized()
     {
         AddExercise();
+    }
+
+    private void HandleWorkoutNameChange(string newName)
+    {
+        workoutTemplate.Name = newName;
     }
 
     private void AddExercise()

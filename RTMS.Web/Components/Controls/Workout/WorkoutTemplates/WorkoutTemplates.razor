@@ -7,13 +7,13 @@
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-            <MudSimpleTable Elevation="3">
+            <MudSimpleTable Elevation="3"> 
                 <tbody>
                     @if (userWorkoutTemplates != null && userWorkoutTemplates.Count > 0)
                     {
                         @foreach (var workout in userWorkoutTemplates)
                         {
-                            <WorkoutTemplatesItemComponent WorkoutTemplate="workout" />
+                            <WorkoutTemplatesItem WorkoutTemplate="workout" />
                         }
                     }
                     else
