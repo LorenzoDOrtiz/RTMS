@@ -44,7 +44,7 @@
                                              Variant="Variant.Filled"
                                              Min="1"
                                              Max="@(Exercise.RestTimerUnit == "minutes" ? 60 : 3600)"
-                                             Margin="Margin.Dense"/>
+                                             Margin="Margin.Dense" />
                         </MudItem>
                         <MudItem xs="6">
                             <MudSelect T="string"
@@ -80,31 +80,13 @@
     <tbody>
         @if (Exercise.Sets != null && Exercise.Sets.Any())
         {
-            @for (int j = 0; j < Exercise.Sets.Count; j++)
+            @for (int i = 0; i < Exercise.Sets.Count; i++)
             {
-                var setIndex = j;
-                var set = Exercise.Sets[setIndex];
+                var set = Exercise.Sets[i];
 
-                <tr>
-                    <td>@($"Set {j + 1}")</td>
-                    <td>
-                        <MudNumericField @bind-Value="set.Reps"
-                                         Variant="Variant.Outlined"
-                                         Margin="Margin.Dense" />
-                    </td>
-                    <td>
-                        <MudNumericField @bind-Value="set.Weight"
-                                         Variant="Variant.Outlined"
-                                         Margin="Margin.Dense" />
-                    </td>
-                    <td>
-                        <MudTooltip Text="Delete Set">
-                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                           Color="Color.Error"
-                                           OnClick="() => DeleteSet(setIndex)" />
-                        </MudTooltip>
-                    </td>
-                </tr>
+                <WorkoutTemplateSet Set="set" 
+                                    SetIndex="i"
+                                    OnSetDelete="HandleSetDelete"/>
             }
         }
     </tbody>
@@ -120,7 +102,12 @@
 
     private void AddSet()
     {
-        Exercise.Sets?.Add(new ExerciseTemplateSet { Reps = 10, Weight = 0 });
+        Exercise.Sets?.Add(new ExerciseTemplateSet 
+            { 
+                Id = Exercise.Sets.Any() ? Exercise.Sets.Max(s => s.Id) + 1 : 1,
+                Reps = 10, 
+                Weight = 0 
+            });
     }
 
     private void DeleteExercise()
@@ -139,11 +126,16 @@
         Exercise.IsRestTimerOpen = false;
     }
 
-    private void DeleteSet(int setIndex)
+    private void HandleSetDelete(int setId)
     {
-        if (setIndex >= 0 && Exercise.Sets.Count > 0)
+        if (Exercise.Sets.Count > 0)
         {
-            Exercise.Sets.RemoveAt(setIndex);
+            var setToDelete = Exercise.Sets.FirstOrDefault(s => s.Id == setId);
+
+            if (setToDelete != null)
+            {
+                Exercise.Sets.Remove(setToDelete);
+            }
         }
     }
 }

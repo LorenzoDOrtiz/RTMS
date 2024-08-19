@@ -1,0 +1,36 @@
+﻿<tr>
+    <td>@($"Set {SetIndex + 1}")</td>
+    <td>
+        <MudNumericField @bind-Value="Set.Reps"
+                         Variant="Variant.Outlined"
+                         Margin="Margin.Dense" />
+    </td>
+    <td>
+        <MudNumericField @bind-Value="Set.Weight"
+                         Variant="Variant.Outlined"
+                         Margin="Margin.Dense" />
+    </td>
+    <td>
+        <MudTooltip Text="Delete Set">
+            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                           Color="Color.Error"
+                           OnClick="DeleteSet" />
+        </MudTooltip>
+    </td>
+</tr>
+
+@code {
+    [Parameter]
+    public ExerciseTemplateSet Set { get;  set;}
+
+    [Parameter]
+    public int SetIndex { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnSetDelete { get; set; }
+
+    private void DeleteSet()
+    {
+        OnSetDelete.InvokeAsync(Set.Id);
+    }
+}

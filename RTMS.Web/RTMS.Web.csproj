@@ -26,5 +26,10 @@
 	
 	<ItemGroup>
 	  <_ContentIncludedByDefault Remove="Components\Controls\Workout\WorkoutTemplates\WorkoutTemplateExercise.razor" />
+	  <_ContentIncludedByDefault Remove="Components\Controls\Workout\WorkoutTemplates\WorkoutTemplateSet.razor" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <UpToDateCheckInput Remove="Components\Controls\Workout\WorkoutTemplates\WorkoutTemplateSet.razor" />
 	</ItemGroup>
 </Project>
