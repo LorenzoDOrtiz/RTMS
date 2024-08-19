@@ -1,0 +1,50 @@
+﻿<MudMenu Icon="@Icons.Material.Filled.MoreVert"
+         AriaLabel="Open workout options"
+         AnchorOrigin="Origin.BottomLeft"
+         TransformOrigin="Origin.BottomCenter">
+    <MudMenuItem OnClick="AddSet"
+                 Icon="@Icons.Material.Filled.AddCircle"
+                 IconColor="Color.Success">
+        Add Set
+    </MudMenuItem>
+    <MudMenuItem OnClick="OpenRestTimer"
+                 Icon="@Icons.Material.Filled.Timer"
+                 IconColor="Color.Secondary">
+        Rest Timer
+    </MudMenuItem>
+    <MudMenuItem Icon="@Icons.Material.Filled.Note"
+                 IconColor="Color.Tertiary">
+        Note
+    </MudMenuItem>
+    <MudMenuItem OnClick="DeleteExercise"
+                 Icon="@Icons.Material.Filled.Delete"
+                 IconColor="Color.Error">
+        Delete Exercise
+    </MudMenuItem>
+</MudMenu>
+
+@code {
+    [Parameter]
+    public EventCallback OnSetAdded { get; set; }
+
+    [Parameter]
+    public EventCallback OnRestTimerOpened { get; set; }
+
+    [Parameter]
+    public EventCallback OnExerciseDeleted { get; set; }
+
+    private void AddSet()
+    {
+        OnSetAdded.InvokeAsync();
+    }
+
+    private void OpenRestTimer()
+    {
+        OnRestTimerOpened.InvokeAsync();
+    }
+    
+    private void DeleteExercise()
+    {
+        OnExerciseDeleted.InvokeAsync();
+    }
+}

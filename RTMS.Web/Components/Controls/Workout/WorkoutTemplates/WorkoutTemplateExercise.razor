@@ -10,30 +10,9 @@
             <th>Reps</th>
             <th>Weight</th>
             <th>
-                <MudMenu Icon="@Icons.Material.Filled.MoreVert"
-                         AriaLabel="Open workout options"
-                         AnchorOrigin="Origin.BottomCenter"
-                         TransformOrigin="Origin.TopCenter">
-                    <MudMenuItem OnClick="AddSet"
-                                 Icon="@Icons.Material.Filled.AddCircle"
-                                 IconColor="Color.Success">
-                        Add Set
-                    </MudMenuItem>
-                    <MudMenuItem OnClick="@(() => @Exercise.IsRestTimerOpen = true )"
-                                 Icon="@Icons.Material.Filled.Timer"
-                                 IconColor="Color.Secondary">
-                        Rest Timer
-                    </MudMenuItem>
-                    <MudMenuItem Icon="@Icons.Material.Filled.Note"
-                                 IconColor="Color.Tertiary">
-                        Note
-                    </MudMenuItem>
-                    <MudMenuItem OnClick="DeleteExercise"
-                                 Icon="@Icons.Material.Filled.Delete"
-                                 IconColor="Color.Error">
-                        Delete Exercise
-                    </MudMenuItem>
-                </MudMenu>
+                <WorkoutTemplateExerciseMenu OnSetAdded="HandleSetAdded"
+                                             OnRestTimerOpened="HandleRestTimerOpened"
+                                             OnExerciseDeleted="HandleExerciseDeleted" />
 
                 <MudPopover Open="@Exercise.IsRestTimerOpen" Class="px-4 pt-2 pb-2">
                     <MudText Typo="Typo.body1" Class="mb-2">Set Rest Timer</MudText>
@@ -100,7 +79,7 @@
     public EventCallback<int> OnExerciseDeleted { get; set; }
 
 
-    private void AddSet()
+    private void HandleSetAdded()
     {
         Exercise.Sets?.Add(new ExerciseTemplateSet 
             { 
@@ -110,7 +89,12 @@
             });
     }
 
-    private void DeleteExercise()
+    private void HandleRestTimerOpened()
+    {
+        Exercise.IsRestTimerOpen = true;
+    }
+
+    private void HandleExerciseDeleted()
     {
         OnExerciseDeleted.InvokeAsync(Exercise.Id);
     }
