@@ -12,8 +12,8 @@
                         Start
                     </MudButton>
                     <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open workout options">
-                        <MudMenuItem Href="@($"workouts/edit-workout-template/{WorkoutTemplate.Id}")">Edit</MudMenuItem>
-                        <MudMenuItem OnClick="async () => await DeleteWorkoutTemplate(WorkoutTemplate.Id)">Delete</MudMenuItem>
+                    <MudMenuItem Icon="@Icons.Material.Filled.Edit" IconColor="Color.Info" Href="@($"workouts/edit-workout-template/{WorkoutTemplate.Id}")">Edit</MudMenuItem>
+                        <MudMenuItem Icon="@Icons.Material.Filled.DeleteForever" IconColor="Color.Error" OnClick="async () => await DeleteWorkoutTemplate(WorkoutTemplate.Id)">Delete</MudMenuItem>
                     </MudMenu>
                 </MudCardActions>
             </td>  
