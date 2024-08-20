@@ -19,31 +19,10 @@
         }
     }
 
-    <MudGrid>
-        <MudItem>
-            @if (workoutTemplate.Exercises.Any())
-            {
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Success"
-                           OnClick="ValidateAndSave"
-                           Class="mr-4">
-                    Save Workout
-                </MudButton>
-            }
-            <MudButton Href="/workouts"
-                       Variant="Variant.Text"
-                       Color="Color.Error">
-                Cancel
-            </MudButton>
-        </MudItem>
-        <MudItem Class="ml-auto">
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Info"
-                       OnClick="AddExercise">
-                Add Exercise
-            </MudButton>
-        </MudItem>
-    </MudGrid>
+    <WorkoutTemplateButtons Exercises="workoutTemplate.Exercises"
+                            OnValidateAndSave="HandleValidateAndSave"
+                            OnExerciseAdded="HandleExerciseAdded"/>
+    
 </MudStack>
 
 
@@ -52,10 +31,10 @@
 
     protected override void OnInitialized()
     {
-        AddExercise();
+        HandleExerciseAdded();
     }
 
-    private void AddExercise()
+    private void HandleExerciseAdded()
     {
         workoutTemplate.Exercises.Add(new ExerciseTemplate
             {
@@ -90,7 +69,7 @@
         NavigationManager.NavigateTo("/workouts");
     }
 
-    private async Task ValidateAndSave()
+    private async Task HandleValidateAndSave()
     {
         // Perform manual validation
         var validationResults = new List<ValidationResult>();

@@ -1,0 +1,47 @@
+﻿<MudGrid>
+    <MudItem>
+        @if (Exercises.Any())
+        {
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Success"
+                       OnClick="ValidateAndSave"
+                       Class="mr-4">
+                Save Workout
+            </MudButton>
+        }
+        <MudButton Href="/workouts"
+                   Variant="Variant.Text"
+                   Color="Color.Error">
+            Cancel
+        </MudButton>
+    </MudItem>
+    <MudItem Class="ml-auto">
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Info"
+                   OnClick="AddExercise">
+            Add Exercise
+        </MudButton>
+    </MudItem>
+</MudGrid>
+
+@code {
+    [Parameter]
+    public List<ExerciseTemplate> Exercises { get; set; }
+
+    [Parameter]
+    public EventCallback OnValidateAndSave { get; set; }
+
+    [Parameter]
+
+    public EventCallback OnExerciseAdded { get; set; }
+
+    private void ValidateAndSave()
+    {
+        OnValidateAndSave.InvokeAsync();
+    }
+
+    private void AddExercise()
+    {
+        OnExerciseAdded.InvokeAsync();
+    }
+}

@@ -25,6 +25,7 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+	  <_ContentIncludedByDefault Remove="Components\Controls\Workout\WorkoutTemplates\WorkoutTemplateButtons.razor" />
 	  <_ContentIncludedByDefault Remove="Components\Controls\Workout\WorkoutTemplates\WorkoutTemplateExercise.razor" />
 	  <_ContentIncludedByDefault Remove="Components\Controls\Workout\WorkoutTemplates\WorkoutTemplateExerciseMenu.razor" />
 	  <_ContentIncludedByDefault Remove="Components\Controls\Workout\WorkoutTemplates\WorkoutTemplateRestTimerMenu.razor" />
@@ -41,5 +42,9 @@
 	
 	<ItemGroup>
 	  <UpToDateCheckInput Remove="Components\Controls\Workout\WorkoutTemplates\WorkoutTemplateRestTimerMenu.razor" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <UpToDateCheckInput Remove="Components\Controls\Workout\WorkoutTemplates\WorkoutTemplateButtons.razor" />
 	</ItemGroup>
 </Project>
