@@ -1,0 +1,91 @@
+﻿<MudStack Spacing="4">
+    <WorkoutTemplateHeader WorkoutName="@WorkoutTemplate.Name"
+                           OnWorkoutNameChanged="HandleWorkoutNameChange" />
+
+    @if (WorkoutTemplate.Exercises != null && WorkoutTemplate.Exercises.Any())
+    {
+        foreach (var exercise in WorkoutTemplate.Exercises)
+        {
+            <WorkoutTemplateExercise Exercise="exercise"
+                                     OnExerciseDeleted="HandleExerciseDeleted" />
+        }
+    }
+
+    <WorkoutTemplateButtons Exercises="WorkoutTemplate.Exercises"
+                            OnValidateAndSave="HandleValidateAndSave"
+                            OnExerciseAdded="HandleExerciseAdded" />
+</MudStack>
+
+@code {
+    protected override void OnInitialized()
+    {
+        InitializeWorkoutTemplate();
+    }
+
+    [Parameter]
+    public bool IsForEdit { get; set; }
+
+    [Parameter]
+    public WorkoutTemplate WorkoutTemplate { get; set; }
+
+    [Parameter]
+    public EventCallback OnSave { get; set; }
+
+    private void InitializeWorkoutTemplate()
+    {
+        if (!IsForEdit)
+        {
+            HandleExerciseAdded();
+        }
+    }
+
+    private void HandleWorkoutNameChange(string newName)
+    {
+        WorkoutTemplate.Name = newName;
+    }
+
+    private void HandleExerciseAdded()
+    {
+        WorkoutTemplate.Exercises.Add(new ExerciseTemplate
+            {
+                Id = WorkoutTemplate.Exercises.Any() ? WorkoutTemplate.Exercises.Max(w => w.Id) + 1 : 1,
+                WorkoutTemplateId = WorkoutTemplate.Id,
+                Name = "",
+                Sets = new List<ExerciseTemplateSet>()
+            {
+                new ExerciseTemplateSet { Reps = 10, Weight = 0 }
+            }
+            });
+    }
+
+    private void HandleExerciseDeleted(int exerciseId)
+    {
+        var exerciseToDelete = WorkoutTemplate.Exercises.FirstOrDefault(e => e.Id == exerciseId);
+        if (exerciseToDelete != null)
+        {
+            WorkoutTemplate.Exercises.Remove(exerciseToDelete);
+        }
+    }
+
+    private async Task HandleValidateAndSave()
+    {
+        // Perform validation before saving.
+        var validationResults = new List<ValidationResult>();
+        var context = new ValidationContext(WorkoutTemplate, null, null);
+        bool isValid = Validator.TryValidateObject(WorkoutTemplate, context, validationResults, true);
+
+        if (isValid)
+        {
+            // Invoke the parent component's save logic if validation passes.
+            await OnSave.InvokeAsync();
+        }
+        else
+        {
+            // Handle validation errors (could display using MudBlazor components).
+            foreach (var error in validationResults)
+            {
+                Console.WriteLine(error.ErrorMessage);
+            }
+        }
+    }
+}

@@ -5,89 +5,15 @@
 
 <PageTitle>Add Workout</PageTitle>
 
-<MudStack Spacing="4">
-    <WorkoutTemplateHeader WorkoutName="@workoutTemplate.Name"
-                           OnWorkoutNameChanged="HandleWorkoutNameChange" />
-
-
-    @if (workoutTemplate.Exercises != null && workoutTemplate.Exercises.Any())
-    {
-        foreach (var exercise in workoutTemplate.Exercises)
-        {
-            <WorkoutTemplateExercise Exercise="exercise"
-                                     OnExerciseDeleted="HandleExerciseDeleted" />
-        }
-    }
-
-    <WorkoutTemplateButtons Exercises="workoutTemplate.Exercises"
-                            OnValidateAndSave="HandleValidateAndSave"
-                            OnExerciseAdded="HandleExerciseAdded"/>
-    
-</MudStack>
-
+<AddEditWorkoutTemplate WorkoutTemplate="@workoutTemplate"
+                        OnSave="HandleSave" />
 
 @code {
     private WorkoutTemplate workoutTemplate = new();
 
-    protected override void OnInitialized()
-    {
-        HandleExerciseAdded();
-    }
-
-    private void HandleExerciseAdded()
-    {
-        workoutTemplate.Exercises.Add(new ExerciseTemplate
-            {
-                Id = workoutTemplate.Exercises.Any() ? workoutTemplate.Exercises.Max(w => w.Id) + 1 : 1,
-                WorkoutTemplateId = workoutTemplate.Id,
-                Name = "",
-                Sets = new List<ExerciseTemplateSet>() // Initialize with an empty list
-            {
-                new ExerciseTemplateSet { Reps = 10, Weight = 0 }
-            }
-            });
-    }
-
-    private void HandleWorkoutNameChange(string newName)
-    {
-        workoutTemplate.Name = newName;
-    }
-
-    private void HandleExerciseDeleted(int exerciseId)
-    {
-        var exerciseToDelete = workoutTemplate.Exercises.FirstOrDefault(e => e.Id == exerciseId);
-
-        if (exerciseToDelete != null)
-        {
-            workoutTemplate.Exercises.Remove(exerciseToDelete);
-        }
-    }
-
-    private async Task SaveWorkout()
+    private async Task HandleSave()
     {
         await AddWorkoutUseCase.ExecuteAsync(workoutTemplate);
         NavigationManager.NavigateTo("/workouts");
-    }
-
-    private async Task HandleValidateAndSave()
-    {
-        // Perform manual validation
-        var validationResults = new List<ValidationResult>();
-        var context = new ValidationContext(workoutTemplate, null, null);
-        bool isValid = Validator.TryValidateObject(workoutTemplate, context, validationResults, true);
-
-        if (isValid)
-        {
-            // Call SaveWorkout if validation passes
-            await SaveWorkout();
-        }
-        else
-        {
-            // Handle validation errors (e.g., display errors)
-            foreach (var error in validationResults)
-            {
-                Console.WriteLine(error.ErrorMessage); // Or use MudBlazor components to display errors
-            }
-        }
     }
 }
