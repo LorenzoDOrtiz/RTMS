@@ -1,50 +1,39 @@
 ﻿@page "/workout-in-progress"
 
 @inject NavigationManager NavigationManager
-@inject IGetActiveWorkoutUseCase GetActiveWorkoutUseCase
-@inject IEndWorkoutUseCase EndWorkoutUseCase
+@inject ActiveWorkoutService ActiveWorkoutService
+@inject IActiveWorkoutService ActiveWorkoutService
 
 <PageTitle>@_activeWorkout?.Name</PageTitle>
 
-<MudCard Elevation="3" Class="mb-4">
-    <MudCardContent>
-        <MudGrid>
-            <MudItem xs="6">
-                <MudText Typo="Typo.h6">@_activeWorkout?.Name</MudText>
-            </MudItem>
-
-            <MudItem xs="6" Class="d-flex justify-end align-center">
-
-                <MudTooltip Text="Exercise Time">
-                    <MudIcon Icon="@Icons.Material.Filled.Timer" />
-                </MudTooltip>
-                <div style="width:80px;">
-                    <MudText Typo="Typo.body1" Class="ml-2">
-                        @FormatTime(_exerciseDuration)
-                    </MudText>
-                </div>
-            </MudItem>
-
-        </MudGrid>
-    </MudCardContent>
-</MudCard>
-
-
-
-
-@if (_activeWorkout == null)
+@if (_activeWorkout != null)
 {
-    <MudText Typo="Typo.h5">No workout in progress.</MudText>
-    <MudCardActions>
-        <MudButton Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   Href="/workouts">
-            Back to Workouts
-        </MudButton>
-    </MudCardActions>
-}
-else
-{
+    <MudCard Elevation="3" Class="mb-4">
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="6" >
+                    <MudText Typo="Typo.h6" >@_activeWorkout?.Name</MudText>
+                </MudItem>
+
+                <MudItem xs="6" Class="d-flex justify-end align-center">
+                    <div style="margin-left: auto; display: flex;">
+                        <div style=" display: flex; align-items: center; padding: 5px; margin-left: 5px;">
+                            <MudIcon Icon="@Icons.Material.Filled.AccessTimeFilled" Color="Color.Dark" />
+                            <MudText Typo="Typo.subtitle2" Class="ml-2"> @FormatTime(_exerciseDuration) </MudText>
+                        </div>
+                        @if (_restTimer > TimeSpan.Zero)
+                        {
+                            <div style="display: flex; align-items: center; border-radius: 50px; padding: 5px; margin-left: 5px;">
+                                <MudIcon Icon="@Icons.Material.Filled.Timer" Color="Color.Info" />
+                                <MudText Typo="Typo.subtitle2" Class="ml-2">@FormatTime(_restTimer)</MudText>
+                            </div>
+                        }
+                    </div>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+
     @for (int i = 0; i < _exerciseViewModels.Count; i++)
     {
         var exerciseViewModel = _exerciseViewModels[i];
@@ -56,7 +45,6 @@ else
                     <th>Reps</th>
                     <th>Weight</th>
                     <th style="padding:0px;"></th>
-                    @* <th>Rest Timer</th> *@
                     <th>
                         <MudMenu Icon="@Icons.Material.Filled.MoreVert"
                                  AriaLabel="Open workout options"
@@ -111,12 +99,6 @@ else
                                 </MudTooltip>
                             }
                         </td>
-                        @* <td>
-                            @if (setViewModel.IsCompleted && setViewModel.InitialRestTime > 0 && setViewModel.RemainingRestTime >= 0)
-                            {
-                                <MudText>@TimeSpan.FromSeconds(setViewModel.RemainingRestTime).ToString(@"mm\:ss")</MudText>
-                            }
-                        </td> *@
                         <td>
                             <MudTooltip Text="Delete Set">
                                 <MudIconButton Icon="@Icons.Material.Filled.Delete"
@@ -130,26 +112,43 @@ else
             </tbody>
         </MudSimpleTable>
     }
+
+    <br />
+
+    <MudButton Variant="Variant.Text"
+               Color="Color.Secondary"
+               OnClick="EndWorkout">
+        End Workout
+    </MudButton>
 }
 
-<br />
+else
+{
+    <MudText Typo="Typo.h5">No workout in progress.</MudText>
+    <MudCardActions>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Href="/workouts">
+            Back to Workouts
+        </MudButton>
+    </MudCardActions>
+    
+}
 
-<MudButton Variant="Variant.Text"
-           Color="Color.Secondary"
-           OnClick="EndWorkout">
-    End Workout
-</MudButton>
+
 
 @code {
     private Workout? _activeWorkout;
     private TimeSpan _exerciseDuration;
+    private TimeSpan _restTimer;
 
     // List of ExerciseViewModels to hold persistent view models for each exercise
     private List<ExerciseViewModel> _exerciseViewModels = new();
 
     protected override async Task OnInitializedAsync()
     {
-        _activeWorkout = await GetActiveWorkoutUseCase.ExecuteAsync();
+        _activeWorkout = await ActiveWorkoutService.GetActiveWorkoutAsync(1);
+
         if (_activeWorkout != null)
         {
             // Initialize view models for exercises and sets
@@ -166,29 +165,28 @@ else
 
     private async Task EndWorkout()
     {
-        if (_activeWorkout != null)
-        {
-            await EndWorkoutUseCase.ExecuteAsync(_activeWorkout.Id);
-            _activeWorkout = null;
-            _exerciseDuration = TimeSpan.Zero;
-            NavigationManager.NavigateTo("/workouts");
-        }
+        await ActiveWorkoutService.EndWorkoutAsync(1);
+        _activeWorkout = null;
+        _exerciseDuration = TimeSpan.Zero;
+        NavigationManager.NavigateTo("/workouts");
     }
 
     private void CompleteSet(ExerciseViewModel exerciseViewModel, ExerciseSetViewModel setViewModel)
     {
         setViewModel.MarkAsCompleted();
 
-        if (exerciseViewModel.Exercise.InitialRestTimeBetweenSets > 0)
+        if (exerciseViewModel.Exercise.RestTimerSecondsBetweenSets > 0)
         {
-            setViewModel.RemainingRestTime = exerciseViewModel.Exercise.InitialRestTimeBetweenSets;
-            _ = RestTimerLoop(setViewModel); // Start rest timer
+            // Initialize the rest timer with the calculated seconds
+            _restTimer = TimeSpan.FromSeconds(exerciseViewModel.Exercise.RestTimerSecondsBetweenSets);
+            _ = RestTimerLoop(); // Start rest timer loop
         }
     }
 
     private void ResetSet(ExerciseSetViewModel setViewModel)
     {
         setViewModel.ResetSet();
+        _restTimer = TimeSpan.Zero;
     }
 
     private void DeleteSet(ExerciseViewModel exerciseViewModel, ExerciseSetViewModel setViewModel)
@@ -207,22 +205,22 @@ else
         }
     }
 
-    private async Task RestTimerLoop(ExerciseSetViewModel setViewModel)
+    private async Task RestTimerLoop()
     {
         // Display initial time
         StateHasChanged();
 
-        while (_activeWorkout != null && !_activeWorkout.IsCompleted && setViewModel.IsRestTimeActive())
+        while (_restTimer.TotalSeconds > 0)
         {
             await Task.Delay(1000); // Wait first, then update
-            setViewModel.DecrementRestTime();
+            _restTimer = _restTimer.Subtract(TimeSpan.FromSeconds(1));
             StateHasChanged(); // Notify the UI to update
         }
 
         // Add a small delay after reaching 0
         await Task.Delay(1000);
 
-        setViewModel.DecrementRestTime(); // Set to -1 to hide the timer
+        _restTimer = TimeSpan.Zero; // Set to zero to hide the timer or indicate rest is complete
         StateHasChanged(); // Final UI update
     }
 

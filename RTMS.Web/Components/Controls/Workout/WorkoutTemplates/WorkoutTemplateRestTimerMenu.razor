@@ -2,18 +2,16 @@
     <MudText Typo="Typo.body1" Class="mb-2">Set Rest Timer</MudText>
     <MudGrid>
         <MudItem xs="6">
-            <MudNumericField Value="RestTimerValue"
-                             ValueChanged="OnRestTimerValueChanged"
+            <MudNumericField @bind-Value="RestTimerValue"
                              Label="Duration"
                              Variant="Variant.Filled"
-                             Min="1"
+                             Min="0"
                              Max="@(RestTimerUnit == "minutes" ? 60 : 3600)"
                              Margin="Margin.Dense" />
         </MudItem>
         <MudItem xs="6">
             <MudSelect T="string"
-                       Value="RestTimerUnit"
-                       ValueChanged="OnRestTimerUnitChanged"
+                       @bind-Value="RestTimerUnit"
                        Label="Unit"
                        Variant="Variant.Filled"
                        Margin="Margin.Dense"
@@ -51,16 +49,10 @@
     public string RestTimerUnit { get; set; }
 
     [Parameter]
-    public EventCallback<string> OnRestTimerUnitChanged { get; set; }
-
-    [Parameter]
-    public EventCallback<int> OnRestTimerValueChanged { get; set; }
-
-    [Parameter]
     public EventCallback OnRestTimerCancel { get; set; }
 
     [Parameter]
-    public EventCallback<int> OnRestTimerSet { get; set; }
+    public EventCallback<(int, string)> OnRestTimerSet { get; set; }
 
     private void SetRestTimer()
     {
@@ -69,8 +61,7 @@
             return;
         }
 
-        int durationInSeconds = RestTimerUnit == "minutes" ? RestTimerValue * 60 : RestTimerValue;
-        OnRestTimerSet.InvokeAsync(durationInSeconds);
+        OnRestTimerSet.InvokeAsync((RestTimerValue, RestTimerUnit));
     }
 
     private void CloseRestTimer()

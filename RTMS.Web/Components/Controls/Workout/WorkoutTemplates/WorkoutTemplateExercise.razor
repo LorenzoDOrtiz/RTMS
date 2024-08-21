@@ -5,7 +5,10 @@
                 <MudTextField @bind-Value="Exercise.Name"
                               Label="Exercise Name"
                               Variant="Variant.Filled"
-                              Margin="Margin.Dense" />
+                              Margin="Margin.Dense"
+                              Required
+                              Immediate="true" 
+                              OnBlur="OnExerciseNameChanged" />
             </th>
             <th>Reps</th>
             <th>Weight</th>
@@ -16,11 +19,9 @@
 
                 <WorkoutTemplateRestTimerMenu IsRestTimerOpen="@Exercise.IsRestTimerOpen"
                                               RestTimerValue="@Exercise.RestTimerValue"
-                                              RestTimerUnit="@Exercise.RestTimerUnit"
-                                              OnRestTimerUnitChanged="HandleRestTimerUnitChanged"
-                                              OnRestTimerValueChanged="HandleRestTimerValueChanged"
+                                              RestTimerUnit="@Exercise.RestTimerUnit"      
                                               OnRestTimerCancel="HandleRestTimerCancel"
-                                              OnRestTimerSet="HandleRestTimerSet" />
+                                              OnRestTimerSet="@((args) => HandleRestTimerSet(args.Item1, args.Item2))" />
             </th>
         </tr>
     </thead>
@@ -41,11 +42,18 @@
 
 @code {
     [Parameter]
-    public ExerciseTemplate Exercise { get; set; }
+    public ExerciseTemplateViewModel Exercise { get; set; }
 
     [Parameter]
     public EventCallback<int> OnExerciseDeleted { get; set; }
 
+    [Parameter]
+    public EventCallback OnExerciseNameChanged { get; set; }
+
+    private async Task ExerciseNameChanged()
+    {
+        await OnExerciseNameChanged.InvokeAsync();
+    }
 
     private void HandleSetAdded()
     {
@@ -57,19 +65,9 @@
             });
     }
 
-    private void HandleRestTimerValueChanged(int restTimerValue)
-    {
-        Exercise.RestTimerValue = restTimerValue;
-    }
-
     private void HandleRestTimerOpened()
     {
         Exercise.IsRestTimerOpen = true;
-    }
-
-    private void HandleRestTimerUnitChanged(string restTimerUnit)
-    {
-        Exercise.RestTimerUnit = restTimerUnit;
     }
 
     private void HandleExerciseDeleted()
@@ -82,9 +80,10 @@
         Exercise.IsRestTimerOpen = false;
     }
 
-    private void HandleRestTimerSet(int durationInSeconds)
+    private void HandleRestTimerSet(int restTimerValue, string restTimerUnit)
     {
-        Exercise.RestTimeBetweenSets = durationInSeconds;
+        Exercise.RestTimerUnit = restTimerUnit;
+        Exercise.RestTimerValue = restTimerValue;
         Exercise.IsRestTimerOpen = false;
     }
 

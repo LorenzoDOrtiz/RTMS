@@ -7,7 +7,22 @@ public class Exercise
 
     public string Name { get; set; }
 
-    public int InitialRestTimeBetweenSets { get; set; } // Total rest time for each set in seconds
+    public int RestTimerValue { get; set; } = 0;
+
+    public string RestTimerUnit { get; set; } = "minutes";
+
+    public int RestTimerSecondsBetweenSets
+    {
+        get
+        {
+            return RestTimerUnit switch
+            {
+                "minutes" => RestTimerValue * 60,
+                "seconds" => RestTimerValue,
+                _ => 0, // Default or handle other units if necessary
+            };
+        }
+    }
 
     public List<ExerciseSet> Sets { get; set; } = new(); // Collection of sets for the exercise
 

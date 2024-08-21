@@ -6,9 +6,10 @@
 <PageTitle>Add Workout</PageTitle>
 
 <AddEditWorkoutTemplate WorkoutTemplate="@workoutTemplate"
-                        OnSave="HandleSave" />
+                        OnValidationSuccess="HandleSave" />
 
 @code {
+
     private WorkoutTemplate workoutTemplate = new();
 
     private async Task HandleSave()

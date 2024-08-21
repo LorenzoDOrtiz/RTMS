@@ -3,12 +3,17 @@
     <td>
         <MudNumericField @bind-Value="Set.Reps"
                          Variant="Variant.Outlined"
-                         Margin="Margin.Dense" />
+                         Margin="Margin.Dense"
+                         Min="0" />
     </td>
     <td>
         <MudNumericField @bind-Value="Set.Weight"
                          Variant="Variant.Outlined"
-                         Margin="Margin.Dense" />
+                         Margin="Margin.Dense"
+                         Min="0"
+                         Adornment="Adornment.End"
+                         AdornmentText="lbs"
+                         />
     </td>
     <td>
         <MudTooltip Text="Delete Set">

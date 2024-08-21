@@ -1,7 +1,7 @@
 ﻿
 namespace RTMS.UseCases.Workouts;
 
-public interface IEndWorkoutUseCase
+public interface IEndActiveWorkoutUseCase
 {
     Task ExecuteAsync(int workoutId);
 }

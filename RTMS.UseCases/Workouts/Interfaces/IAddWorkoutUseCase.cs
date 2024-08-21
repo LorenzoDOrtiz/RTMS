@@ -1,7 +1,8 @@
-﻿using RTMS.CoreBusiness.Template;
+﻿using RTMS.CoreBusiness.Active;
+using RTMS.CoreBusiness.Template;
 
 namespace RTMS.UseCases.Workouts.Interfaces;
 public interface IAddWorkoutUseCase
 {
-    Task ExecuteAsync(WorkoutTemplate workoutTemplate);
+    Task<Workout> ExecuteAsync(WorkoutTemplate workoutTemplate);
 }

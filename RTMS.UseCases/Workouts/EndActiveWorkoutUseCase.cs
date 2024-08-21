@@ -1,14 +1,15 @@
 ﻿using RTMS.Plugins.InMemory;
+using RTMS.UseCases.Workouts;
 
-namespace RTMS.UseCases.Workouts;
-public class EndWorkoutUseCase : IEndWorkoutUseCase
+public class EndActiveWorkoutUseCase : IEndActiveWorkoutUseCase
 {
     private readonly IWorkoutRepository _workoutRepository;
 
-    public EndWorkoutUseCase(IWorkoutRepository workoutRepository)
+    public EndActiveWorkoutUseCase(IWorkoutRepository workoutRepository)
     {
         _workoutRepository = workoutRepository;
     }
+
     public async Task ExecuteAsync(int workoutId)
     {
         await _workoutRepository.EndWorkoutAsync(workoutId);

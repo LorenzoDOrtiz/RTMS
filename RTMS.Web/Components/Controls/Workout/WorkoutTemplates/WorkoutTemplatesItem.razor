@@ -1,4 +1,4 @@
-﻿@inject IAddWorkoutUseCase StartWorkoutFromTemplateUseCase
+﻿@inject IActiveWorkoutService ActiveWorkoutService
 @inject IDeleteWorkoutTemplateUseCase DeleteWorkoutUseCase
 @inject NavigationManager NavigationManager
 
@@ -28,7 +28,7 @@
     {
         if (WorkoutTemplate != null)
         {
-            await StartWorkoutFromTemplateUseCase.ExecuteAsync(WorkoutTemplate);
+            await ActiveWorkoutService.StartWorkoutAsync(1, WorkoutTemplate);
             NavigationManager.NavigateTo("/workout-in-progress");
         }
     }

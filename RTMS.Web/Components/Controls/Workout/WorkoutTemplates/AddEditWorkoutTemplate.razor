@@ -1,91 +1,129 @@
 ﻿<MudStack Spacing="4">
-    <WorkoutTemplateHeader WorkoutName="@WorkoutTemplate.Name"
+    <WorkoutTemplateHeader WorkoutName="@_viewModel.Name"
                            OnWorkoutNameChanged="HandleWorkoutNameChange" />
 
-    @if (WorkoutTemplate.Exercises != null && WorkoutTemplate.Exercises.Any())
+    @if (_viewModel.Exercises != null && _viewModel.Exercises.Any())
     {
-        foreach (var exercise in WorkoutTemplate.Exercises)
+        foreach (var exercise in _viewModel.Exercises)
         {
             <WorkoutTemplateExercise Exercise="exercise"
-                                     OnExerciseDeleted="HandleExerciseDeleted" />
+                                     OnExerciseDeleted="HandleExerciseDeleted"
+                                     OnExerciseNameChanged="RecalculateSaveDisabled" />
         }
     }
 
-    <WorkoutTemplateButtons Exercises="WorkoutTemplate.Exercises"
-                            OnValidateAndSave="HandleValidateAndSave"
-                            OnExerciseAdded="HandleExerciseAdded" />
+    <WorkoutTemplateButtons Exercises="_viewModel.Exercises"
+                            OnSave="HandleValidation"
+                            OnExerciseAdded="HandleExerciseAdded" 
+                            IsSaveDisabled="IsSaveDisabled" />
 </MudStack>
 
 @code {
-    protected override void OnInitialized()
-    {
-        InitializeWorkoutTemplate();
-    }
-
-    [Parameter]
-    public bool IsForEdit { get; set; }
+    private WorkoutTemplateViewModel _viewModel;
 
     [Parameter]
     public WorkoutTemplate WorkoutTemplate { get; set; }
 
     [Parameter]
-    public EventCallback OnSave { get; set; }
+    public bool IsForEdit { get; set; }
 
-    private void InitializeWorkoutTemplate()
+    [Parameter]
+    public EventCallback OnValidationSuccess { get; set; }
+
+    private bool IsSaveDisabled;
+
+    protected override void OnInitialized()
     {
+        InitializeViewModel();
+    }
+
+    private void InitializeViewModel()
+    {
+        _viewModel = new WorkoutTemplateViewModel
+            {
+                Name = WorkoutTemplate.Name,
+                Exercises = WorkoutTemplate.Exercises.Select(e => new ExerciseTemplateViewModel
+                {
+                    Id = e.Id,
+                    WorkoutTemplateId = WorkoutTemplate.Id,
+                    Name = e.Name,
+                    // Calculate value and unit based on the stored time in seconds
+                    RestTimerValue = e.RestTimerValue,
+                    RestTimerUnit = e.RestTimerUnit,
+                    Sets = e.Sets.ToList(),
+                    Note = e.Note
+                }).ToList()
+            };
+
         if (!IsForEdit)
         {
             HandleExerciseAdded();
         }
-    }
 
-    private void HandleWorkoutNameChange(string newName)
-    {
-        WorkoutTemplate.Name = newName;
+        RecalculateSaveDisabled();
     }
 
     private void HandleExerciseAdded()
     {
-        WorkoutTemplate.Exercises.Add(new ExerciseTemplate
+        _viewModel.Exercises.Add(new ExerciseTemplateViewModel
             {
-                Id = WorkoutTemplate.Exercises.Any() ? WorkoutTemplate.Exercises.Max(w => w.Id) + 1 : 1,
-                WorkoutTemplateId = WorkoutTemplate.Id,
+                Id = _viewModel.Exercises.Any() ? _viewModel.Exercises.Max(w => w.Id) + 1 : 1,
+                WorkoutTemplateId = _viewModel.Id,
                 Name = "",
                 Sets = new List<ExerciseTemplateSet>()
             {
                 new ExerciseTemplateSet { Reps = 10, Weight = 0 }
             }
             });
+        RecalculateSaveDisabled();
+    }
+
+    private void RecalculateSaveDisabled()
+    {
+        IsSaveDisabled = string.IsNullOrWhiteSpace(_viewModel.Name)
+                         || _viewModel.Exercises.Any(e => string.IsNullOrWhiteSpace(e.Name));
+    }
+
+    private void HandleWorkoutNameChange(string newName)
+    {
+        _viewModel.Name = newName;
+        RecalculateSaveDisabled();
+
     }
 
     private void HandleExerciseDeleted(int exerciseId)
     {
-        var exerciseToDelete = WorkoutTemplate.Exercises.FirstOrDefault(e => e.Id == exerciseId);
+        var exerciseToDelete = _viewModel.Exercises.FirstOrDefault(e => e.Id == exerciseId);
         if (exerciseToDelete != null)
         {
-            WorkoutTemplate.Exercises.Remove(exerciseToDelete);
+            _viewModel.Exercises.Remove(exerciseToDelete);
         }
+        RecalculateSaveDisabled();
     }
 
-    private async Task HandleValidateAndSave()
+    private async Task HandleValidation()
     {
         // Perform validation before saving.
-        var validationResults = new List<ValidationResult>();
-        var context = new ValidationContext(WorkoutTemplate, null, null);
-        bool isValid = Validator.TryValidateObject(WorkoutTemplate, context, validationResults, true);
-
-        if (isValid)
+        if (IsSaveDisabled)
         {
-            // Invoke the parent component's save logic if validation passes.
-            await OnSave.InvokeAsync();
+            return; // Prevent save if validation fails.
         }
         else
         {
-            // Handle validation errors (could display using MudBlazor components).
-            foreach (var error in validationResults)
-            {
-                Console.WriteLine(error.ErrorMessage);
-            }
+            // Update the actual model from the view model
+            WorkoutTemplate.Name = _viewModel.Name;
+            WorkoutTemplate.Exercises = _viewModel.Exercises.Select(e => new ExerciseTemplate
+                {
+                    Id = e.Id,
+                    WorkoutTemplateId = e.WorkoutTemplateId,
+                    Name = e.Name,
+                    RestTimerValue = e.RestTimerValue,
+                    RestTimerUnit = e.RestTimerUnit,
+                    Sets = e.Sets.ToList(), 
+                    Note = e.Note
+                }).ToList();
+
+            await OnValidationSuccess.InvokeAsync();
         }
     }
 }
