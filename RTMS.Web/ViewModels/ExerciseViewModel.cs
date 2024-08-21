@@ -1,15 +1,31 @@
-﻿using RTMS.CoreBusiness.Active;
-
-namespace RTMS.Web.ViewModels;
+﻿namespace RTMS.Web.ViewModels;
 
 public class ExerciseViewModel
 {
-    public Exercise Exercise { get; set; }
-    public List<ExerciseSetViewModel> Sets { get; set; } = new();
+    public int Id { get; set; }
 
-    public ExerciseViewModel(Exercise exercise)
+    public int WorkoutId { get; set; } // Link to the Workout
+
+    public string Name { get; set; }
+
+    public int RestTimerValue { get; set; } = 0;
+
+    public string RestTimerUnit { get; set; } = "minutes";
+
+    public int RestTimerSecondsBetweenSets
     {
-        Exercise = exercise;
-        Sets = exercise.Sets.Select(s => new ExerciseSetViewModel(s)).ToList();
+        get
+        {
+            return RestTimerUnit switch
+            {
+                "minutes" => RestTimerValue * 60,
+                "seconds" => RestTimerValue,
+                _ => 0, // Default or handle other units if necessary
+            };
+        }
     }
+
+    public List<ExerciseSetViewModel>? Sets { get; set; }
+
+    public string Note { get; set; } = string.Empty;
 }

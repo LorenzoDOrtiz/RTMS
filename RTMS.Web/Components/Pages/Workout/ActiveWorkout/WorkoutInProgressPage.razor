@@ -1,25 +1,24 @@
 ﻿@page "/workout-in-progress"
 
 @inject NavigationManager NavigationManager
-@inject ActiveWorkoutService ActiveWorkoutService
 @inject IActiveWorkoutService ActiveWorkoutService
 
-<PageTitle>@_activeWorkout?.Name</PageTitle>
+<PageTitle>@_viewModel?.Name</PageTitle>
 
-@if (_activeWorkout != null)
+@if (_viewModel != null)
 {
     <MudCard Elevation="3" Class="mb-4">
         <MudCardContent>
             <MudGrid>
-                <MudItem xs="6" >
-                    <MudText Typo="Typo.h6" >@_activeWorkout?.Name</MudText>
+                <MudItem xs="6">
+                    <MudText Typo="Typo.h6">@_viewModel?.Name</MudText>
                 </MudItem>
 
                 <MudItem xs="6" Class="d-flex justify-end align-center">
                     <div style="margin-left: auto; display: flex;">
-                        <div style=" display: flex; align-items: center; padding: 5px; margin-left: 5px;">
+                        <div style="display: flex; align-items: center; padding: 5px; margin-left: 5px;">
                             <MudIcon Icon="@Icons.Material.Filled.AccessTimeFilled" Color="Color.Dark" />
-                            <MudText Typo="Typo.subtitle2" Class="ml-2"> @FormatTime(_exerciseDuration) </MudText>
+                            <MudText Typo="Typo.subtitle2" Class="ml-2">@FormatTime(_exerciseDuration)</MudText>
                         </div>
                         @if (_restTimer > TimeSpan.Zero)
                         {
@@ -34,14 +33,14 @@
         </MudCardContent>
     </MudCard>
 
-    @for (int i = 0; i < _exerciseViewModels.Count; i++)
+    @for (int i = 0; i < _viewModel.Exercises.Count; i++)
     {
-        var exerciseViewModel = _exerciseViewModels[i];
+        var exerciseViewModel = _viewModel.Exercises[i];
 
         <MudSimpleTable Dense Elevation="1" Class="mb-4">
             <thead>
                 <tr>
-                    <th width="300px">@exerciseViewModel.Exercise.Name</th>
+                    <th width="300px">@exerciseViewModel.Name</th>
                     <th>Reps</th>
                     <th>Weight</th>
                     <th style="padding:0px;"></th>
@@ -70,12 +69,12 @@
                     <tr>
                         <td>@($"Set {j + 1}")</td>
                         <td>
-                            <MudNumericField @bind-Value="setViewModel.ExerciseSet.Reps"
+                            <MudNumericField @bind-Value="setViewModel.Reps"
                                              Variant="Variant.Outlined"
                                              Margin="Margin.Dense" />
                         </td>
                         <td>
-                            <MudNumericField @bind-Value="setViewModel.ExerciseSet.Weight"
+                            <MudNumericField @bind-Value="setViewModel.Weight"
                                              Variant="Variant.Outlined"
                                              Margin="Margin.Dense" />
                         </td>
@@ -105,7 +104,6 @@
                                                Color="Color.Error"
                                                OnClick="() => DeleteSet(exerciseViewModel, setViewModel)" />
                             </MudTooltip>
-
                         </td>
                     </tr>
                 }
@@ -121,7 +119,6 @@
         End Workout
     </MudButton>
 }
-
 else
 {
     <MudText Typo="Typo.h5">No workout in progress.</MudText>
@@ -132,42 +129,61 @@ else
             Back to Workouts
         </MudButton>
     </MudCardActions>
-    
 }
 
-
-
 @code {
+    private WorkoutViewModel? _viewModel;
     private Workout? _activeWorkout;
     private TimeSpan _exerciseDuration;
     private TimeSpan _restTimer;
-
-    // List of ExerciseViewModels to hold persistent view models for each exercise
-    private List<ExerciseViewModel> _exerciseViewModels = new();
+    private CancellationTokenSource _exerciseTokenSource = new();
+    private CancellationTokenSource _restTokenSource = new();
 
     protected override async Task OnInitializedAsync()
     {
         _activeWorkout = await ActiveWorkoutService.GetActiveWorkoutAsync(1);
+        InitializeViewModel(_activeWorkout);
+        _ = ExerciseTimerLoop(); // Start the workout timer
+    }
 
-        if (_activeWorkout != null)
+    private void InitializeViewModel(Workout? activeWorkout)
+    {
+        if (activeWorkout != null)
         {
-            // Initialize view models for exercises and sets
-            foreach (var exercise in _activeWorkout.Exercises)
-            {
-                var exerciseViewModel = new ExerciseViewModel(exercise);
-                _exerciseViewModels.Add(exerciseViewModel);
-            }
-
-            // Start the workout timer if a workout is in progress
-            _ = ExerciseTimerLoop();
+            _viewModel = new WorkoutViewModel
+                {
+                    Id = _activeWorkout.Id,
+                    UserId = _activeWorkout.UserId,
+                    TemplateId = _activeWorkout.TemplateId,
+                    Name = _activeWorkout.Name,
+                    StartTime = _activeWorkout.StartTime,
+                    EndTime = _activeWorkout.EndTime,
+                    Exercises = _activeWorkout.Exercises.Select(e => new ExerciseViewModel
+                    {
+                        Id = e.Id,
+                        WorkoutId = e.WorkoutId,
+                        Name = e.Name,
+                        RestTimerValue = e.RestTimerValue,
+                        RestTimerUnit = e.RestTimerUnit,
+                        Sets = e.Sets.Select(s => new ExerciseSetViewModel
+                        {
+                            Id = s.Id,
+                            Reps = s.Reps,
+                            Weight = s.Weight
+                        }).ToList(),
+                        Note = e.Note
+                    }).ToList()
+                };
         }
     }
 
     private async Task EndWorkout()
     {
+        CancelTimers();
         await ActiveWorkoutService.EndWorkoutAsync(1);
-        _activeWorkout = null;
+        _viewModel = null;
         _exerciseDuration = TimeSpan.Zero;
+        _restTimer = TimeSpan.Zero;
         NavigationManager.NavigateTo("/workouts");
     }
 
@@ -175,11 +191,11 @@ else
     {
         setViewModel.MarkAsCompleted();
 
-        if (exerciseViewModel.Exercise.RestTimerSecondsBetweenSets > 0)
+        if (exerciseViewModel.RestTimerSecondsBetweenSets > 0)
         {
-            // Initialize the rest timer with the calculated seconds
-            _restTimer = TimeSpan.FromSeconds(exerciseViewModel.Exercise.RestTimerSecondsBetweenSets);
-            _ = RestTimerLoop(); // Start rest timer loop
+            CancelRestTimer();
+            _restTimer = TimeSpan.FromSeconds(exerciseViewModel.RestTimerSecondsBetweenSets);
+            StartRestTimerLoop(); // Start rest timer loop
         }
     }
 
@@ -187,6 +203,7 @@ else
     {
         setViewModel.ResetSet();
         _restTimer = TimeSpan.Zero;
+        CancelRestTimer(); // Cancel rest timer if it was running
     }
 
     private void DeleteSet(ExerciseViewModel exerciseViewModel, ExerciseSetViewModel setViewModel)
@@ -197,54 +214,52 @@ else
 
     private async Task ExerciseTimerLoop()
     {
-        while (_activeWorkout != null && !_activeWorkout.IsCompleted)
+        while (_viewModel != null && !_viewModel.IsCompleted && !_exerciseTokenSource.Token.IsCancellationRequested)
         {
-            _exerciseDuration = DateTime.Now - _activeWorkout.StartTime;
+            _exerciseDuration = DateTime.Now - _viewModel.StartTime;
             StateHasChanged();
-            await Task.Delay(1000); // Update every second
+            await Task.Delay(1000, _exerciseTokenSource.Token); // Update every second
         }
+    }
+
+    private void StartRestTimerLoop()
+    {
+        _restTokenSource = new CancellationTokenSource();
+        _ = RestTimerLoop(); // Start rest timer loop
     }
 
     private async Task RestTimerLoop()
     {
-        // Display initial time
-        StateHasChanged();
-
-        while (_restTimer.TotalSeconds > 0)
+        while (_restTimer.TotalSeconds > 0 && !_restTokenSource.Token.IsCancellationRequested)
         {
-            await Task.Delay(1000); // Wait first, then update
+            await Task.Delay(1000, _restTokenSource.Token); // Wait first, then update
             _restTimer = _restTimer.Subtract(TimeSpan.FromSeconds(1));
-            StateHasChanged(); // Notify the UI to update
+            StateHasChanged();
         }
 
-        // Add a small delay after reaching 0
-        await Task.Delay(1000);
+        _restTimer = TimeSpan.Zero;
+        StateHasChanged();
+    }
 
-        _restTimer = TimeSpan.Zero; // Set to zero to hide the timer or indicate rest is complete
-        StateHasChanged(); // Final UI update
+    private void CancelTimers()
+    {
+        _exerciseTokenSource.Cancel();
+        _restTokenSource.Cancel();
+        _exerciseTokenSource.Dispose();
+        _restTokenSource.Dispose();
+        _exerciseTokenSource = new CancellationTokenSource(); // Create a new one for future use
+        _restTokenSource = new CancellationTokenSource(); // Create a new one for future use
+    }
+
+    private void CancelRestTimer()
+    {
+        _restTokenSource.Cancel();
+        _restTokenSource.Dispose();
+        _restTokenSource = new CancellationTokenSource(); // Create a new one for future use
     }
 
     private string FormatTime(TimeSpan time)
     {
-        var hours = time.Hours;
-        var minutes = time.Minutes;
-        var seconds = time.Seconds;
-
-        var timeParts = new List<string>();
-
-        if (hours > 0)
-        {
-            timeParts.Add($"{hours}h");
-        }
-        if (minutes > 0 || hours > 0) // Show minutes if there are any or hours are present
-        {
-            timeParts.Add($"{minutes}m");
-        }
-        if (seconds > 0 || timeParts.Count == 0) // Always show seconds if no other units are present
-        {
-            timeParts.Add($"{seconds}s");
-        }
-
-        return string.Join(" ", timeParts);
+        return time.ToString(@"hh\:mm\:ss");
     }
 }

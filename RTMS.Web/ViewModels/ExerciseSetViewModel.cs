@@ -1,16 +1,15 @@
-﻿using RTMS.CoreBusiness.Active;
-
-namespace RTMS.Web.ViewModels;
+﻿namespace RTMS.Web.ViewModels;
 
 public class ExerciseSetViewModel
 {
-    public ExerciseSet ExerciseSet { get; set; }
-    public bool IsCompleted { get; set; }
+    public int Id { get; set; }
 
-    public ExerciseSetViewModel(ExerciseSet exerciseSet)
-    {
-        ExerciseSet = exerciseSet;
-    }
+    public int Reps { get; set; }
+
+    public double Weight { get; set; }
+
+    // UI-specific property to track whether the set is completed
+    public bool IsCompleted { get; set; }
 
     // Mark the set as completed
     public void MarkAsCompleted()
