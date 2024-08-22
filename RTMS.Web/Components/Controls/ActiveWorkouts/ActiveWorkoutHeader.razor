@@ -1,0 +1,45 @@
+﻿<MudCard Elevation="3" Class="mb-4">
+    <MudCardContent>
+        <MudGrid>
+            <MudItem xs="6">
+                <MudTextField Value="WorkoutName"
+                              ValueChanged="OnWorkoutNameChanged"
+                              Label="Workout Name"
+                              Variant="Variant.Filled"
+                              Margin="Margin.Dense"
+                              Required
+                              Clearable="true" />
+            </MudItem>
+
+            <MudItem xs="6" Class="d-flex justify-end align-center">
+                <div style="margin-left: auto; display: flex;">
+                    <div style="display: flex; align-items: center; padding: 5px; margin-left: 5px;">
+                        <MudIcon Icon="@Icons.Material.Filled.AccessTimeFilled" Color="Color.Dark" />
+                        <MudText Typo="Typo.subtitle2" Class="ml-2">@ExerciseDuration.ToString(@"hh\:mm\:ss")</MudText>
+                    </div>
+                @if (RestTimer > TimeSpan.Zero)
+                {
+                    <div style="display: flex; align-items: center; border-radius: 50px; padding: 5px; margin-left: 5px;">
+                        <MudIcon Icon="@Icons.Material.Filled.Timer" Color="Color.Info" />
+                        <MudText Typo="Typo.subtitle2" Class="ml-2">@RestTimer.ToString(@"hh\:mm\:ss")</MudText>
+                    </div>
+                }
+                </div>
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public string WorkoutName { get; set; }
+
+    [Parameter]
+    public TimeSpan ExerciseDuration { get; set; }
+
+    [Parameter]
+    public TimeSpan RestTimer { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnWorkoutNameChanged { get; set; }
+}

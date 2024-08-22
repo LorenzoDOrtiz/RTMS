@@ -2,11 +2,11 @@
 using RTMS.UseCases.Workouts.Interfaces;
 
 namespace RTMS.UseCases.Workouts;
-public class ViewWorkoutByIdUseCase : IViewWorkoutByIdUseCase
+public class ViewActiveWorkoutByIdUseCase : IViewActiveWorkoutByIdUseCase
 {
     private readonly IWorkoutRepository _workoutRepository;
 
-    public ViewWorkoutByIdUseCase(IWorkoutRepository workoutRepository)
+    public ViewActiveWorkoutByIdUseCase(IWorkoutRepository workoutRepository)
     {
         _workoutRepository = workoutRepository;
     }

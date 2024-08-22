@@ -6,7 +6,7 @@ using RTMS.UseCases.Workouts.Interfaces;
 
 namespace RTMS.Services;
 
-public class ActiveWorkoutService(IAddWorkoutUseCase addWorkoutUseCase,
+public class ActiveWorkoutService(IAddActiveWorkoutUseCase addWorkoutUseCase,
     IEndActiveWorkoutUseCase endWorkoutUseCase) : IActiveWorkoutService
 {
     private readonly Dictionary<int, Workout> _userWorkouts = new();

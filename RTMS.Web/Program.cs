@@ -28,8 +28,8 @@ builder.Services.AddTransient<IViewWorkoutTemplatesByUserIdUseCase, ViewWorkoutT
 builder.Services.AddTransient<IViewWorkoutTemplateUseCase, ViewWorkoutTemplateByIdUseCase>();
 builder.Services.AddTransient<IDeleteWorkoutTemplateUseCase, DeleteWorkoutTemplateUseCase>();
 
-builder.Services.AddTransient<IAddWorkoutUseCase, AddWorkoutUseCase>();
-builder.Services.AddTransient<IViewWorkoutByIdUseCase, ViewWorkoutByIdUseCase>();
+builder.Services.AddTransient<IAddActiveWorkoutUseCase, AddActiveWorkoutUseCase>();
+builder.Services.AddTransient<IViewActiveWorkoutByIdUseCase, ViewActiveWorkoutByIdUseCase>();
 builder.Services.AddTransient<IEndActiveWorkoutUseCase, EndActiveWorkoutUseCase>();
 
 var app = builder.Build();

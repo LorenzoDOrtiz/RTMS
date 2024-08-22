@@ -5,11 +5,11 @@ using RTMS.UseCases.Workouts.Interfaces;
 
 namespace RTMS.UseCases.Workouts
 {
-    public class AddWorkoutUseCase : IAddWorkoutUseCase
+    public class AddActiveWorkoutUseCase : IAddActiveWorkoutUseCase
     {
         private readonly IWorkoutRepository _workoutRepository;
 
-        public AddWorkoutUseCase(IWorkoutRepository workoutRepository)
+        public AddActiveWorkoutUseCase(IWorkoutRepository workoutRepository)
         {
             _workoutRepository = workoutRepository;
         }
