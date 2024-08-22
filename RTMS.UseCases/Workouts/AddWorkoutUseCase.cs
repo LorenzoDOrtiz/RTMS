@@ -30,6 +30,7 @@ namespace RTMS.UseCases.Workouts
                     RestTimerValue = e.RestTimerValue,
                     Sets = e.Sets.Select(s => new ExerciseSet
                     {
+                        Id = s.Id,
                         Reps = s.Reps,
                         Weight = s.Weight
                     }).ToList()

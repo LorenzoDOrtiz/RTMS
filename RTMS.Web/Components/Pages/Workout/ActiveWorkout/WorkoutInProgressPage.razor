@@ -2,6 +2,8 @@
 
 @inject NavigationManager NavigationManager
 @inject IActiveWorkoutService ActiveWorkoutService
+@inject IEditWorkoutTemplateUseCase EditWorkoutTemplateUseCase
+@inject IDialogService DialogService
 
 <PageTitle>@_viewModel?.Name</PageTitle>
 
@@ -35,7 +37,8 @@
 
     @for (int i = 0; i < _viewModel.Exercises.Count; i++)
     {
-        var exerciseViewModel = _viewModel.Exercises[i];
+        var exerciseIndex = i;
+        var exerciseViewModel = _viewModel.Exercises[exerciseIndex];
 
         <MudSimpleTable Dense Elevation="1" Class="mb-4">
             <thead>
@@ -50,12 +53,13 @@
                                  AnchorOrigin="Origin.BottomCenter"
                                  TransformOrigin="Origin.TopCenter">
                             <MudMenuItem Icon="@Icons.Material.Filled.AddCircle"
-                                         IconColor="Color.Success">
-                                Add Set
+                                         IconColor="Color.Success"
+                                         OnClick="() => AddSet(exerciseIndex)">
+                                         Add Set
                             </MudMenuItem>
                             <MudMenuItem Icon="@Icons.Material.Filled.Delete"
                                          IconColor="Color.Error">
-                                Delete Exercise
+                                         Delete Exercise
                             </MudMenuItem>
                         </MudMenu>
                     </th>
@@ -117,7 +121,7 @@
                Color="Color.Secondary"
                OnClick="EndWorkout">
         End Workout
-    </MudButton>
+    </MudButton> 
 }
 else
 {
@@ -177,14 +181,184 @@ else
         }
     }
 
+    private void AddSet(int exerciseIndex)
+    {
+        _viewModel.Exercises[exerciseIndex].Sets?.Add(new ExerciseSetViewModel
+            {
+                Id = _viewModel.Exercises[exerciseIndex].Sets.Any() ? _viewModel.Exercises[exerciseIndex].Sets.Max(s => s.Id) + 1 : 1,
+                Reps = 10,
+                Weight = 0
+            });
+    }
+
+    private async Task<DialogResult> OpenDialogAsync()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+        var dialog = DialogService.Show<ActiveWorkoutUpdateTemplateDialog>("Update Template", options);
+        var result = await dialog.Result;
+
+        return result;
+    }
+
     private async Task EndWorkout()
     {
         CancelTimers();
-        await ActiveWorkoutService.EndWorkoutAsync(1);
+
+        // Compare the Workout and WorkoutViewModel to determine if there are changes
+        if (HasChanges(_activeWorkout, _viewModel))
+        {
+            var dialogResult = await OpenDialogAsync();
+
+            if (!dialogResult.Canceled)
+            {
+                // Update the WorkoutTemplate with the changes from the WorkoutViewModel
+                await UpdateWorkoutTemplateAsync(CreateWorkoutTemplateViewModelFromWorkoutViewModel(_viewModel));
+            }
+        }
+
+        // Set the _activeWorkout values from the view model 
+        _activeWorkout = CreateWorkoutFromWorkoutViewModel(_viewModel);
+
+        // Save the active workout
+        await ActiveWorkoutService.SaveActiveWorkoutAsync(_activeWorkout);
+
+        // Reset view model and timers
         _viewModel = null;
         _exerciseDuration = TimeSpan.Zero;
         _restTimer = TimeSpan.Zero;
+
+        // Navigate to workouts page
         NavigationManager.NavigateTo("/workouts");
+    }
+
+    private WorkoutTemplateViewModel CreateWorkoutTemplateViewModelFromWorkoutViewModel(WorkoutViewModel viewModel)
+    {
+        return new WorkoutTemplateViewModel
+            {
+                Id = viewModel.TemplateId,
+                UserId = viewModel.UserId,
+                Name = viewModel.Name,
+                Exercises = viewModel.Exercises.Select(e => new ExerciseTemplateViewModel
+                {
+                    Id = e.Id,
+                    WorkoutTemplateId = viewModel.TemplateId,
+                    Name = e.Name,
+                    RestTimerValue = e.RestTimerValue,
+                    RestTimerUnit = e.RestTimerUnit,
+                    Sets = e.Sets.Select(s => new ExerciseTemplateSetViewModel
+                    {
+                        Id = s.Id,
+                        Reps = s.Reps,
+                        Weight = s.Weight
+                    }).ToList(),
+                    Note = e.Note
+                }).ToList()
+            };
+    }
+
+    private Workout CreateWorkoutFromWorkoutViewModel(WorkoutViewModel viewModel)
+    {
+        return new Workout
+            {
+                Id = viewModel.Id,
+                UserId = viewModel.UserId,
+                TemplateId = viewModel.TemplateId,
+                Name = viewModel.Name,
+                StartTime = viewModel.StartTime,
+                EndTime = viewModel.EndTime,
+                Exercises = viewModel.Exercises.Select(e => new Exercise
+                {
+                    Id = e.Id,
+                    WorkoutId = e.WorkoutId,
+                    Name = e.Name,
+                    RestTimerValue = e.RestTimerValue,
+                    RestTimerUnit = e.RestTimerUnit,
+                    Sets = e.Sets.Select(s => new ExerciseSet
+                    {
+                        Id = s.Id,
+                        Reps = s.Reps,
+                        Weight = s.Weight
+                    }).ToList(),
+                    Note = e.Note
+                }).ToList()
+            };
+    }
+
+    private async Task UpdateWorkoutTemplateAsync(WorkoutTemplateViewModel viewModel)
+    {
+        var workoutTemplate = new WorkoutTemplate
+            {
+                UserId = viewModel.UserId,
+                Name = viewModel.Name,
+                Exercises = viewModel.Exercises.Select(e => new ExerciseTemplate
+                {
+                    Id = e.Id,
+                    WorkoutTemplateId = viewModel.Id,
+                    Name = e.Name,
+                    RestTimerValue = e.RestTimerValue,
+                    RestTimerUnit = e.RestTimerUnit,
+                    Sets = e.Sets.Select(s => new ExerciseTemplateSet
+                    {
+                        Id = s.Id,
+                        Reps = s.Reps,
+                        Weight = s.Weight
+                    }).ToList(),
+                    Note = e.Note
+                }).ToList()
+            };
+
+        await EditWorkoutTemplateUseCase.ExecuteAsync(workoutTemplate);
+    }
+
+    private bool HasChanges(Workout activeWorkout, WorkoutViewModel viewModel)
+    {
+        // Compare the workout names
+        if (viewModel.Name != activeWorkout.Name)
+        {
+            return true;
+        }
+
+        // Compare the number of exercises
+        if (viewModel.Exercises.Count != activeWorkout.Exercises.Count)
+        {
+            return true;
+        }
+
+        // Compare each exercise and its sets
+        for (int i = 0; i < viewModel.Exercises.Count; i++)
+        {
+            var exerciseViewModel = viewModel.Exercises[i];
+            var correspondingActiveExercise = activeWorkout.Exercises[i];
+
+            // Compare exercise names
+            if (exerciseViewModel.Name != correspondingActiveExercise.Name)
+            {
+                return true;
+            }
+
+            // Compare the number of sets
+            if (exerciseViewModel.Sets.Count != correspondingActiveExercise.Sets.Count)
+            {
+                return true;
+            }
+
+            // Compare each set within the exercise
+            // for (int j = 0; j < exerciseViewModel.Sets.Count; j++)
+            // {
+            //     var setViewModel = exerciseViewModel.Sets[j];
+            //     var correspondingActiveSet = correspondingActiveExercise.Sets[j];
+
+            //     // Compare reps and weight
+            //     if (setViewModel.Reps != correspondingActiveSet.Reps || setViewModel.Weight != correspondingActiveSet.Weight)
+            //     {
+            //         return true;
+            //     }
+            // }
+        }
+
+        // No differences found
+        return false;
     }
 
     private void CompleteSet(ExerciseViewModel exerciseViewModel, ExerciseSetViewModel setViewModel)

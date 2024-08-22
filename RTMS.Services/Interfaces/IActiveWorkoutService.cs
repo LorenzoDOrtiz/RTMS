@@ -7,7 +7,7 @@ public interface IActiveWorkoutService
 {
     public bool WorkoutIsActive(int userId);
     public string GetActiveWorkoutName(int userId);
-    Task EndWorkoutAsync(int userId);
+    Task SaveActiveWorkoutAsync(Workout workout);
     Task<Workout?> GetActiveWorkoutAsync(int userId);
     Task StartWorkoutAsync(int userId, WorkoutTemplate workoutTemplate);
 }

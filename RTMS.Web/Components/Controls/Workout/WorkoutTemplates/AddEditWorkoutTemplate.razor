@@ -42,6 +42,7 @@
         _viewModel = new WorkoutTemplateViewModel
             {
                 Name = WorkoutTemplate.Name,
+                UserId = WorkoutTemplate.UserId,
                 Exercises = WorkoutTemplate.Exercises.Select(e => new ExerciseTemplateViewModel
                 {
                     Id = e.Id,
@@ -50,7 +51,12 @@
                     // Calculate value and unit based on the stored time in seconds
                     RestTimerValue = e.RestTimerValue,
                     RestTimerUnit = e.RestTimerUnit,
-                    Sets = e.Sets.ToList(),
+                    Sets = e.Sets.Select(s => new ExerciseTemplateSetViewModel
+                    {
+                        Id = s.Id, 
+                        Weight = s.Weight, 
+                        Reps = s.Reps
+                    }).ToList(),
                     Note = e.Note
                 }).ToList()
             };
@@ -70,10 +76,14 @@
                 Id = _viewModel.Exercises.Any() ? _viewModel.Exercises.Max(w => w.Id) + 1 : 1,
                 WorkoutTemplateId = _viewModel.Id,
                 Name = "",
-                Sets = new List<ExerciseTemplateSet>()
-            {
-                new ExerciseTemplateSet { Reps = 10, Weight = 0 }
-            }
+                Sets = new List<ExerciseTemplateSetViewModel>()
+                {
+                    new ExerciseTemplateSetViewModel 
+                    {
+                        Reps = 10, 
+                        Weight = 0 
+                    }
+                }
             });
         RecalculateSaveDisabled();
     }
@@ -119,7 +129,13 @@
                     Name = e.Name,
                     RestTimerValue = e.RestTimerValue,
                     RestTimerUnit = e.RestTimerUnit,
-                    Sets = e.Sets.ToList(), 
+                    Sets = e.Sets.Select(s => new ExerciseTemplateSet
+                    {
+                        Id = s.Id, 
+                        Reps = s.Reps, 
+                        Weight = s.Weight
+
+                    }).ToList(),
                     Note = e.Note
                 }).ToList();
 

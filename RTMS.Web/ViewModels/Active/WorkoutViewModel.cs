@@ -1,4 +1,4 @@
-﻿namespace RTMS.Web.ViewModels;
+﻿namespace RTMS.Web.ViewModels.Active;
 
 public class WorkoutViewModel
 {
@@ -16,7 +16,7 @@ public class WorkoutViewModel
 
     public TimeSpan Duration => EndTime.HasValue ? EndTime.Value - StartTime : TimeSpan.Zero;  // Calculate the duration
 
-    public List<ExerciseViewModel>? Exercises { get; set; }  // List of exercises in the workout
+    public List<ExerciseViewModel> Exercises { get; set; }  // List of exercises in the workout
 
     public bool IsCompleted { get; set; }  // Flag to indicate if the workout is completed
 }

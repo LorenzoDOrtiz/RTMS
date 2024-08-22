@@ -1,4 +1,4 @@
-﻿namespace RTMS.Web.ViewModels;
+﻿namespace RTMS.Web.ViewModels.WorkoutTemplate;
 
 public class WorkoutTemplateViewModel
 {

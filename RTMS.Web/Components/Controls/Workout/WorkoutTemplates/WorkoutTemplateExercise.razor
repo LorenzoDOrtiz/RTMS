@@ -57,7 +57,7 @@
 
     private void HandleSetAdded()
     {
-        Exercise.Sets?.Add(new ExerciseTemplateSet 
+        Exercise.Sets?.Add(new ExerciseTemplateSetViewModel
             { 
                 Id = Exercise.Sets.Any() ? Exercise.Sets.Max(s => s.Id) + 1 : 1,
                 Reps = 10, 

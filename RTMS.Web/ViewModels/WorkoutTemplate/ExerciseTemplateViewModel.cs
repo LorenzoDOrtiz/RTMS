@@ -1,6 +1,6 @@
-﻿using RTMS.CoreBusiness.Template;
+﻿using RTMS.Web.ViewModels.Active;
 
-namespace RTMS.Web.ViewModels;
+namespace RTMS.Web.ViewModels.WorkoutTemplate;
 
 public class ExerciseTemplateViewModel
 {
@@ -16,7 +16,7 @@ public class ExerciseTemplateViewModel
 
     public string RestTimerUnit { get; set; } = "minutes";
 
-    public List<ExerciseTemplateSet> Sets { get; set; }
+    public List<ExerciseTemplateSetViewModel> Sets { get; set; }
 
     public string Note { get; set; } = string.Empty;
 }

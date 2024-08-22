@@ -12,31 +12,37 @@ public class WorkoutTemplateRepository : IWorkoutTemplateRepository
         new WorkoutTemplate
         {
             UserId = 1,
-            Id = 1,
+            Id = 0,
             Name = "Workout A",
             Exercises = new List<ExerciseTemplate>
             {
                 new ExerciseTemplate
                 {
-                    Id = 11,
+                    Id = 0,
+                    WorkoutTemplateId = 1,
                     Name = "Barbell Flat Bench Press",
+                    RestTimerValue = 10,
+                    RestTimerUnit = "seconds",
                     Sets = new List<ExerciseTemplateSet>
                     {
-                        new ExerciseTemplateSet { Reps = 10, Weight = 225 },
-                        new ExerciseTemplateSet { Reps = 10, Weight = 225 },
-                        new ExerciseTemplateSet { Reps = 10, Weight = 225 }
+                        new ExerciseTemplateSet { Id = 0, Reps = 10, Weight = 225 },
+                        new ExerciseTemplateSet { Id = 1, Reps = 10, Weight = 225 },
+                        new ExerciseTemplateSet { Id = 2, Reps = 10, Weight = 225 }
                     },
                     Note = "Shoulder blades up, back, and down."
                 },
                 new ExerciseTemplate
                 {
-                    Id = 12,
+                    Id = 1,
+                    WorkoutTemplateId = 1,
                     Name = "Barbell Incline Bench Press",
+                    RestTimerValue = 10,
+                    RestTimerUnit = "seconds",
                     Sets = new List<ExerciseTemplateSet>
                     {
-                        new ExerciseTemplateSet { Reps = 10, Weight = 185 },
-                        new ExerciseTemplateSet { Reps = 10, Weight = 185 },
-                        new ExerciseTemplateSet { Reps = 10, Weight = 185 }
+                        new ExerciseTemplateSet { Id = 0, Reps = 10, Weight = 185 },
+                        new ExerciseTemplateSet { Id = 0, Reps = 10, Weight = 185 },
+                        new ExerciseTemplateSet { Id = 0, Reps = 10, Weight = 185 }
                     },
                     Note = "Shoulder blades up, back, and down."
                 }
@@ -124,7 +130,6 @@ public class WorkoutTemplateRepository : IWorkoutTemplateRepository
         {
             workoutToUpdate.Name = workout.Name;
 
-            // Update the exercises
             foreach (var updatedExercise in workout.Exercises)
             {
                 var existingExercise = workoutToUpdate.Exercises.FirstOrDefault(e => e.Id == updatedExercise.Id);
@@ -134,7 +139,24 @@ public class WorkoutTemplateRepository : IWorkoutTemplateRepository
                     existingExercise.Name = updatedExercise.Name;
                     existingExercise.RestTimerValue = updatedExercise.RestTimerValue;
                     existingExercise.RestTimerUnit = updatedExercise.RestTimerUnit;
-                    existingExercise.Sets = updatedExercise.Sets;
+
+                    // Update existing sets and add new ones
+                    foreach (var updatedSet in updatedExercise.Sets)
+                    {
+                        var existingSet = existingExercise.Sets.FirstOrDefault(s => s.Id == updatedSet.Id);
+
+                        if (existingSet is not null)
+                        {
+                            existingSet.Reps = updatedSet.Reps;
+                            existingSet.Weight = updatedSet.Weight;
+                        }
+                        else
+                        {
+                            // This is a new set, add it to the exercise
+                            existingExercise.Sets.Add(updatedSet);
+                        }
+                    }
+
                     existingExercise.Note = updatedExercise.Note;
                 }
                 else

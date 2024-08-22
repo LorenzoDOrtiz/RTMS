@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RTMS.Web", "RTMS.Web\RTMS.W
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RTMS.Plugins.InMemory", "RTMS.Plugins\RTMS.Plugins.InMemory\RTMS.Plugins.InMemory.csproj", "{2EFFA3D9-8442-42EE-A2A9-5930B3ADEC8A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTMS.Services", "RTMS.Services\RTMS.Services.csproj", "{A2B1CB95-AA04-4C06-8C32-8901855F2EA1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RTMS.Services", "RTMS.Services\RTMS.Services.csproj", "{A2B1CB95-AA04-4C06-8C32-8901855F2EA1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

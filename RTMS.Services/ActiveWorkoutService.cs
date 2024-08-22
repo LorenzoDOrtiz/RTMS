@@ -6,7 +6,8 @@ using RTMS.UseCases.Workouts.Interfaces;
 
 namespace RTMS.Services;
 
-public class ActiveWorkoutService(IAddWorkoutUseCase addWorkoutUseCase, IEndActiveWorkoutUseCase endWorkoutUseCase) : IActiveWorkoutService
+public class ActiveWorkoutService(IAddWorkoutUseCase addWorkoutUseCase,
+    IEndActiveWorkoutUseCase endWorkoutUseCase) : IActiveWorkoutService
 {
     private readonly Dictionary<int, Workout> _userWorkouts = new();
 
@@ -20,13 +21,10 @@ public class ActiveWorkoutService(IAddWorkoutUseCase addWorkoutUseCase, IEndActi
         _userWorkouts[userId] = workout;
     }
 
-    public async Task EndWorkoutAsync(int userId)
+    public async Task SaveActiveWorkoutAsync(Workout workout)
     {
-        if (_userWorkouts.TryGetValue(userId, out var workout))
-        {
-            await endWorkoutUseCase.ExecuteAsync(workout.Id);
-            _userWorkouts.Remove(userId);
-        }
+        await endWorkoutUseCase.ExecuteAsync(workout.Id);
+        _userWorkouts.Remove(workout.UserId);
     }
 
     public Task<Workout?> GetActiveWorkoutAsync(int userId)
@@ -34,6 +32,4 @@ public class ActiveWorkoutService(IAddWorkoutUseCase addWorkoutUseCase, IEndActi
         _userWorkouts.TryGetValue(userId, out var workout);
         return Task.FromResult(workout);
     }
-
-
 }

@@ -1,0 +1,18 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6">There are changes in your workout. Do you want to update the template?</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="UpdateTemplate">Yes</MudButton>
+        <MudButton Color="Color.Secondary" OnClick="CancelDialog">No</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance UpdateTemplateDialog { get; set; }
+
+    private void UpdateTemplate() => UpdateTemplateDialog.Close(DialogResult.Ok(true));
+
+    private void CancelDialog() => UpdateTemplateDialog.Cancel();
+}
