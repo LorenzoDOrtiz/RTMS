@@ -1,0 +1,85 @@
+﻿<tr>
+    <td>@($"Set {SetIndex + 1}")</td>
+    <td>
+        <MudNumericField @bind-Value="Set.Reps"
+                         Variant="Variant.Outlined"
+                         Margin="Margin.Dense" />
+    </td>
+    <td>
+        <MudNumericField @bind-Value="Set.Weight"
+                         Variant="Variant.Outlined"
+                         Margin="Margin.Dense" />
+    </td>
+    <td>
+        @if (!Set.IsCompleted)
+        {
+            <MudTooltip Text="Complete Set">
+                <MudIconButton Icon="@Icons.Material.Outlined.CheckCircleOutline"
+                               Color="Color.Dark"
+                               Size="Size.Medium"
+                               OnClick="CompleteSet" />
+            </MudTooltip>
+        }
+        else
+        {
+            <MudTooltip Text="Set Complete">
+                <MudIconButton Icon="@Icons.Material.Outlined.CheckCircleOutline"
+                               Color="Color.Success"
+                               Size="Size.Medium"
+                               OnClick="ResetSet" />
+            </MudTooltip>
+        }
+    </td>
+    <td>
+        <MudTooltip Text="Delete Set">
+            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                           Color="Color.Error"
+                           OnClick="DeleteSet" />
+        </MudTooltip>
+    </td>
+</tr>
+
+@code {
+    [Parameter]
+    public ExerciseSetViewModel Set { get; set; }
+
+    [Parameter]
+    public int SetIndex { get; set; }
+
+    [Parameter]
+    public int RestTimerSecondsBetweenSets { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnSetDelete { get; set; }
+
+    [Parameter]
+    public EventCallback OnSetCompleted { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnSetReset{ get; set; }
+
+    private void DeleteSet()
+    {
+        OnSetDelete.InvokeAsync(Set.Id);
+    }
+
+    private void CompleteSet()
+    {
+        Set.MarkAsCompleted();
+
+        if (RestTimerSecondsBetweenSets > 0)
+        {
+            OnSetCompleted.InvokeAsync();
+        }
+    }
+
+    private void ResetSet()
+    {
+        Set.ResetSet();
+
+        if (RestTimerSecondsBetweenSets > 0)
+        {
+            OnSetReset.InvokeAsync();
+        }
+    }
+}

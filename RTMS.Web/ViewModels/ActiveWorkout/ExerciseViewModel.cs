@@ -28,4 +28,6 @@ public class ExerciseViewModel
     public List<ExerciseSetViewModel>? Sets { get; set; }
 
     public string Note { get; set; } = string.Empty;
+
+    public bool IsRestTimerOpen { get; set; }
 }

@@ -36,13 +36,11 @@ public class WorkoutTemplateRepository : IWorkoutTemplateRepository
                     Id = 1,
                     WorkoutTemplateId = 1,
                     Name = "Barbell Incline Bench Press",
-                    RestTimerValue = 10,
-                    RestTimerUnit = "seconds",
                     Sets = new List<ExerciseTemplateSet>
                     {
                         new ExerciseTemplateSet { Id = 0, Reps = 10, Weight = 185 },
-                        new ExerciseTemplateSet { Id = 0, Reps = 10, Weight = 185 },
-                        new ExerciseTemplateSet { Id = 0, Reps = 10, Weight = 185 }
+                        new ExerciseTemplateSet { Id = 1, Reps = 10, Weight = 185 },
+                        new ExerciseTemplateSet { Id = 2, Reps = 10, Weight = 185 }
                     },
                     Note = "Shoulder blades up, back, and down."
                 }

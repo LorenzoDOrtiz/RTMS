@@ -1,17 +1,18 @@
-﻿<MudSimpleTable Dense Elevation="3">
+﻿<MudSimpleTable Dense Elevation="1" Class="mb-4">
     <thead>
         <tr>
-            <th>
+            <th width="300px">
                 <MudTextField @bind-Value="Exercise.Name"
                               Label="Exercise Name"
                               Variant="Variant.Filled"
                               Margin="Margin.Dense"
                               Required
-                              Immediate="true" 
+                              Immediate="true"
                               OnBlur="ExerciseNameChanged" />
             </th>
             <th>Reps</th>
             <th>Weight</th>
+            <th style="padding:0px;"></th>
             <th>
                 <ExerciseMenu OnSetAdded="HandleSetAdded"
                               OnRestTimerOpened="HandleRestTimerOpened"
@@ -19,7 +20,7 @@
 
                 <RestTimerMenu IsRestTimerOpen="@Exercise.IsRestTimerOpen"
                                RestTimerValue="@Exercise.RestTimerValue"
-                               RestTimerUnit="@Exercise.RestTimerUnit"      
+                               RestTimerUnit="@Exercise.RestTimerUnit"
                                OnRestTimerCancel="HandleRestTimerCancel"
                                OnRestTimerSet="@((args) => HandleRestTimerSet(args.Item1, args.Item2))" />
             </th>
@@ -32,9 +33,12 @@
             {
                 var set = Exercise.Sets[i];
 
-                <WorkoutTemplateSet Set="set" 
-                                    SetIndex="i"
-                                    OnSetDelete="HandleSetDelete" />
+                <ActiveWorkoutSet Set="set"
+                                  SetIndex="i"
+                                  RestTimerSecondsBetweenSets="@Exercise.RestTimerSecondsBetweenSets"
+                                  OnSetDelete="HandleSetDelete"
+                                  OnSetCompleted="HandleSetCompleted"
+                                  OnSetReset="HandleSetReset"/>
             }
         }
     </tbody>
@@ -42,13 +46,19 @@
 
 @code {
     [Parameter]
-    public ExerciseTemplateViewModel Exercise { get; set; }
+    public ExerciseViewModel Exercise { get; set; }
 
     [Parameter]
     public EventCallback<int> OnExerciseDeleted { get; set; }
 
     [Parameter]
     public EventCallback OnExerciseNameChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnSetComplete { get; set; }
+
+    [Parameter]
+    public EventCallback OnSetRest { get; set; }
 
     private async Task ExerciseNameChanged()
     {
@@ -57,11 +67,11 @@
 
     private void HandleSetAdded()
     {
-        Exercise.Sets?.Add(new ExerciseTemplateSetViewModel
-            { 
+        Exercise.Sets?.Add(new ExerciseSetViewModel
+            {
                 Id = Exercise.Sets.Any() ? Exercise.Sets.Max(s => s.Id) + 1 : 1,
-                Reps = 10, 
-                Weight = 0 
+                Reps = 10,
+                Weight = 0
             });
     }
 
@@ -97,6 +107,22 @@
             {
                 Exercise.Sets.Remove(setToDelete);
             }
+        }
+    }
+
+    private void HandleSetCompleted()
+    {
+        if (Exercise.Sets.Count > 0)
+        {
+            OnSetComplete.InvokeAsync(Exercise.RestTimerSecondsBetweenSets);
+        }
+    }
+
+    private void HandleSetReset()
+    {
+        if (Exercise.Sets.Count > 0)
+        {
+            OnSetRest.InvokeAsync();
         }
     }
 }

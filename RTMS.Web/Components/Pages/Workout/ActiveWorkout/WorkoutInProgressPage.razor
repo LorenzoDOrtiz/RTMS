@@ -9,110 +9,40 @@
 
 @if (_viewModel != null)
 {
-
     <ActiveWorkoutHeader WorkoutName="@_viewModel.Name"
                          OnWorkoutNameChanged="HandleWorkoutNameChange"
                          ExerciseDuration="@_exerciseDuration"
                          RestTimer="@_restTimer" />
 
-    @for (int i = 0; i < _viewModel.Exercises.Count; i++)
+    foreach (var exercise in _viewModel.Exercises)
     {
-        var exerciseIndex = i;
-        var exerciseViewModel = _viewModel.Exercises[exerciseIndex];
-
-        <MudSimpleTable Dense Elevation="1" Class="mb-4">
-            <thead>
-                <tr>
-                    <th width="300px">@exerciseViewModel.Name</th>
-                    <th>Reps</th>
-                    <th>Weight</th>
-                    <th style="padding:0px;"></th>
-                    <th>
-                        <MudMenu Icon="@Icons.Material.Filled.MoreVert"
-                                 AriaLabel="Open workout options"
-                                 AnchorOrigin="Origin.BottomCenter"
-                                 TransformOrigin="Origin.TopCenter">
-                            <MudMenuItem Icon="@Icons.Material.Filled.AddCircle"
-                                         IconColor="Color.Success"
-                                         OnClick="() => AddSet(exerciseIndex)">
-                                         Add Set
-                            </MudMenuItem>
-                            <MudMenuItem Icon="@Icons.Material.Filled.Delete"
-                                         IconColor="Color.Error">
-                                         Delete Exercise
-                            </MudMenuItem>
-                        </MudMenu>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (int j = 0; j < exerciseViewModel.Sets.Count; j++)
-                {
-                    var setViewModel = exerciseViewModel.Sets[j];
-
-                    <tr>
-                        <td>@($"Set {j + 1}")</td>
-                        <td>
-                            <MudNumericField @bind-Value="setViewModel.Reps"
-                                             Variant="Variant.Outlined"
-                                             Margin="Margin.Dense" />
-                        </td>
-                        <td>
-                            <MudNumericField @bind-Value="setViewModel.Weight"
-                                             Variant="Variant.Outlined"
-                                             Margin="Margin.Dense" />
-                        </td>
-                        <td>
-                            @if (!setViewModel.IsCompleted)
-                            {
-                                <MudTooltip Text="Complete Set">
-                                    <MudIconButton Icon="@Icons.Material.Outlined.CheckCircleOutline"
-                                                   Color="Color.Dark"
-                                                   Size="Size.Medium"
-                                                   OnClick="() => CompleteSet(exerciseViewModel, setViewModel)" />
-                                </MudTooltip>
-                            }
-                            else
-                            {
-                                <MudTooltip Text="Set Complete">
-                                    <MudIconButton Icon="@Icons.Material.Outlined.CheckCircleOutline"
-                                                   Color="Color.Success"
-                                                   Size="Size.Medium"
-                                                   OnClick="() => ResetSet(setViewModel)" />
-                                </MudTooltip>
-                            }
-                        </td>
-                        <td>
-                            <MudTooltip Text="Delete Set">
-                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                               Color="Color.Error"
-                                               OnClick="() => DeleteSet(exerciseViewModel, setViewModel)" />
-                            </MudTooltip>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </MudSimpleTable>
+        <ActiveWorkoutExercise Exercise="exercise"
+                               OnExerciseDeleted="HandleExerciseDeleted"
+                               OnExerciseNameChanged="RecalculateEndWorkoutDisabled"
+                               OnSetComplete="HandleSetComplete"
+                               OnSetRest="HandleSetRest"/>
     }
 
     <br />
 
     <MudButton Variant="Variant.Text"
                Color="Color.Secondary"
-               OnClick="EndWorkout">
+               OnClick="EndWorkout"
+               Disabled="IsEndWorkoutDisabled">
         End Workout
     </MudButton> 
 }
 else
 {
     <MudText Typo="Typo.h5">No workout in progress.</MudText>
-    <MudCardActions>
-        <MudButton Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   Href="/workouts">
-            Back to Workouts
-        </MudButton>
-    </MudCardActions>
+
+    <br />
+
+    <MudButton Variant="Variant.Filled"
+                Color="Color.Primary"
+                Href="/workouts">
+        Back to Workouts
+    </MudButton>
 }
 
 @code {
@@ -122,6 +52,7 @@ else
     private TimeSpan _restTimer;
     private CancellationTokenSource _exerciseTokenSource = new();
     private CancellationTokenSource _restTokenSource = new();
+    private bool IsEndWorkoutDisabled;
 
     protected override async Task OnInitializedAsync()
     {
@@ -164,8 +95,37 @@ else
     private void HandleWorkoutNameChange(string newName)
     {
         _viewModel.Name = newName;
-        //RecalculateSaveDisabled();
+        RecalculateEndWorkoutDisabled();
 
+    }
+
+    private void HandleExerciseDeleted(int exerciseId)
+    {
+        var exerciseToDelete = _viewModel.Exercises.FirstOrDefault(e => e.Id == exerciseId);
+        if (exerciseToDelete != null)
+        {
+            _viewModel.Exercises.Remove(exerciseToDelete);
+        }
+        RecalculateEndWorkoutDisabled();
+    }
+
+    private void HandleSetComplete(int restTimerSecondsBetweenSets)
+    {
+        CancelRestTimer();
+        _restTimer = TimeSpan.FromSeconds(restTimerSecondsBetweenSets);
+        StartRestTimerLoop(); // Start rest timer loop
+    }
+
+    private void HandleSetRest()
+    {
+        _restTimer = TimeSpan.Zero;
+        CancelRestTimer(); // Cancel rest timer if it was running
+    }
+
+    private void RecalculateEndWorkoutDisabled()
+    {
+        IsEndWorkoutDisabled = string.IsNullOrWhiteSpace(_viewModel.Name)
+                         || _viewModel.Exercises.Any(e => string.IsNullOrWhiteSpace(e.Name));
     }
 
     private void AddSet(int exerciseIndex)
@@ -330,6 +290,12 @@ else
                 return true;
             }
 
+            // Compare the rest timer value
+            if (exerciseViewModel.RestTimerSecondsBetweenSets != correspondingActiveExercise.RestTimerSecondsBetweenSets)
+            {
+                return true;
+            }
+
             // Compare each set within the exercise
             // for (int j = 0; j < exerciseViewModel.Sets.Count; j++)
             // {
@@ -346,31 +312,6 @@ else
 
         // No differences found
         return false;
-    }
-
-    private void CompleteSet(ExerciseViewModel exerciseViewModel, ExerciseSetViewModel setViewModel)
-    {
-        setViewModel.MarkAsCompleted();
-
-        if (exerciseViewModel.RestTimerSecondsBetweenSets > 0)
-        {
-            CancelRestTimer();
-            _restTimer = TimeSpan.FromSeconds(exerciseViewModel.RestTimerSecondsBetweenSets);
-            StartRestTimerLoop(); // Start rest timer loop
-        }
-    }
-
-    private void ResetSet(ExerciseSetViewModel setViewModel)
-    {
-        setViewModel.ResetSet();
-        _restTimer = TimeSpan.Zero;
-        CancelRestTimer(); // Cancel rest timer if it was running
-    }
-
-    private void DeleteSet(ExerciseViewModel exerciseViewModel, ExerciseSetViewModel setViewModel)
-    {
-        exerciseViewModel.Sets.Remove(setViewModel);
-        StateHasChanged(); // Notify the UI to update
     }
 
     private async Task ExerciseTimerLoop()

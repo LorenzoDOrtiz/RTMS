@@ -12,10 +12,10 @@
         }
     }
 
-    <WorkoutTemplateButtons Exercises="_viewModel.Exercises"
+    <WorkoutTemplateButtons Exercises="@_viewModel.Exercises"
                             OnSave="HandleValidation"
                             OnExerciseAdded="HandleExerciseAdded" 
-                            IsSaveDisabled="IsSaveDisabled" />
+                            IsSaveDisabled="@IsSaveDisabled" />
 </MudStack>
 
 @code {
@@ -48,7 +48,6 @@
                     Id = e.Id,
                     WorkoutTemplateId = WorkoutTemplate.Id,
                     Name = e.Name,
-                    // Calculate value and unit based on the stored time in seconds
                     RestTimerValue = e.RestTimerValue,
                     RestTimerUnit = e.RestTimerUnit,
                     Sets = e.Sets.Select(s => new ExerciseTemplateSetViewModel
