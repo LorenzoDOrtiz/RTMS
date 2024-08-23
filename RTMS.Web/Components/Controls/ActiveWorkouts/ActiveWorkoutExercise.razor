@@ -58,7 +58,7 @@
     public EventCallback<int> OnSetComplete { get; set; }
 
     [Parameter]
-    public EventCallback OnSetRest { get; set; }
+    public EventCallback OnSetReset { get; set; }
 
     private async Task ExerciseNameChanged()
     {
@@ -80,9 +80,9 @@
         Exercise.IsRestTimerOpen = true;
     }
 
-    private void HandleExerciseDeleted()
+    private async Task HandleExerciseDeleted()
     {
-        OnExerciseDeleted.InvokeAsync(Exercise.Id);
+        await OnExerciseDeleted.InvokeAsync(Exercise.Id);
     }
 
     private void HandleRestTimerCancel()
@@ -110,19 +110,19 @@
         }
     }
 
-    private void HandleSetCompleted()
+    private async Task HandleSetCompleted()
     {
         if (Exercise.Sets.Count > 0)
         {
-            OnSetComplete.InvokeAsync(Exercise.RestTimerSecondsBetweenSets);
+            await OnSetComplete.InvokeAsync(Exercise.RestTimerSecondsBetweenSets);
         }
     }
 
-    private void HandleSetReset()
+    private async Task HandleSetReset()
     {
         if (Exercise.Sets.Count > 0)
         {
-            OnSetRest.InvokeAsync();
+            await OnSetReset.InvokeAsync();
         }
     }
 }

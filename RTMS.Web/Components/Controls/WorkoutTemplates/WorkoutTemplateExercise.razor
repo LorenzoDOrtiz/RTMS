@@ -70,9 +70,9 @@
         Exercise.IsRestTimerOpen = true;
     }
 
-    private void HandleExerciseDeleted()
+    private async Task HandleExerciseDeleted()
     {
-        OnExerciseDeleted.InvokeAsync(Exercise.Id);
+        await OnExerciseDeleted.InvokeAsync(Exercise.Id);
     }
 
     private void HandleRestTimerCancel()

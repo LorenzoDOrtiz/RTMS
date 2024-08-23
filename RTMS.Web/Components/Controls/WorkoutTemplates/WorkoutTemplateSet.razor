@@ -34,8 +34,8 @@
     [Parameter]
     public EventCallback<int> OnSetDelete { get; set; }
 
-    private void DeleteSet()
+    private async Task DeleteSet()
     {
-        OnSetDelete.InvokeAsync(Set.Id);
+        await OnSetDelete.InvokeAsync(Set.Id);
     }
 }

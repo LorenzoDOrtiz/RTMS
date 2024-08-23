@@ -1,0 +1,29 @@
+﻿<div style="display: flex; align-items: center; padding: 5px; margin-left: 5px;">
+    <MudIcon Icon="@Icons.Material.Filled.AccessTimeFilled" Color="Color.Dark" />
+    <MudText Typo="Typo.subtitle2" Class="ml-2">@WorkoutDuration.ToString(@"hh\:mm\:ss")</MudText>
+</div>
+
+@code {
+    [Parameter]
+    public DateTime StartTime { get; set; }
+
+    [Parameter]
+    public CancellationTokenSource CancellationTokenSourceWorkout { get; set; }
+
+    private TimeSpan WorkoutDuration { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await WorkoutTimerLoop();
+    }
+
+    private async Task WorkoutTimerLoop()
+    {
+        while (!CancellationTokenSourceWorkout.Token.IsCancellationRequested)
+        {
+            WorkoutDuration = DateTime.Now - StartTime;
+            StateHasChanged();
+            await Task.Delay(1000, CancellationTokenSourceWorkout.Token);
+        }
+    }
+}

@@ -24,6 +24,7 @@ namespace RTMS.UseCases.Workouts
                 StartTime = DateTime.Now,
                 Exercises = workoutTemplate.Exercises.Select(e => new Exercise
                 {
+                    Id = e.Id,
                     Name = e.Name,
                     Note = e.Note,
                     RestTimerUnit = e.RestTimerUnit,

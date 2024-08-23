@@ -56,30 +56,30 @@
     public EventCallback OnSetCompleted { get; set; }
 
     [Parameter]
-    public EventCallback<int> OnSetReset{ get; set; }
+    public EventCallback OnSetReset{ get; set; }
 
-    private void DeleteSet()
+    private async Task DeleteSet()
     {
-        OnSetDelete.InvokeAsync(Set.Id);
+        await OnSetDelete.InvokeAsync(Set.Id);
     }
 
-    private void CompleteSet()
+    private async Task CompleteSet()
     {
         Set.MarkAsCompleted();
 
         if (RestTimerSecondsBetweenSets > 0)
         {
-            OnSetCompleted.InvokeAsync();
+            await OnSetCompleted.InvokeAsync();
         }
     }
 
-    private void ResetSet()
+    private async Task ResetSet()
     {
         Set.ResetSet();
 
         if (RestTimerSecondsBetweenSets > 0)
         {
-            OnSetReset.InvokeAsync();
+            await OnSetReset.InvokeAsync();
         }
     }
 }

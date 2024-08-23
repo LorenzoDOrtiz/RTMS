@@ -33,18 +33,18 @@
     [Parameter]
     public EventCallback OnExerciseDeleted { get; set; }
 
-    private void AddSet()
+    private async Task AddSet()
     {
-        OnSetAdded.InvokeAsync();
+        await OnSetAdded.InvokeAsync();
     }
 
-    private void OpenRestTimer()
+    private async Task OpenRestTimer()
     {
-        OnRestTimerOpened.InvokeAsync();
+        await OnRestTimerOpened.InvokeAsync();
     }
     
-    private void DeleteExercise()
+    private async Task DeleteExercise()
     {
-        OnExerciseDeleted.InvokeAsync();
+        await OnExerciseDeleted.InvokeAsync();
     }
 }

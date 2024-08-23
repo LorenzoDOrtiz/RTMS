@@ -2,7 +2,7 @@
     <MudText Typo="Typo.body1" Class="mb-2">Set Rest Timer</MudText>
     <MudGrid>
         <MudItem xs="6">
-            <MudNumericField @bind-Value="RestTimerValue"
+            <MudNumericField @bind-Value="RestTimerValue" 
                              Label="Duration"
                              Variant="Variant.Filled"
                              Min="0"
@@ -10,8 +10,7 @@
                              Margin="Margin.Dense" />
         </MudItem>
         <MudItem xs="6">
-            <MudSelect T="string"
-                       @bind-Value="RestTimerUnit"
+            <MudSelect @bind-Value="RestTimerUnit"
                        Label="Unit"
                        Variant="Variant.Filled"
                        Margin="Margin.Dense"
@@ -54,18 +53,13 @@
     [Parameter]
     public EventCallback<(int, string)> OnRestTimerSet { get; set; }
 
-    private void SetRestTimer()
+    private async Task SetRestTimer()
     {
-        if (RestTimerValue <= 0)
-        {
-            return;
-        }
-
-        OnRestTimerSet.InvokeAsync((RestTimerValue, RestTimerUnit));
+        await OnRestTimerSet.InvokeAsync((RestTimerValue, RestTimerUnit));
     }
 
-    private void CloseRestTimer()
+    private async Task CloseRestTimer()
     {
-        OnRestTimerCancel.InvokeAsync();
+        await OnRestTimerCancel.InvokeAsync();
     }
 }

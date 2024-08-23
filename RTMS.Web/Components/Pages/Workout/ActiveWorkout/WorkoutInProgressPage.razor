@@ -9,10 +9,12 @@
 
 @if (_viewModel != null)
 {
-    <ActiveWorkoutHeader WorkoutName="@_viewModel.Name"
+    <ActiveWorkoutHeader ViewModel="_viewModel"
                          OnWorkoutNameChanged="HandleWorkoutNameChange"
-                         ExerciseDuration="@_exerciseDuration"
-                         RestTimer="@_restTimer" />
+                         OnExerciseAdded="HandleExerciseAdded"
+                         CancellationTokenSourceExercise="_exerciseTokenSource"
+                         CancellationTokenSourceRest="_restTokenSource"
+                         RestTimerSecondsBetweenSets="RestTimerSecondsBetweenSets" />
 
     foreach (var exercise in _viewModel.Exercises)
     {
@@ -20,7 +22,7 @@
                                OnExerciseDeleted="HandleExerciseDeleted"
                                OnExerciseNameChanged="RecalculateEndWorkoutDisabled"
                                OnSetComplete="HandleSetComplete"
-                               OnSetRest="HandleSetRest"/>
+                               OnSetReset="HandleSetReset"/>
     }
 
     <br />
@@ -48,17 +50,18 @@ else
 @code {
     private WorkoutViewModel _viewModel;
     private Workout? _activeWorkout;
-    private TimeSpan _exerciseDuration;
-    private TimeSpan _restTimer;
-    private CancellationTokenSource _exerciseTokenSource = new();
-    private CancellationTokenSource _restTokenSource = new();
+
+    private int RestTimerSecondsBetweenSets;
+
+    private CancellationTokenSource _exerciseTokenSource = new CancellationTokenSource();
+    private CancellationTokenSource _restTokenSource = new CancellationTokenSource();
+
     private bool IsEndWorkoutDisabled;
 
     protected override async Task OnInitializedAsync()
     {
         _activeWorkout = await ActiveWorkoutService.GetActiveWorkoutAsync(1);
         InitializeViewModel(_activeWorkout);
-        _ = ExerciseTimerLoop(); // Start the workout timer
     }
 
     private void InitializeViewModel(Workout? activeWorkout)
@@ -96,7 +99,19 @@ else
     {
         _viewModel.Name = newName;
         RecalculateEndWorkoutDisabled();
+    }
 
+    private void HandleExerciseAdded()
+    {
+        _viewModel.Exercises.Add(new ExerciseViewModel
+            {
+                Id = _viewModel.Exercises.Any() ? _viewModel.Exercises.Max(w => w.Id) + 1 : 1,
+                WorkoutId = _viewModel.Id,
+                Name = "",
+                Sets = new List<ExerciseSetViewModel>()
+            });
+
+        RecalculateEndWorkoutDisabled();
     }
 
     private void HandleExerciseDeleted(int exerciseId)
@@ -106,19 +121,19 @@ else
         {
             _viewModel.Exercises.Remove(exerciseToDelete);
         }
+
         RecalculateEndWorkoutDisabled();
     }
 
     private void HandleSetComplete(int restTimerSecondsBetweenSets)
     {
+        RestTimerSecondsBetweenSets = restTimerSecondsBetweenSets; 
         CancelRestTimer();
-        _restTimer = TimeSpan.FromSeconds(restTimerSecondsBetweenSets);
-        StartRestTimerLoop(); // Start rest timer loop
     }
 
-    private void HandleSetRest()
+    private void HandleSetReset()
     {
-        _restTimer = TimeSpan.Zero;
+        RestTimerSecondsBetweenSets = -1; // set to -1 for the rest timer to not render
         CancelRestTimer(); // Cancel rest timer if it was running
     }
 
@@ -128,19 +143,9 @@ else
                          || _viewModel.Exercises.Any(e => string.IsNullOrWhiteSpace(e.Name));
     }
 
-    private void AddSet(int exerciseIndex)
-    {
-        _viewModel.Exercises[exerciseIndex].Sets?.Add(new ExerciseSetViewModel
-            {
-                Id = _viewModel.Exercises[exerciseIndex].Sets.Any() ? _viewModel.Exercises[exerciseIndex].Sets.Max(s => s.Id) + 1 : 1,
-                Reps = 10,
-                Weight = 0
-            });
-    }
-
     private async Task<DialogResult> OpenDialogAsync()
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true  };
 
         var dialog = DialogService.Show<ActiveWorkoutUpdateTemplateDialog>("Update Template", options);
         var result = await dialog.Result;
@@ -170,10 +175,8 @@ else
         // Save the active workout
         await ActiveWorkoutService.SaveActiveWorkoutAsync(_activeWorkout);
 
-        // Reset view model and timers
+        // Reset view model
         _viewModel = null;
-        _exerciseDuration = TimeSpan.Zero;
-        _restTimer = TimeSpan.Zero;
 
         // Navigate to workouts page
         NavigationManager.NavigateTo("/workouts");
@@ -314,49 +317,27 @@ else
         return false;
     }
 
-    private async Task ExerciseTimerLoop()
-    {
-        while (_viewModel != null && !_viewModel.IsCompleted && !_exerciseTokenSource.Token.IsCancellationRequested)
-        {
-            _exerciseDuration = DateTime.Now - _viewModel.StartTime;
-            StateHasChanged();
-            await Task.Delay(1000, _exerciseTokenSource.Token); // Update every second
-        }
-    }
-
-    private void StartRestTimerLoop()
-    {
-        _restTokenSource = new CancellationTokenSource();
-        _ = RestTimerLoop(); // Start rest timer loop
-    }
-
-    private async Task RestTimerLoop()
-    {
-        while (_restTimer.TotalSeconds > 0 && !_restTokenSource.Token.IsCancellationRequested)
-        {
-            await Task.Delay(1000, _restTokenSource.Token); // Wait first, then update
-            _restTimer = _restTimer.Subtract(TimeSpan.FromSeconds(1));
-            StateHasChanged();
-        }
-
-        _restTimer = TimeSpan.Zero;
-        StateHasChanged();
-    }
-
     private void CancelTimers()
     {
-        _exerciseTokenSource.Cancel();
-        _restTokenSource.Cancel();
-        _exerciseTokenSource.Dispose();
-        _restTokenSource.Dispose();
-        _exerciseTokenSource = new CancellationTokenSource(); // Create a new one for future use
-        _restTokenSource = new CancellationTokenSource(); // Create a new one for future use
+        if (_exerciseTokenSource != null)
+        {
+            _exerciseTokenSource.Cancel();
+            _exerciseTokenSource.Dispose();
+            _exerciseTokenSource = new CancellationTokenSource(); // Re-initialize for future use
+        }
+
+        if (_restTokenSource != null)
+        {
+            _restTokenSource.Cancel();
+            _restTokenSource.Dispose();
+            _restTokenSource = new CancellationTokenSource(); // Re-initialize for future use
+        }
     }
 
     private void CancelRestTimer()
     {
         _restTokenSource.Cancel();
         _restTokenSource.Dispose();
-        _restTokenSource = new CancellationTokenSource(); // Create a new one for future use
+        _restTokenSource = new CancellationTokenSource();
     }
 }

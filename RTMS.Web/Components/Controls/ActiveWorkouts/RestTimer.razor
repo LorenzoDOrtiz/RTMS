@@ -1,0 +1,33 @@
+﻿@if (RestTimerDuration > TimeSpan.Zero)
+{
+    <div style="display: flex; align-items: center; padding: 5px; margin-left: 5px;">
+        <MudIcon Icon="@Icons.Material.Filled.Timer" Color="Color.Info" />
+        <MudText Typo="Typo.subtitle2" Class="ml-2">@RestTimerDuration.ToString(@"hh\:mm\:ss")</MudText>
+    </div>
+}
+
+
+@code {
+    [Parameter]
+    public int RestTimerSecondsBetweenSets { get; set; } // Initial rest time for the exercise of the set that was completed
+
+    private TimeSpan RestTimerDuration { get; set; } // Real time rest timer time
+    [Parameter]
+    public CancellationTokenSource CancellationTokenSourceRest { get; set; } // Accepts the shared CancellationTokenSource
+
+    protected override async Task OnParametersSetAsync() // Using onParamSet to start the timer because the parameter is set whenever a timer is marked as complete
+    {
+        RestTimerDuration = TimeSpan.FromSeconds(RestTimerSecondsBetweenSets);
+        await StartRestTimerLoop();
+    }
+
+    private async Task StartRestTimerLoop()
+    {
+        while (RestTimerDuration.TotalSeconds > 0 && !CancellationTokenSourceRest.Token.IsCancellationRequested)
+        {
+            await Task.Delay(1000, CancellationTokenSourceRest.Token);
+            RestTimerDuration = RestTimerDuration.Subtract(TimeSpan.FromSeconds(1));
+            StateHasChanged();
+        }
+    }
+}

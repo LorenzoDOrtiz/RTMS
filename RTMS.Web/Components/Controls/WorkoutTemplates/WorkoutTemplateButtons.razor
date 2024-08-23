@@ -39,13 +39,13 @@
 
     public EventCallback OnExerciseAdded { get; set; }
 
-    private void Save()
+    private async Task Save()
     {
-        OnSave.InvokeAsync();
+        await OnSave.InvokeAsync();
     }
 
-    private void AddExercise()
+    private async Task AddExercise()
     {
-        OnExerciseAdded.InvokeAsync();
+        await OnExerciseAdded.InvokeAsync();
     }
 }

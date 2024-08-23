@@ -19,7 +19,7 @@ public class WorkoutTemplateRepository : IWorkoutTemplateRepository
                 new ExerciseTemplate
                 {
                     Id = 0,
-                    WorkoutTemplateId = 1,
+                    WorkoutTemplateId = 0,
                     Name = "Barbell Flat Bench Press",
                     RestTimerValue = 10,
                     RestTimerUnit = "seconds",
@@ -34,7 +34,7 @@ public class WorkoutTemplateRepository : IWorkoutTemplateRepository
                 new ExerciseTemplate
                 {
                     Id = 1,
-                    WorkoutTemplateId = 1,
+                    WorkoutTemplateId = 0,
                     Name = "Barbell Incline Bench Press",
                     Sets = new List<ExerciseTemplateSet>
                     {
@@ -165,7 +165,7 @@ public class WorkoutTemplateRepository : IWorkoutTemplateRepository
             }
 
             // Remove exercises that are no longer in the incoming workout
-            workoutToUpdate.Exercises.RemoveAll(e => !workout.Exercises.Any(updatedE => updatedE.Id == e.Id));
+            //workoutToUpdate.Exercises.RemoveAll(e => !workout.Exercises.Any(updatedE => updatedE.Id == e.Id));
         }
         return Task.CompletedTask;
     }
