@@ -34,4 +34,11 @@ public class WorkoutRepository : IWorkoutRepository
 
         return Task.CompletedTask;
     }
+
+    public Task<List<Workout>> ViewWorkoutHistoryByUserIdAsync(int userId)
+    {
+        var userWorkouts = _workouts.Where(w => w.UserId == userId).ToList();
+
+        return Task.FromResult(userWorkouts);
+    }
 }

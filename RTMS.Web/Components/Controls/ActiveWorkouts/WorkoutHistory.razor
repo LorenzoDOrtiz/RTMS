@@ -1,0 +1,43 @@
+﻿@inject IViewWorkoutHistoryByUserIdUseCase ViewWorkoutHistoryByUserIdUseCase
+
+<MudText Typo="Typo.h5" GutterBottom>Workout History</MudText>
+
+<MudSimpleTable Elevation="3" Striped>
+    <thead>
+        <tr>
+            <th>Workout Name</th>
+            <th>Date</th>
+            <th>Duration</th>
+            <th>Volume</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (userWorkoutHistory != null && userWorkoutHistory.Count > 0)
+        {
+            @foreach (var workout in userWorkoutHistory)
+            {
+                if (workout.IsCompleted)
+                {
+                    <WorkoutHistoryItem Workout="workout" />
+
+                }
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="2">No workout history.</td>
+            </tr>
+        }
+    </tbody>
+</MudSimpleTable>
+
+@code {
+    private List<Workout>? userWorkoutHistory;
+    private int userId = 1;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        userWorkoutHistory = (await ViewWorkoutHistoryByUserIdUseCase.ExecuteAsync(userId)).ToList();
+    }
+}

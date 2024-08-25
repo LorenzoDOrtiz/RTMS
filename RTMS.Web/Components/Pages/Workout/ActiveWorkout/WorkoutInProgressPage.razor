@@ -103,6 +103,8 @@ else
 
     private void HandleExerciseAdded()
     {
+        RestTimerSecondsBetweenSets = -1;
+
         _viewModel.Exercises.Add(new ExerciseViewModel
             {
                 Id = _viewModel.Exercises.Any() ? _viewModel.Exercises.Max(w => w.Id) + 1 : 1,
@@ -116,6 +118,8 @@ else
 
     private void HandleExerciseDeleted(int exerciseId)
     {
+        RestTimerSecondsBetweenSets = -1;
+
         var exerciseToDelete = _viewModel.Exercises.FirstOrDefault(e => e.Id == exerciseId);
         if (exerciseToDelete != null)
         {

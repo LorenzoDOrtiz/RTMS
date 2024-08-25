@@ -17,5 +17,20 @@ public class Workout
 
     public List<Exercise> Exercises { get; set; } = new();  // List of exercises in the workout
 
+    public double GetTotalWorkoutVolume()
+    {
+        double totalVolume = 0;
+
+        foreach (var exercise in Exercises)
+        {
+            foreach (var set in exercise.Sets)
+            {
+                totalVolume += set.Reps * set.Weight;
+            }
+        }
+
+        return totalVolume;
+    }
+
     public bool IsCompleted { get; set; }  // Flag to indicate if the workout is completed
 }

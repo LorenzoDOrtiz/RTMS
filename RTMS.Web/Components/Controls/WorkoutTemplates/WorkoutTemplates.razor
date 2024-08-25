@@ -1,38 +1,32 @@
 ﻿@inject IViewWorkoutTemplatesByUserIdUseCase ViewWorkoutsByUserIdUseCase
 
-<MudCard>
-    <MudCardHeader>
-        <CardHeaderContent>
-            <MudText Typo="Typo.h5">Workouts</MudText>
-        </CardHeaderContent>
-    </MudCardHeader>
-    <MudCardContent>
-            <MudSimpleTable Elevation="3"> 
-                <tbody>
-                    @if (userWorkoutTemplates != null && userWorkoutTemplates.Count > 0)
-                    {
-                        @foreach (var workout in userWorkoutTemplates)
-                        {
-                            <WorkoutTemplatesItem WorkoutTemplate="workout" />
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="2">No workouts available.</td>
-                        </tr>
-                    }
-                </tbody>
-            </MudSimpleTable>
+<MudText Typo="Typo.h5" GutterBottom="true">Workouts</MudText>
 
-            <br />
+<MudSimpleTable Elevation="3">
+    <tbody>
+        @if (userWorkoutTemplates != null && userWorkoutTemplates.Count > 0)
+        {
+            @foreach (var workout in userWorkoutTemplates)
+            {
+                <WorkoutTemplatesItem WorkoutTemplate="workout" />
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="2">No workouts available.</td>
+            </tr>
+        }
+    </tbody>
+</MudSimpleTable>
 
-            <MudButton Href="workouts/add-workout-template" Color="Color.Info" Variant="Variant.Filled">
-                Add Workout
-            </MudButton>
+<br />
 
-    </MudCardContent>
-</MudCard>
+<MudButton Href="workouts/add-workout-template" Color="Color.Info" Variant="Variant.Filled" Size="Size.Small">
+    Add Workout
+</MudButton>
+
+<br />
 
 @code {
     private List<WorkoutTemplate>? userWorkoutTemplates;

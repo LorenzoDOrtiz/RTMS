@@ -49,31 +49,34 @@ public class WorkoutTemplateRepository : IWorkoutTemplateRepository
         new WorkoutTemplate
         {
             UserId = 1,
-            Id = 2,
+            Id = 1,
             Name = "Workout B",
             Exercises = new List<ExerciseTemplate>
             {
                 new ExerciseTemplate
                 {
-                    Id = 21,
+                    Id = 0,
+                    WorkoutTemplateId = 1,
+                    RestTimerValue = 10,
+                    RestTimerUnit = "seconds",
                     Name = "Barbell Dead Lift",
                     Sets = new List<ExerciseTemplateSet>
                     {
-                        new ExerciseTemplateSet { Reps = 10, Weight = 425 },
-                        new ExerciseTemplateSet { Reps = 10, Weight = 425 },
-                        new ExerciseTemplateSet { Reps = 10, Weight = 425 }
+                        new ExerciseTemplateSet { Id = 0, Reps = 10, Weight = 425 },
+                        new ExerciseTemplateSet { Id = 1,Reps = 10, Weight = 425 },
+                        new ExerciseTemplateSet { Id = 2,Reps = 10, Weight = 425 }
                     },
                     Note = "Feet shoulder width apart."
                 },
                 new ExerciseTemplate
                 {
-                    Id = 22,
+                    Id = 1,
                     Name = "Barbell Squats",
                     Sets = new List<ExerciseTemplateSet>
                     {
-                        new ExerciseTemplateSet { Reps = 10, Weight = 385 },
-                        new ExerciseTemplateSet { Reps = 10, Weight = 385 },
-                        new ExerciseTemplateSet { Reps = 10, Weight = 385 }
+                        new ExerciseTemplateSet { Id = 0,Reps = 10, Weight = 385 },
+                        new ExerciseTemplateSet { Id = 1,Reps = 10, Weight = 385 },
+                        new ExerciseTemplateSet { Id = 2,Reps = 10, Weight = 385 }
                     },
                     Note = "Watch for butt wink."
                 }

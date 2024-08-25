@@ -5,18 +5,18 @@
 @if (WorkoutTemplate != null)
 {
     <tr>
-            <td>@WorkoutTemplate.Name</td> 
-            <td>
-                <MudCardActions>
-                    <MudButton OnClick="StartWorkout" Color="Color.Success" Variant="Variant.Filled">
-                        Start
-                    </MudButton>
-                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open workout options">
-                    <MudMenuItem Icon="@Icons.Material.Filled.Edit" IconColor="Color.Info" Href="@($"workouts/edit-workout-template/{WorkoutTemplate.Id}")">Edit</MudMenuItem>
-                        <MudMenuItem Icon="@Icons.Material.Filled.DeleteForever" IconColor="Color.Error" OnClick="async () => await DeleteWorkoutTemplate(WorkoutTemplate.Id)">Delete</MudMenuItem>
-                    </MudMenu>
-                </MudCardActions>
-            </td>  
+        <td>@WorkoutTemplate.Name</td> 
+        <td style="padding: 3px;">
+            <MudCardActions Class="justify-end">
+                <MudButton OnClick="StartWorkout" Color="Color.Success" Variant="Variant.Filled">
+                    Start
+                </MudButton>
+                <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open workout options">
+                <MudMenuItem Icon="@Icons.Material.Filled.Edit" IconColor="Color.Info" Href="@($"workouts/edit-workout-template/{WorkoutTemplate.Id}")">Edit</MudMenuItem>
+                    <MudMenuItem Icon="@Icons.Material.Filled.DeleteForever" IconColor="Color.Error" OnClick="async () => await DeleteWorkoutTemplate(WorkoutTemplate.Id)">Delete</MudMenuItem>
+                </MudMenu>
+            </MudCardActions>
+        </td>  
     </tr>
 }
 

@@ -7,4 +7,5 @@ public interface IWorkoutRepository
     Task AddWorkoutAsync(Workout workout);
     Task<Workout> GetWorkoutByIdAsync(int id);
     Task EndWorkoutAsync(int workoutId);
+    Task<List<Workout>> ViewWorkoutHistoryByUserIdAsync(int userId);
 }

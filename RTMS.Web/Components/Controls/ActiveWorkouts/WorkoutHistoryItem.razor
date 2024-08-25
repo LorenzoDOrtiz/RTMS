@@ -1,0 +1,14 @@
+﻿@if (Workout != null)
+{
+    <tr>
+        <td>@Workout.Name</td>
+        <td>@Workout.StartTime.ToShortDateString()</td>  
+        <td>@($"{(Workout?.EndTime - Workout?.StartTime).ToString().Substring(0, 8)}")</td>
+        <td>@Workout.GetTotalWorkoutVolume() lbs</td>
+    </tr>
+}
+
+@code {
+    [Parameter]
+    public Workout? Workout { get; set; }
+}

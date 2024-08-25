@@ -2,6 +2,8 @@ using MudBlazor.Services;
 using RTMS.Plugins.InMemory;
 using RTMS.Services;
 using RTMS.Services.Interfaces;
+using RTMS.UseCases.ActiveWorkouts;
+using RTMS.UseCases.ActiveWorkouts.Interfaces;
 using RTMS.UseCases.PluginInterfaces;
 using RTMS.UseCases.Workouts;
 using RTMS.UseCases.Workouts.Interfaces;
@@ -31,6 +33,7 @@ builder.Services.AddTransient<IDeleteWorkoutTemplateUseCase, DeleteWorkoutTempla
 builder.Services.AddTransient<IAddActiveWorkoutUseCase, AddActiveWorkoutUseCase>();
 builder.Services.AddTransient<IViewActiveWorkoutByIdUseCase, ViewActiveWorkoutByIdUseCase>();
 builder.Services.AddTransient<IEndActiveWorkoutUseCase, EndActiveWorkoutUseCase>();
+builder.Services.AddTransient<IViewWorkoutHistoryByUserIdUseCase, ViewWorkoutHistoryByUserIdUseCase>();
 
 var app = builder.Build();
 
