@@ -1,4 +1,6 @@
-﻿namespace RTMS.CoreBusiness.Template;
+﻿using RTMS.CoreBusiness.Active;
+
+namespace RTMS.CoreBusiness.Template;
 
 public class WorkoutTemplate
 {
@@ -9,4 +11,6 @@ public class WorkoutTemplate
     public string Name { get; set; }
 
     public List<ExerciseTemplate> Exercises { get; set; } = new();
+
+    public List<Workout> Workouts { get; set; }
 }

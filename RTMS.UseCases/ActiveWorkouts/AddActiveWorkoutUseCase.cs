@@ -1,46 +1,45 @@
 ﻿using RTMS.CoreBusiness.Active;
 using RTMS.CoreBusiness.Template;
-using RTMS.Plugins.InMemory;
+using RTMS.UseCases.PluginInterfaces;
 using RTMS.UseCases.Workouts.Interfaces;
 
-namespace RTMS.UseCases.Workouts
+namespace RTMS.UseCases.ActiveWorkouts;
+
+public class AddActiveWorkoutUseCase : IAddActiveWorkoutUseCase
 {
-    public class AddActiveWorkoutUseCase : IAddActiveWorkoutUseCase
+    private readonly IWorkoutRepository _workoutRepository;
+
+    public AddActiveWorkoutUseCase(IWorkoutRepository workoutRepository)
     {
-        private readonly IWorkoutRepository _workoutRepository;
+        _workoutRepository = workoutRepository;
+    }
 
-        public AddActiveWorkoutUseCase(IWorkoutRepository workoutRepository)
+    public async Task<Workout> ExecuteAsync(WorkoutTemplate workoutTemplate)
+    {
+        var workout = new Workout
         {
-            _workoutRepository = workoutRepository;
-        }
-
-        public async Task<Workout> ExecuteAsync(WorkoutTemplate workoutTemplate)
-        {
-            var workout = new Workout
+            UserId = workoutTemplate.UserId,
+            Name = workoutTemplate.Name,
+            TemplateId = workoutTemplate.Id,
+            StartTime = DateTime.Now,
+            Exercises = workoutTemplate.Exercises.Select(e => new Exercise
             {
-                UserId = workoutTemplate.UserId,
-                Name = workoutTemplate.Name,
-                TemplateId = workoutTemplate.Id,
-                StartTime = DateTime.Now,
-                Exercises = workoutTemplate.Exercises.Select(e => new Exercise
+                Id = e.Id,
+                Name = e.Name,
+                Note = e.Note,
+                RestTimerUnit = e.RestTimerUnit,
+                RestTimerValue = e.RestTimerValue,
+                Sets = e.Sets.Select(s => new ExerciseSet
                 {
-                    Id = e.Id,
-                    Name = e.Name,
-                    Note = e.Note,
-                    RestTimerUnit = e.RestTimerUnit,
-                    RestTimerValue = e.RestTimerValue,
-                    Sets = e.Sets.Select(s => new ExerciseSet
-                    {
-                        Id = s.Id,
-                        Reps = s.Reps,
-                        Weight = s.Weight
-                    }).ToList()
+                    Id = s.Id,
+                    Reps = s.Reps,
+                    Weight = s.Weight
                 }).ToList()
-            };
+            }).ToList()
+        };
 
-            await _workoutRepository.AddWorkoutAsync(workout);
+        await _workoutRepository.AddWorkoutAsync(workout);
 
-            return workout;
-        }
+        return workout;
     }
 }

@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
+using RTMS.Plugins.EFCoreSql;
 using RTMS.Plugins.InMemory;
 using RTMS.Services;
 using RTMS.Services.Interfaces;
@@ -14,13 +16,30 @@ using RTMS.Web.Components;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Services.AddDbContextFactory<RTMSContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("RTMS"));
+});
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddMudServices();
 
-builder.Services.AddSingleton<IWorkoutTemplateRepository, WorkoutTemplateRepository>();
-builder.Services.AddSingleton<IWorkoutRepository, WorkoutRepository>();
+if (builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddSingleton<IWorkoutTemplateRepository, WorkoutTemplateRepository>();
+    builder.Services.AddSingleton<IWorkoutRepository, WorkoutRepository>();
+}
+else
+{
+    builder.Services.AddSingleton<IWorkoutTemplateRepository, WorkoutTemplatesEFCoreRepository>();
+    builder.Services.AddSingleton<IWorkoutRepository, WorkoutRepository>();
+}
+
+
+
 
 builder.Services.AddScoped<IActiveWorkoutService, ActiveWorkoutService>();
 

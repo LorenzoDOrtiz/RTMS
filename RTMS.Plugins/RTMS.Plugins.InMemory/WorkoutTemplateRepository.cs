@@ -104,10 +104,9 @@ public class WorkoutTemplateRepository : IWorkoutTemplateRepository
         return Task.CompletedTask;
     }
 
-    public Task DeleteWorkoutTemplateAsync(int workoutId)
+    public Task DeleteWorkoutTemplateAsync(WorkoutTemplate workoutTemplate)
     {
-        var workoutToDelete = _workoutTemplates.First(x => x.Id == workoutId);
-        _workoutTemplates.Remove(workoutToDelete);
+        _workoutTemplates.Remove(workoutTemplate);
         return Task.CompletedTask;
     }
 

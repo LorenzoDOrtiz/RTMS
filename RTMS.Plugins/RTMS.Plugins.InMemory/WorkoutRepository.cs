@@ -1,4 +1,5 @@
 ﻿using RTMS.CoreBusiness.Active;
+using RTMS.UseCases.PluginInterfaces;
 
 namespace RTMS.Plugins.InMemory;
 

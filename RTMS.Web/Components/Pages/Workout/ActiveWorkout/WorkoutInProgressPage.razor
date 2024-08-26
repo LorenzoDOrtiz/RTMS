@@ -22,7 +22,7 @@
                                OnExerciseDeleted="HandleExerciseDeleted"
                                OnExerciseNameChanged="RecalculateEndWorkoutDisabled"
                                OnSetComplete="HandleSetComplete"
-                               OnSetReset="HandleSetReset"/>
+                               OnSetReset="HandleSetReset" />
     }
 
     <br />
@@ -51,11 +51,10 @@ else
     private WorkoutViewModel _viewModel;
     private Workout? _activeWorkout;
 
-    private int RestTimerSecondsBetweenSets;
-
     private CancellationTokenSource _exerciseTokenSource = new CancellationTokenSource();
     private CancellationTokenSource _restTokenSource = new CancellationTokenSource();
 
+    private int RestTimerSecondsBetweenSets;
     private bool IsEndWorkoutDisabled;
 
     protected override async Task OnInitializedAsync()
@@ -106,12 +105,12 @@ else
         RestTimerSecondsBetweenSets = -1;
 
         _viewModel.Exercises.Add(new ExerciseViewModel
-            {
-                Id = _viewModel.Exercises.Any() ? _viewModel.Exercises.Max(w => w.Id) + 1 : 1,
-                WorkoutId = _viewModel.Id,
-                Name = "",
-                Sets = new List<ExerciseSetViewModel>()
-            });
+        {
+            Id = _viewModel.Exercises.Any() ? _viewModel.Exercises.Max(w => w.Id) + 1 : 1,
+            WorkoutId = _viewModel.Id,
+            Name = "",
+            Sets = new List<ExerciseSetViewModel>()
+        });
 
         RecalculateEndWorkoutDisabled();
     }

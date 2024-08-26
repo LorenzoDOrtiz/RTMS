@@ -1,4 +1,5 @@
-﻿using RTMS.UseCases.PluginInterfaces;
+﻿using RTMS.CoreBusiness.Template;
+using RTMS.UseCases.PluginInterfaces;
 using RTMS.UseCases.WorkoutTemplates.Interfaces;
 
 namespace RTMS.UseCases.WorkoutTemplates;
@@ -11,8 +12,8 @@ public class DeleteWorkoutTemplateUseCase : IDeleteWorkoutTemplateUseCase
         _workoutRepository = workoutRepository;
     }
 
-    public async Task ExecuteAsync(int workoutId)
+    public async Task ExecuteAsync(WorkoutTemplate workout)
     {
-        await _workoutRepository.DeleteWorkoutTemplateAsync(workoutId);
+        await _workoutRepository.DeleteWorkoutTemplateAsync(workout);
     }
 }

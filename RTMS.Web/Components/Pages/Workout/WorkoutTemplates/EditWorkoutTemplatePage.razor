@@ -14,9 +14,9 @@
     [Parameter]
     public int Id { get; set; }
 
-    private WorkoutTemplate workoutTemplate;
+    private WorkoutTemplate workoutTemplate = new();
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         // Use the Id to fetch the workout details and populate the form
         workoutTemplate = await ViewWorkoutUseCase.ExecuteAsync(Id);

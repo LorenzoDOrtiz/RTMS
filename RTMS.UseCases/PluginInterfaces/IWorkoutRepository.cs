@@ -1,6 +1,6 @@
 ﻿using RTMS.CoreBusiness.Active;
 
-namespace RTMS.Plugins.InMemory;
+namespace RTMS.UseCases.PluginInterfaces;
 
 public interface IWorkoutRepository
 {

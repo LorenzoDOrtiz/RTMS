@@ -1,7 +1,8 @@
-﻿using RTMS.Plugins.InMemory;
+﻿using RTMS.UseCases.PluginInterfaces;
 using RTMS.UseCases.Workouts.Interfaces;
 
-namespace RTMS.UseCases.Workouts;
+namespace RTMS.UseCases.ActiveWorkouts;
+
 public class ViewActiveWorkoutByIdUseCase : IViewActiveWorkoutByIdUseCase
 {
     private readonly IWorkoutRepository _workoutRepository;

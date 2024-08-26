@@ -1,4 +1,6 @@
-﻿namespace RTMS.CoreBusiness.Active;
+﻿using RTMS.CoreBusiness.Template;
+
+namespace RTMS.CoreBusiness.Active;
 public class Workout
 {
     public int Id { get; set; }  // Unique identifier for the workout
@@ -6,6 +8,8 @@ public class Workout
     public int UserId { get; set; } // Link to ASP.NET Core Identity User
 
     public int TemplateId { get; set; }  // Reference to the WorkoutTemplate it was created from
+
+    public WorkoutTemplate Template { get; set; }
 
     public string Name { get; set; }  // Name of the workout (usually copied from the template)
 
