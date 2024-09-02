@@ -1,4 +1,4 @@
-﻿namespace RTMS.CoreBusiness.WorkoutTemplate;
+﻿namespace RTMS.CoreBusiness.Template;
 
 public class WorkoutTemplate
 {

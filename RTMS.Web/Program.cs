@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using RTMS.Plugins.SqlServer;
 using RTMS.Services;
@@ -23,6 +20,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 // Add services to the container.
+
+builder.Services.AddDbContextFactory<RTMSContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("RTMS"));
+});
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -54,18 +57,8 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSe
 
 builder.Services.AddMudServices();
 
-builder.Services.AddAutoMapper(typeof(WorkoutTemplateViewModelToWorkoutTemplateMappingProfile),
-    typeof(WorkoutTemplateToWorkoutTemplateViewModelMappingProfile));
-
-string rtmsConnectionString = builder.Configuration.GetConnectionString("RTMS") ?? throw new InvalidOperationException("Connection string 'RTMS' not found.");
-builder.Services.AddSingleton(new SqlConnectionFactory(rtmsConnectionString));
-
-if (builder.Environment.IsDevelopment())
-{
-    builder.Services.AddSingleton<IWorkoutTemplateRepository, WorkoutTemplateRepositorySqlServer>();
-    builder.Services.AddSingleton<IActiveWorkoutRepository, ActiveWorkoutRepositorySqlServer>();
-    builder.Services.AddSingleton<IWorkoutHistoryRepository, WorkoutHistoryRepositorySqlServer>();
-}
+builder.Services.AddSingleton<IWorkoutTemplateRepository, WorkoutTemplateRepository>();
+builder.Services.AddSingleton<IWorkoutRepository, WorkoutRepository>();
 
 builder.Services.AddScoped<IActiveWorkoutService, ActiveWorkoutService>();
 

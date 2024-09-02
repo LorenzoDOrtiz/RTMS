@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RTMS.CoreBusiness\RTMS.CoreBusiness.csproj" />
+    <ProjectReference Include="..\RTMS.Plugins\RTMS.Plugins.EFCoreSql\RTMS.Plugins.EFCoreSql.csproj" />
     <ProjectReference Include="..\RTMS.Plugins\RTMS.Plugins.InMemory\RTMS.Plugins.InMemory.csproj" />
     <ProjectReference Include="..\RTMS.Plugins\RTMS.Plugins.SqlServer\RTMS.Plugins.SqlServer.csproj" />
     <ProjectReference Include="..\RTMS.Services\RTMS.Services.csproj" />

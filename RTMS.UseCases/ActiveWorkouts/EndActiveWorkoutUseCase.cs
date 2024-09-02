@@ -1,5 +1,7 @@
-﻿using RTMS.Plugins.InMemory;
+﻿using RTMS.UseCases.PluginInterfaces;
 using RTMS.UseCases.Workouts;
+
+namespace RTMS.UseCases.ActiveWorkouts;
 
 public class EndActiveWorkoutUseCase : IEndActiveWorkoutUseCase
 {

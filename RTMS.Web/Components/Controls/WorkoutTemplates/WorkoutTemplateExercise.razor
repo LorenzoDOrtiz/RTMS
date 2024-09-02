@@ -45,7 +45,7 @@
     public ExerciseTemplateViewModel Exercise { get; set; }
 
     [Parameter]
-    public EventCallback<int> OnExerciseDeleted { get; set; }
+    public EventCallback<ExerciseTemplateViewModel> OnExerciseDeleted { get; set; }
 
     [Parameter]
     public EventCallback OnExerciseNameChanged { get; set; }
@@ -70,7 +70,7 @@
 
     private async Task HandleExerciseDeleted()
     {
-        await OnExerciseDeleted.InvokeAsync(Exercise.Id);
+        await OnExerciseDeleted.InvokeAsync(Exercise);
     }
 
     private void HandleRestTimerCancel()

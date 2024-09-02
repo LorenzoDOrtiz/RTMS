@@ -17,4 +17,6 @@ public class ExerciseTemplate
     public List<ExerciseSetTemplate>? Sets { get; set; } = new List<ExerciseSetTemplate>();
 
     public string Note { get; set; } = string.Empty;
+
+    public WorkoutTemplate WorkoutTemplate { get; set; }
 }
