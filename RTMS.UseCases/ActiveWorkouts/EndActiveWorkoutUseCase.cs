@@ -3,9 +3,9 @@ using RTMS.UseCases.Workouts;
 
 public class EndActiveWorkoutUseCase : IEndActiveWorkoutUseCase
 {
-    private readonly IWorkoutRepository _workoutRepository;
+    private readonly IActiveWorkoutRepository _workoutRepository;
 
-    public EndActiveWorkoutUseCase(IWorkoutRepository workoutRepository)
+    public EndActiveWorkoutUseCase(IActiveWorkoutRepository workoutRepository)
     {
         _workoutRepository = workoutRepository;
     }

@@ -1,0 +1,96 @@
+﻿@inject IEditWorkoutTemplateUseCase EditWorkoutUseCase
+@inject IMapper Mapper
+@inject NavigationManager NavigationManager
+
+<MudStack Spacing="4">
+    <WorkoutTemplateHeader WorkoutName="_workoutTemplateViewModel.Name"
+                           OnWorkoutNameChanged="HandleWorkoutNameChange" />
+
+    @if (_workoutTemplateViewModel is not null && 
+         _workoutTemplateViewModel.Exercises is not null 
+         && _workoutTemplateViewModel.Exercises.Any())
+    {
+        foreach (var exercise in _workoutTemplateViewModel.Exercises)
+        {
+            <WorkoutTemplateExercise Exercise="exercise"
+                                     OnExerciseDeleted="HandleExerciseDeleted"
+                                     OnExerciseNameChanged="RecalculateSaveDisabled" />
+        }
+    }
+
+    <WorkoutTemplateButtons Exercises="_workoutTemplateViewModel?.Exercises"
+                            OnSave="HandleValidation"
+                            OnExerciseAdded="HandleExerciseAdded"
+                            IsSaveDisabled="IsSaveDisabled" />
+</MudStack>
+
+@code {
+    [Parameter]
+    public WorkoutTemplate? WorkoutTemplate { get; set; }
+    private WorkoutTemplateViewModel? _workoutTemplateViewModel;
+    private bool IsSaveDisabled;
+
+    protected override void OnInitialized()
+    {
+        _workoutTemplateViewModel = new WorkoutTemplateViewModel();
+    }
+
+    protected override void OnParametersSet()
+    {
+        _workoutTemplateViewModel = Mapper.Map<WorkoutTemplateViewModel>(WorkoutTemplate);
+    }
+
+    private void HandleExerciseAdded()
+    {
+        if (_workoutTemplateViewModel is not null && _workoutTemplateViewModel.Exercises is not null)
+        {
+            _workoutTemplateViewModel.Exercises.Add(new ExerciseTemplateViewModel
+                {
+                    Id = _workoutTemplateViewModel.Exercises.Any() ? _workoutTemplateViewModel.Exercises.Max(w => w.Id) + 1 : 1,
+                    Sets = new List<ExerciseSetTemplateViewModel>
+                {
+                    new ExerciseSetTemplateViewModel()
+                }
+                });
+
+            RecalculateSaveDisabled();
+        }
+    }
+
+    private void RecalculateSaveDisabled()
+    {
+        IsSaveDisabled = string.IsNullOrWhiteSpace(_workoutTemplateViewModel.Name)
+                         || _workoutTemplateViewModel.Exercises.Any(e => string.IsNullOrWhiteSpace(e.Name));
+    }
+
+    private void HandleWorkoutNameChange(string newName)
+    {
+        _workoutTemplateViewModel.Name = newName;
+        RecalculateSaveDisabled();
+    }
+
+    private void HandleExerciseDeleted(int exerciseId)
+    {
+        var exerciseToDelete = _workoutTemplateViewModel.Exercises.FirstOrDefault(e => e.Id == exerciseId);
+        if (exerciseToDelete != null)
+        {
+            _workoutTemplateViewModel.Exercises.Remove(exerciseToDelete);
+        }
+        RecalculateSaveDisabled();
+    }
+
+    private async Task HandleValidation()
+    {
+        // Perform validation before saving.
+        if (IsSaveDisabled)
+        {
+            return; // Prevent save if validation fails.
+        }
+
+        var workoutTemplate = Mapper.Map<WorkoutTemplate>(_workoutTemplateViewModel);
+
+        await EditWorkoutUseCase.ExecuteAsync(workoutTemplate);
+
+        NavigationManager.NavigateTo("/workouts");
+    }
+}

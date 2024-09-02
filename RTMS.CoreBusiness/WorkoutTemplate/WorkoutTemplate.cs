@@ -1,12 +1,12 @@
-﻿namespace RTMS.CoreBusiness.Template;
+﻿namespace RTMS.CoreBusiness.WorkoutTemplate;
 
 public class WorkoutTemplate
 {
+    public Guid UserId { get; set; }
+
     public int Id { get; set; }
 
-    public int UserId { get; set; } // Link to ASP.NET Core Identity User
+    public string Name { get; set; } = string.Empty;
 
-    public string Name { get; set; }
-
-    public List<ExerciseTemplate> Exercises { get; set; } = new();
+    public List<ExerciseTemplate>? Exercises { get; set; }
 }

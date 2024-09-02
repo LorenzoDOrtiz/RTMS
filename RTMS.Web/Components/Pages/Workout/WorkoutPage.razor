@@ -1,10 +1,22 @@
-﻿@page "/workouts"
+﻿[Authorize]
+
+@page "/workouts"
+
+@inject IHttpContextAccessor HttpContextAccessor
+@inject UserManager<ApplicationUser> UserManager
+
 <PageTitle>Workouts</PageTitle>
 
-<WorkoutTemplates />
+<WorkoutTemplates UserId="userId" />
 <br />
-<WorkoutHistory />
+<WorkoutHistory UserId="userId" />
 
 @code {
-  
+    private string userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = HttpContextAccessor.HttpContext.User;
+        userId = UserManager.GetUserId(user);
+    }
 }

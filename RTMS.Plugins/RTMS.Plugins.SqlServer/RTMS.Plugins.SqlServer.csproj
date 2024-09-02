@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.35" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\RTMS.CoreBusiness\RTMS.CoreBusiness.csproj" />
     <ProjectReference Include="..\..\RTMS.UseCases\RTMS.UseCases.csproj" />
   </ItemGroup>
 

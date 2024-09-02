@@ -1,11 +1,10 @@
 ﻿using RTMS.CoreBusiness.Active;
 
-namespace RTMS.Plugins.InMemory;
+namespace RTMS.UseCases.PluginInterfaces;
 
-public interface IWorkoutRepository
+public interface IActiveWorkoutRepository
 {
     Task AddWorkoutAsync(Workout workout);
     Task<Workout> GetWorkoutByIdAsync(int id);
     Task EndWorkoutAsync(int workoutId);
-    Task<List<Workout>> ViewWorkoutHistoryByUserIdAsync(int userId);
 }

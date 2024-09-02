@@ -1,7 +1,7 @@
-﻿using RTMS.CoreBusiness.Template;
+﻿using RTMS.CoreBusiness.WorkoutTemplate;
 
 namespace RTMS.UseCases.WorkoutTemplates.Interfaces;
 public interface IViewWorkoutTemplatesByUserIdUseCase
 {
-    Task<IEnumerable<WorkoutTemplate>> ExecuteAsync(int userId);
+    Task<IEnumerable<WorkoutTemplate>> ExecuteAsync(Guid userId);
 }

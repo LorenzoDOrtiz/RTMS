@@ -1,13 +1,13 @@
 ﻿using RTMS.CoreBusiness.Active;
-using RTMS.CoreBusiness.Template;
+using RTMS.CoreBusiness.WorkoutTemplate;
 
 namespace RTMS.Services.Interfaces;
 
 public interface IActiveWorkoutService
 {
-    public bool WorkoutIsActive(int userId);
-    public string GetActiveWorkoutName(int userId);
+    public bool WorkoutIsActive(Guid userId);
+    public string GetActiveWorkoutName(Guid userId);
     Task SaveActiveWorkoutAsync(Workout workout);
-    Task<Workout?> GetActiveWorkoutAsync(int userId);
-    Task StartWorkoutAsync(int userId, WorkoutTemplate workoutTemplate);
+    Task<Workout?> GetActiveWorkoutAsync(Guid userId);
+    Task StartWorkoutAsync(Guid userId, WorkoutTemplate workoutTemplate);
 }

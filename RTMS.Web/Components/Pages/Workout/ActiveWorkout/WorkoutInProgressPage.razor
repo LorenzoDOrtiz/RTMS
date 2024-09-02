@@ -60,7 +60,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _activeWorkout = await ActiveWorkoutService.GetActiveWorkoutAsync(1);
+        _activeWorkout = await ActiveWorkoutService.GetActiveWorkoutAsync(new Guid());
         InitializeViewModel(_activeWorkout);
     }
 
@@ -70,8 +70,6 @@ else
         {
             _viewModel = new WorkoutViewModel
                 {
-                    Id = _activeWorkout.Id,
-                    UserId = _activeWorkout.UserId,
                     TemplateId = _activeWorkout.TemplateId,
                     Name = _activeWorkout.Name,
                     StartTime = _activeWorkout.StartTime,
@@ -191,16 +189,15 @@ else
         return new WorkoutTemplateViewModel
             {
                 Id = viewModel.TemplateId,
-                UserId = viewModel.UserId,
                 Name = viewModel.Name,
                 Exercises = viewModel.Exercises.Select(e => new ExerciseTemplateViewModel
                 {
                     Id = e.Id,
                     WorkoutTemplateId = viewModel.TemplateId,
                     Name = e.Name,
-                    RestTimerValue = e.RestTimerValue,
+                    RestTimerValue = e.RestTimerValue, 
                     RestTimerUnit = e.RestTimerUnit,
-                    Sets = e.Sets.Select(s => new ExerciseTemplateSetViewModel
+                    Sets = e.Sets.Select(s => new ExerciseSetTemplateViewModel
                     {
                         Id = s.Id,
                         Reps = s.Reps,
@@ -216,7 +213,6 @@ else
         return new Workout
             {
                 Id = viewModel.Id,
-                UserId = viewModel.UserId,
                 TemplateId = viewModel.TemplateId,
                 Name = viewModel.Name,
                 StartTime = viewModel.StartTime,
@@ -252,7 +248,7 @@ else
                     Name = e.Name,
                     RestTimerValue = e.RestTimerValue,
                     RestTimerUnit = e.RestTimerUnit,
-                    Sets = e.Sets.Select(s => new ExerciseTemplateSet
+                    Sets = e.Sets.Select(s => new ExerciseSetTemplate
                     {
                         Id = s.Id,
                         Reps = s.Reps,

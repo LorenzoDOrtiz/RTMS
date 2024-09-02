@@ -6,19 +6,18 @@
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
-
 <MudLayout>
     <MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         <MudText Typo="Typo.h5" Class="ml-2">RTMS</MudText>
-        @if (ActiveWorkoutService.WorkoutIsActive(1) && !IsWorkoutInProgressPage())
+        @if (ActiveWorkoutService.WorkoutIsActive(new Guid()) && !IsWorkoutInProgressPage())
         {
             <div style="margin-left: auto;">
                     <MudButton StartIcon="@Icons.Material.Filled.MonitorHeart"
                                Color="Color.Success"
                                Variant="Variant.Filled"
                                Href="/workout-in-progress" Style="border-radius: 50px">
-                               @ActiveWorkoutService.GetActiveWorkoutName(1)
+                               @ActiveWorkoutService.GetActiveWorkoutName(new Guid())
                     </MudButton>
             </div>
         }

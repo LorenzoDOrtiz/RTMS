@@ -1,5 +1,5 @@
 ﻿using RTMS.CoreBusiness.Active;
-using RTMS.CoreBusiness.Template;
+using RTMS.CoreBusiness.WorkoutTemplate;
 
 namespace RTMS.UseCases.Workouts.Interfaces;
 public interface IAddActiveWorkoutUseCase

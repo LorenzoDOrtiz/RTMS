@@ -1,5 +1,5 @@
 ﻿using RTMS.CoreBusiness.Active;
-using RTMS.CoreBusiness.Template;
+using RTMS.CoreBusiness.WorkoutTemplate;
 using RTMS.Plugins.InMemory;
 using RTMS.UseCases.Workouts.Interfaces;
 
@@ -7,9 +7,9 @@ namespace RTMS.UseCases.Workouts
 {
     public class AddActiveWorkoutUseCase : IAddActiveWorkoutUseCase
     {
-        private readonly IWorkoutRepository _workoutRepository;
+        private readonly IActiveWorkoutRepository _workoutRepository;
 
-        public AddActiveWorkoutUseCase(IWorkoutRepository workoutRepository)
+        public AddActiveWorkoutUseCase(IActiveWorkoutRepository workoutRepository)
         {
             _workoutRepository = workoutRepository;
         }

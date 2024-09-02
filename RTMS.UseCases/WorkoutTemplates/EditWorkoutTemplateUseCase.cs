@@ -1,19 +1,12 @@
-﻿using RTMS.CoreBusiness.Template;
+﻿using RTMS.CoreBusiness.WorkoutTemplate;
 using RTMS.UseCases.PluginInterfaces;
 using RTMS.UseCases.WorkoutTemplates.Interfaces;
 
 namespace RTMS.UseCases.WorkoutTemplates;
-public class EditWorkoutTemplateUseCase : IEditWorkoutTemplateUseCase
+public class EditWorkoutTemplateUseCase(IWorkoutTemplateRepository workoutRepository) : IEditWorkoutTemplateUseCase
 {
-    private readonly IWorkoutTemplateRepository _workoutRepository;
-
-    public EditWorkoutTemplateUseCase(IWorkoutTemplateRepository workoutRepository)
-    {
-        _workoutRepository = workoutRepository;
-    }
-
     public async Task ExecuteAsync(WorkoutTemplate workout)
     {
-        await _workoutRepository.UpdateWorkoutTemplateAsync(workout);
+        await workoutRepository.UpdateWorkoutTemplateAsync(workout);
     }
 }

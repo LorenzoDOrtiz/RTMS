@@ -1,20 +1,9 @@
 ﻿@page "/workouts/add-workout-template"
 
-@inject IAddWorkoutTemplateUseCase AddWorkoutUseCase
-@inject NavigationManager NavigationManager
-
 <PageTitle>Add Workout</PageTitle>
 
-<AddEditWorkoutTemplate WorkoutTemplate="@workoutTemplate"
-                        OnValidationSuccess="HandleSave" />
+<AddWorkoutTemplate />
 
 @code {
 
-    private WorkoutTemplate workoutTemplate = new();
-
-    private async Task HandleSave()
-    {
-        await AddWorkoutUseCase.ExecuteAsync(workoutTemplate);
-        NavigationManager.NavigateTo("/workouts");
-    }
 }

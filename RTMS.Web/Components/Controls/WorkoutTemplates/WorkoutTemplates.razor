@@ -30,7 +30,7 @@
 
 @code {
     private List<WorkoutTemplate>? userWorkoutTemplates;
-    private int userId = 1;
+    private Guid userId = new Guid();
 
     protected override async Task OnParametersSetAsync()
     {

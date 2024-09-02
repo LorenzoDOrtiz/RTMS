@@ -34,7 +34,7 @@
 
 @code {
     private List<Workout>? userWorkoutHistory;
-    private int userId = 1;
+    private Guid userId = new Guid();
 
     protected override async Task OnParametersSetAsync()
     {

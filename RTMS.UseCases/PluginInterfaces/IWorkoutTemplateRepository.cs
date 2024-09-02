@@ -1,12 +1,11 @@
-﻿using RTMS.CoreBusiness.Template;
+﻿using RTMS.CoreBusiness.WorkoutTemplate;
 
 namespace RTMS.UseCases.PluginInterfaces;
-
 public interface IWorkoutTemplateRepository
 {
-    Task AddWorkoutTemplateAsync(WorkoutTemplate workout);
-    Task DeleteWorkoutTemplateAsync(int workoutId);
-    Task<WorkoutTemplate> GetWorkoutTemplateAsync(int Id);
-    Task<IEnumerable<WorkoutTemplate>> GetWorkoutsByUserIdAsync(int userId);
-    Task UpdateWorkoutTemplateAsync(WorkoutTemplate workout);
+    Task AddWorkoutTemplateAsync(WorkoutTemplate workoutTemplate);
+    Task DeleteWorkoutTemplateAsync(int id);
+    Task<WorkoutTemplate> GetWorkoutTemplateByIdAsync(int id);
+    Task<List<WorkoutTemplate>> GetWorkoutTemplatesByUserIdAsync(Guid userId);
+    Task UpdateWorkoutTemplateAsync(WorkoutTemplate workoutTemplate);
 }

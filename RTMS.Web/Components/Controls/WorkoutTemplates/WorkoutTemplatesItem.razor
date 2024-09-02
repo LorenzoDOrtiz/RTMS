@@ -28,7 +28,7 @@
     {
         if (WorkoutTemplate != null)
         {
-            await ActiveWorkoutService.StartWorkoutAsync(1, WorkoutTemplate);
+            await ActiveWorkoutService.StartWorkoutAsync(new Guid(), WorkoutTemplate);
             NavigationManager.NavigateTo("/workout-in-progress");
         }
     }
