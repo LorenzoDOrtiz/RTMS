@@ -1,7 +1,7 @@
-﻿using RTMS.CoreBusiness.Active;
+﻿using RTMS.CoreBusiness;
 
 namespace RTMS.UseCases.ActiveWorkouts.Interfaces;
 public interface IViewWorkoutHistoryByUserIdUseCase
 {
-    Task<List<Workout>> ExecuteAsync(Guid userId);
+    Task<List<Workout>> ExecuteAsync(string userId);
 }

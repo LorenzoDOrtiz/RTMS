@@ -1,4 +1,5 @@
-﻿@inject IActiveWorkoutService ActiveWorkoutService
+﻿@using RTMS.CoreBusiness
+@inject IAddWorkoutUseCase AddWorkoutUseCase
 @inject IDeleteWorkoutTemplateUseCase DeleteWorkoutUseCase
 @inject NavigationManager NavigationManager
 
@@ -28,14 +29,14 @@
     {
         if (WorkoutTemplate != null)
         {
-            await ActiveWorkoutService.StartWorkoutAsync(new Guid(), WorkoutTemplate);
+            await AddWorkoutUseCase.ExecuteAsync(WorkoutTemplate);
             NavigationManager.NavigateTo("/workout-in-progress");
         }
     }
 
     private async Task DeleteWorkoutTemplate()
     {
-        await DeleteWorkoutUseCase.ExecuteAsync(WorkoutTemplate);
+        await DeleteWorkoutUseCase.ExecuteAsync(WorkoutTemplate.Id);
         WorkoutTemplate = null;
     }
 }

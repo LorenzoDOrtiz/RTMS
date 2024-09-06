@@ -9,6 +9,8 @@
 
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
 
 @using AutoMapper
 
@@ -20,20 +22,14 @@
 @using RTMS.Web.Components.Controls.ActiveWorkouts
 @using RTMS.Web.Components.Controls.WorkoutTemplates
 
-@using RTMS.Web.ViewModels
-@using RTMS.Web.ViewModels.ActiveWorkout
-@using RTMS.Web.ViewModels.WorkoutTemplate
+@using RTMS.Web.Services
 
-@using RTMS.CoreBusiness.Active
-@using RTMS.CoreBusiness.WorkoutTemplate
+@using RTMS.Web.ViewModels
+
+@using RTMS.CoreBusiness
 
 @using RTMS.UseCases.WorkoutTemplates
 @using RTMS.UseCases.WorkoutTemplates.Interfaces
 @using RTMS.UseCases.Workouts
 @using RTMS.UseCases.Workouts.Interfaces
 @using RTMS.UseCases.ActiveWorkouts.Interfaces
-
-@using RTMS.Services
-@using RTMS.Services.Interfaces
-
-@using RTMS.Web.Data

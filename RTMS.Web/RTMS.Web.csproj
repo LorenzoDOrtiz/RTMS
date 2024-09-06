@@ -7,23 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Auth0.AspNetCore.Authentication" Version="1.4.1" />
     <PackageReference Include="AutoMapper" Version="13.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.8" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="MudBlazor" Version="7.5.0" />
+    <PackageReference Include="MudBlazor" Version="7.7.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\RTMS.CoreBusiness\RTMS.CoreBusiness.csproj" />
-    <ProjectReference Include="..\RTMS.Plugins\RTMS.Plugins.EFCoreSql\RTMS.Plugins.EFCoreSql.csproj" />
-    <ProjectReference Include="..\RTMS.Plugins\RTMS.Plugins.InMemory\RTMS.Plugins.InMemory.csproj" />
-    <ProjectReference Include="..\RTMS.Plugins\RTMS.Plugins.SqlServer\RTMS.Plugins.SqlServer.csproj" />
-    <ProjectReference Include="..\RTMS.Services\RTMS.Services.csproj" />
+    <ProjectReference Include="..\RTMS.Plugins\RTMS.Plugins.PostgreEFCore\RTMS.Plugins.PostgreEFCore.csproj" />
     <ProjectReference Include="..\RTMS.UseCases\RTMS.UseCases.csproj" />
   </ItemGroup>
 	

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using RTMS.CoreBusiness.WorkoutTemplate;
-using RTMS.Web.ViewModels.WorkoutTemplate;
+using RTMS.CoreBusiness;
+using RTMS.Web.ViewModels;
 
 namespace RTMS.Web.MappingProfiles;
 

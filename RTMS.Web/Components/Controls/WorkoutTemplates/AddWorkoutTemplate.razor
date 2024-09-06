@@ -58,12 +58,11 @@
         RecalculateSaveDisabled();
     }
 
-    private void HandleExerciseDeleted(int exerciseId)
+    private void HandleExerciseDeleted(ExerciseTemplateViewModel exerciseTemplateViewModel)
     {
-        var exerciseToDelete = _workoutTemplateViewModel.Exercises.FirstOrDefault(e => e.Id == exerciseId);
-        if (exerciseToDelete != null)
+        if (exerciseTemplateViewModel != null)
         {
-            _workoutTemplateViewModel.Exercises.Remove(exerciseToDelete);
+            _workoutTemplateViewModel.Exercises.Remove(exerciseTemplateViewModel);
         }
         RecalculateSaveDisabled();
     }

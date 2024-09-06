@@ -1,0 +1,23 @@
+﻿@page "/workouts"
+
+@attribute [Authorize]
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserContextService UserContextService
+
+
+<PageTitle>Workouts</PageTitle>
+
+<WorkoutTemplates UserID="@userId" />
+
+<br />
+
+<WorkoutHistory UserID="@userId" />
+
+@code {
+    private string? userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        userId = await UserContextService.GetUserIdAsync();
+    }
+}

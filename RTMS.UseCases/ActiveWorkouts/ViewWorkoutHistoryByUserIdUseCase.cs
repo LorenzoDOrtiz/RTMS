@@ -1,19 +1,13 @@
-﻿using RTMS.CoreBusiness.Active;
+﻿using RTMS.CoreBusiness;
 using RTMS.UseCases.ActiveWorkouts.Interfaces;
 using RTMS.UseCases.PluginInterfaces;
 
 namespace RTMS.UseCases.ActiveWorkouts;
 
-public class ViewWorkoutHistoryByUserIdUseCase : IViewWorkoutHistoryByUserIdUseCase
+public class ViewWorkoutHistoryByUserIdUseCase(IWorkoutHistoryRepository workoutRepository) : IViewWorkoutHistoryByUserIdUseCase
 {
-    private readonly IActiveWorkoutRepository _workoutRepository;
-
-    public ViewWorkoutHistoryByUserIdUseCase(IActiveWorkoutRepository workoutRepository)
+    public async Task<List<Workout>> ExecuteAsync(string userId)
     {
-        _workoutRepository = workoutRepository;
-    }
-    public async Task<List<Workout>> ExecuteAsync(Guid userId)
-    {
-        return await _workoutRepository.ViewWorkoutHistoryByUserIdAsync(userId);
+        return await workoutRepository.ViewWorkoutHistoryByUserIdAsync(userId);
     }
 }

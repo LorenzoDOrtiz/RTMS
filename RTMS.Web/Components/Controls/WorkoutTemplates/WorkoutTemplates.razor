@@ -1,4 +1,5 @@
-﻿@inject IViewWorkoutTemplatesByUserIdUseCase ViewWorkoutsByUserIdUseCase
+﻿@using RTMS.CoreBusiness
+@inject IViewWorkoutTemplatesByUserIdUseCase ViewWorkoutsByUserIdUseCase
 
 <MudText Typo="Typo.h5" GutterBottom="true">Workouts</MudText>
 
@@ -29,11 +30,13 @@
 
 
 @code {
-    private List<WorkoutTemplate>? userWorkoutTemplates;
-    private Guid userId = new Guid();
+    [Parameter]
+    public string UserID { get; set; }
 
+    private List<WorkoutTemplate>? userWorkoutTemplates;
+    
     protected override async Task OnInitializedAsync()
     {
-        userWorkoutTemplates = (await ViewWorkoutsByUserIdUseCase.ExecuteAsync(userId)).ToList();
+        userWorkoutTemplates = (await ViewWorkoutsByUserIdUseCase.ExecuteAsync(UserID)).ToList();
     }
 }

@@ -1,0 +1,18 @@
+﻿@inject IViewWorkoutTemplateUseCase ViewWorkoutUseCase
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit Workout</PageTitle>
+
+<EditWorkoutTemplate WorkoutTemplate="workoutTemplate" />
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private WorkoutTemplate? workoutTemplate;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        workoutTemplate = await ViewWorkoutUseCase.ExecuteAsync(Id);
+    }
+}

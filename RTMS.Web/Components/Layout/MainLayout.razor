@@ -1,5 +1,4 @@
 ﻿@inherits LayoutComponentBase
-@inject IActiveWorkoutService ActiveWorkoutService
 @inject NavigationManager  NavigationManager
 
 <MudThemeProvider @bind-IsDarkMode="_isDarkMode" />
@@ -10,18 +9,15 @@
     <MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         <MudText Typo="Typo.h5" Class="ml-2">RTMS</MudText>
-        @if (ActiveWorkoutService.WorkoutIsActive(new Guid()) && !IsWorkoutInProgressPage())
-        {
+
             <div style="margin-left: auto;">
                     <MudButton StartIcon="@Icons.Material.Filled.MonitorHeart"
                                Color="Color.Success"
-                               Variant="Variant.Filled"
-                               Href="/workout-in-progress" Style="border-radius: 50px">
-                               @ActiveWorkoutService.GetActiveWorkoutName(new Guid())
+                               Variant="Variant.Filled">
+                               Workout A
                     </MudButton>
             </div>
-        }
-
+        
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <MyNavMenu />

@@ -1,6 +1,8 @@
-﻿namespace RTMS.UseCases.Workouts.Interfaces;
+﻿using RTMS.CoreBusiness;
+
+namespace RTMS.UseCases.Workouts.Interfaces;
 
 public interface IViewActiveWorkoutByIdUseCase
 {
-    Task ExecuteAsync(int workoutId);
+    Task<Workout> ExecuteAsync(string userId);
 }

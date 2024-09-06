@@ -1,4 +1,6 @@
-﻿@inject IViewWorkoutHistoryByUserIdUseCase ViewWorkoutHistoryByUserIdUseCase
+﻿@using RTMS.CoreBusiness
+@inject IViewWorkoutHistoryByUserIdUseCase ViewWorkoutHistoryByUserIdUseCase
+@inject IHttpContextAccessor HttpContextAccessor
 
 <MudText Typo="Typo.h5" GutterBottom>Workout History</MudText>
 
@@ -33,11 +35,13 @@
 </MudSimpleTable>
 
 @code {
+    [Parameter]
+    public string UserID { get; set; }
+
     private List<Workout>? userWorkoutHistory;
-    private Guid userId = new Guid();
 
     protected override async Task OnParametersSetAsync()
     {
-        userWorkoutHistory = (await ViewWorkoutHistoryByUserIdUseCase.ExecuteAsync(userId)).ToList();
+        userWorkoutHistory = (await ViewWorkoutHistoryByUserIdUseCase.ExecuteAsync(UserID)).ToList();
     }
 }

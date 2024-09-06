@@ -1,13 +1,11 @@
 ﻿<MudNavMenu>
     <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
-    <MudNavLink Href="/workouts" Match="NavLinkMatch.Prefix">Workouts</MudNavLink> 
     <AuthorizeView>
         <Authorized>
-            <MudNavLink Href="Account/Manage" Match="NavLinkMatch.Prefix">@context.User.Identity?.Name</MudNavLink>
+            <MudNavLink Href="/workouts" Match="NavLinkMatch.Prefix">Workouts</MudNavLink>
             <MudNavLink Href="Account/Logout" Match="NavLinkMatch.Prefix">Logout</MudNavLink>
         </Authorized>
         <NotAuthorized>
-            <MudNavLink Href="Account/Register" Match="NavLinkMatch.Prefix">Register</MudNavLink>
             <MudNavLink Href="Account/Login" Match="NavLinkMatch.Prefix">Login</MudNavLink>
         </NotAuthorized>
     </AuthorizeView>

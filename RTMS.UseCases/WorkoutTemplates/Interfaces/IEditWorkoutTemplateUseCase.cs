@@ -1,4 +1,4 @@
-﻿using RTMS.CoreBusiness.WorkoutTemplate;
+﻿using RTMS.CoreBusiness;
 
 namespace RTMS.UseCases.WorkoutTemplates.Interfaces;
 public interface IEditWorkoutTemplateUseCase

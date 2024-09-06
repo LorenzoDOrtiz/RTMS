@@ -7,13 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RTMS.UseCases", "RTMS.UseCa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RTMS.CoreBusiness", "RTMS.CoreBusiness\RTMS.CoreBusiness.csproj", "{5F209127-3B97-40D1-8B57-692A9214653E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RTMS.Plugins", "RTMS.Plugins", "{8478DB45-ABA7-4C21-9BD2-7B3B490593CA}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RTMS.Web", "RTMS.Web\RTMS.Web.csproj", "{5782DE4F-EB3C-4011-959D-470CDF7A832E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RTMS.Services", "RTMS.Services\RTMS.Services.csproj", "{A2B1CB95-AA04-4C06-8C32-8901855F2EA1}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RTMS.Plugins", "RTMS.Plugins", "{1D433BDE-EF92-4025-A671-23B0FBC3D614}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RTMS.Plugins.SqlServer", "RTMS.Plugins\RTMS.Plugins.SqlServer\RTMS.Plugins.SqlServer.csproj", "{99DA7AB9-BF05-4A03-88B4-9BFEE233C3CE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTMS.Plugins.PostgreEFCore", "RTMS.Plugins\RTMS.Plugins.PostgreEFCore\RTMS.Plugins.PostgreEFCore.csproj", "{2598E225-80C9-4A09-8AEA-F860D158363D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,16 +31,16 @@ Global
 		{5782DE4F-EB3C-4011-959D-470CDF7A832E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5782DE4F-EB3C-4011-959D-470CDF7A832E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5782DE4F-EB3C-4011-959D-470CDF7A832E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A2B1CB95-AA04-4C06-8C32-8901855F2EA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A2B1CB95-AA04-4C06-8C32-8901855F2EA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A2B1CB95-AA04-4C06-8C32-8901855F2EA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A2B1CB95-AA04-4C06-8C32-8901855F2EA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2598E225-80C9-4A09-8AEA-F860D158363D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2598E225-80C9-4A09-8AEA-F860D158363D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2598E225-80C9-4A09-8AEA-F860D158363D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2598E225-80C9-4A09-8AEA-F860D158363D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{2EFFA3D9-8442-42EE-A2A9-5930B3ADEC8A} = {8478DB45-ABA7-4C21-9BD2-7B3B490593CA}
+		{2598E225-80C9-4A09-8AEA-F860D158363D} = {1D433BDE-EF92-4025-A671-23B0FBC3D614}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4BD68A70-3FA5-4D30-A0B5-CC6A70870CC6}
