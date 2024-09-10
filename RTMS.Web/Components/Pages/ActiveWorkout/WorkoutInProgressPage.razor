@@ -4,6 +4,7 @@
 @inject IViewActiveWorkoutByIdUseCase ViewActiveWorkoutByIdUseCase
 @inject IEditWorkoutTemplateUseCase EditWorkoutTemplateUseCase
 @inject IEndWorkoutUseCase EndWorkoutUseCase
+@inject UserContextService UserContextService
 
 @inject IDialogService DialogService
 
@@ -61,8 +62,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-
-        _activeWorkout = await ViewActiveWorkoutByIdUseCase.ExecuteAsync("141");
+        _activeWorkout = (await ViewActiveWorkoutByIdUseCase.ExecuteAsync(await UserContextService.GetUserIdAsync()));
 
         InitializeViewModel(_activeWorkout);
     }

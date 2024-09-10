@@ -24,4 +24,8 @@
     <ProjectReference Include="..\..\RTMS.UseCases\RTMS.UseCases.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

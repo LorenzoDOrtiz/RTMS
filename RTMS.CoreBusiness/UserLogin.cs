@@ -13,7 +13,7 @@ namespace RTMS.CoreBusiness
         public string ProviderKey { get; set; }  // e.g., "google-oauth2|105291924524340186405"
 
         // Foreign key to the User entity
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public User User { get; set; }
     }
 }

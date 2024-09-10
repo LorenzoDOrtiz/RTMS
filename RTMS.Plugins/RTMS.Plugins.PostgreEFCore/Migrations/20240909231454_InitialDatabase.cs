@@ -13,17 +13,57 @@ namespace RTMS.Plugins.PostgreEFCore.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserLogin",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Provider = table.Column<string>(type: "text", nullable: false),
+                    ProviderKey = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserLogin", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserLogin_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "WorkoutTemplates",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_WorkoutTemplates", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_WorkoutTemplates_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -56,7 +96,7 @@ namespace RTMS.Plugins.PostgreEFCore.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     StartTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     EndTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -66,6 +106,12 @@ namespace RTMS.Plugins.PostgreEFCore.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Workouts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Workouts_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Workouts_WorkoutTemplates_TemplateId",
                         column: x => x.TemplateId,
@@ -160,9 +206,30 @@ namespace RTMS.Plugins.PostgreEFCore.Migrations
                 column: "WorkoutTemplateId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserLogin_Provider_ProviderKey",
+                table: "UserLogin",
+                columns: new[] { "Provider", "ProviderKey" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserLogin_UserId",
+                table: "UserLogin",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Workouts_TemplateId",
                 table: "Workouts",
                 column: "TemplateId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Workouts_UserId",
+                table: "Workouts",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WorkoutTemplates_UserId",
+                table: "WorkoutTemplates",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -175,6 +242,9 @@ namespace RTMS.Plugins.PostgreEFCore.Migrations
                 name: "ExerciseSetTemplates");
 
             migrationBuilder.DropTable(
+                name: "UserLogin");
+
+            migrationBuilder.DropTable(
                 name: "Exercises");
 
             migrationBuilder.DropTable(
@@ -185,6 +255,9 @@ namespace RTMS.Plugins.PostgreEFCore.Migrations
 
             migrationBuilder.DropTable(
                 name: "WorkoutTemplates");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }

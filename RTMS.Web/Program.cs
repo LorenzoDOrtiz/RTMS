@@ -7,6 +7,8 @@ using RTMS.Plugins.PostgreEFCore;
 using RTMS.UseCases.ActiveWorkouts;
 using RTMS.UseCases.ActiveWorkouts.Interfaces;
 using RTMS.UseCases.PluginInterfaces;
+using RTMS.UseCases.Users;
+using RTMS.UseCases.Users.Interfaces;
 using RTMS.UseCases.Workouts;
 using RTMS.UseCases.Workouts.Interfaces;
 using RTMS.UseCases.WorkoutTemplates;
@@ -26,6 +28,7 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
 {
     options.Domain = builder.Configuration["Auth0:Domain"];
     options.ClientId = builder.Configuration["Auth0:ClientId"];
+    options.Scope = "openid profile email"; // Add the email scope
 });
 
 builder.Services.AddDbContextFactory<RTMSDBContext>(options =>
@@ -33,8 +36,11 @@ builder.Services.AddDbContextFactory<RTMSDBContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("RTMSDB"));
 });
 
+builder.Services.AddScoped<UserContextService>();
+
 builder.Services.AddSingleton<IWorkoutTemplateRepository, WorkoutTemplateRepositoryPostgreEFCore>();
 builder.Services.AddSingleton<IWorkoutHistoryRepository, WorkoutHistoryRepositoryPostgreEFCore>();
+builder.Services.AddSingleton<IUserRepositoryPostgreEFCore, UserRepositoryPostgreEFCore>();
 
 builder.Services.AddTransient<IAddWorkoutTemplateUseCase, AddWorkoutTemplateUseCase>();
 builder.Services.AddTransient<IEditWorkoutTemplateUseCase, EditWorkoutTemplateUseCase>();
@@ -47,7 +53,7 @@ builder.Services.AddTransient<IViewActiveWorkoutByIdUseCase, ViewActiveWorkoutBy
 builder.Services.AddTransient<IEndWorkoutUseCase, EndWorkoutUseCase>();
 builder.Services.AddTransient<IViewWorkoutHistoryByUserIdUseCase, ViewWorkoutHistoryByUserIdUseCase>();
 
-builder.Services.AddSingleton<UserContextService>();
+builder.Services.AddTransient<IGetOrCreateUserUseCase, GetOrCreateUserUseCase>();
 
 // Configure AutoMapper
 builder.Services.AddAutoMapper(cfg =>

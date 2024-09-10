@@ -8,7 +8,7 @@ public class WorkoutTemplate
     public int Id { get; set; }
 
     [Required]
-    public string UserId { get; set; }
+    public Guid UserId { get; set; }
 
     public User User { get; set; }
 

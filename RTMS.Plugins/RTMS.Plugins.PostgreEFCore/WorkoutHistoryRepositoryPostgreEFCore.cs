@@ -1,31 +1,48 @@
-﻿using RTMS.CoreBusiness;
+﻿using Microsoft.EntityFrameworkCore;
+using RTMS.CoreBusiness;
 using RTMS.UseCases.PluginInterfaces;
 
 namespace RTMS.Plugins.PostgreEFCore;
-public class WorkoutHistoryRepositoryPostgreEFCore : IWorkoutHistoryRepository
+public class WorkoutHistoryRepositoryPostgreEFCore(IDbContextFactory<RTMSDBContext> contextFactory) : IWorkoutHistoryRepository
 {
-    public Task AddWorkoutAsync(Workout workout)
+    public async Task AddWorkoutAsync(Workout workout)
     {
-        throw new NotImplementedException();
+        using var context = contextFactory.CreateDbContext();
+        await context.AddAsync(workout);
+        await context.SaveChangesAsync();
     }
 
-    public Task EndWorkoutAsync(Workout workout)
+    public async Task EndWorkoutAsync(Workout workout)
     {
-        throw new NotImplementedException();
+        using var context = contextFactory.CreateDbContext();
+        var workoutToEnd = await context.Workouts.FindAsync(workout.Id);
+
+        if (workoutToEnd != null)
+        {
+            workoutToEnd.IsCompleted = true;
+            workoutToEnd.EndTime = DateTime.Now;
+            await context.SaveChangesAsync();
+        }
     }
 
-    public Task UpdateWorkoutAsync(Workout workout)
+    public async Task UpdateWorkoutAsync(Workout workout)
     {
-        throw new NotImplementedException();
+        using var context = contextFactory.CreateDbContext();
+        context.Workouts.Update(workout);
+        await context.SaveChangesAsync();
     }
 
-    public Task<Workout> ViewActiveWorkoutByUserIdAsync(string userId)
+    public async Task<Workout> ViewActiveWorkoutByUserIdAsync(Guid userId)
     {
-        throw new NotImplementedException();
+        using var context = contextFactory.CreateDbContext();
+        return await context.Workouts.FirstOrDefaultAsync(w => w.UserId == userId && !w.IsCompleted);
+
     }
 
-    public Task<List<Workout>> ViewWorkoutHistoryByUserIdAsync(string userId)
+    public async Task<List<Workout>> ViewWorkoutHistoryByUserIdAsync(Guid userId)
     {
-        throw new NotImplementedException();
+        using var context = contextFactory.CreateDbContext();
+
+        return await context.Workouts.Where(w => w.UserId == userId && w.IsCompleted == true).ToListAsync();
     }
 }

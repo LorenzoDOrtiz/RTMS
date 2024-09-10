@@ -6,7 +6,7 @@ namespace RTMS.UseCases.ActiveWorkouts;
 
 public class ViewActiveWorkoutByIdUseCase(IWorkoutHistoryRepository workoutRepository) : IViewActiveWorkoutByIdUseCase
 {
-    public async Task<Workout> ExecuteAsync(string userId)
+    public async Task<Workout> ExecuteAsync(Guid userId)
     {
         return await workoutRepository.ViewActiveWorkoutByUserIdAsync(userId);
 

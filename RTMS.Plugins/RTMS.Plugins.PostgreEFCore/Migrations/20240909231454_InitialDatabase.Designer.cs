@@ -12,7 +12,7 @@ using RTMS.Plugins.PostgreEFCore;
 namespace RTMS.Plugins.PostgreEFCore.Migrations
 {
     [DbContext(typeof(RTMSDBContext))]
-    [Migration("20240906043459_InitialDatabase")]
+    [Migration("20240909231454_InitialDatabase")]
     partial class InitialDatabase
     {
         /// <inheritdoc />
@@ -140,6 +140,55 @@ namespace RTMS.Plugins.PostgreEFCore.Migrations
                     b.ToTable("ExerciseTemplates");
                 });
 
+            modelBuilder.Entity("RTMS.CoreBusiness.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("RTMS.CoreBusiness.UserLogin", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProviderKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("Provider", "ProviderKey")
+                        .IsUnique();
+
+                    b.ToTable("UserLogin");
+                });
+
             modelBuilder.Entity("RTMS.CoreBusiness.Workout", b =>
                 {
                     b.Property<int>("Id")
@@ -164,13 +213,14 @@ namespace RTMS.Plugins.PostgreEFCore.Migrations
                     b.Property<int>("TemplateId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
                     b.HasIndex("TemplateId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Workouts");
                 });
@@ -187,11 +237,12 @@ namespace RTMS.Plugins.PostgreEFCore.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("WorkoutTemplates");
                 });
@@ -236,6 +287,17 @@ namespace RTMS.Plugins.PostgreEFCore.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("RTMS.CoreBusiness.UserLogin", b =>
+                {
+                    b.HasOne("RTMS.CoreBusiness.User", "User")
+                        .WithMany("UserLogins")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("RTMS.CoreBusiness.Workout", b =>
                 {
                     b.HasOne("RTMS.CoreBusiness.WorkoutTemplate", "Template")
@@ -244,7 +306,26 @@ namespace RTMS.Plugins.PostgreEFCore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("RTMS.CoreBusiness.User", "User")
+                        .WithMany("Workouts")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Template");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("RTMS.CoreBusiness.WorkoutTemplate", b =>
+                {
+                    b.HasOne("RTMS.CoreBusiness.User", "User")
+                        .WithMany("WorkoutTemplates")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RTMS.CoreBusiness.Exercise", b =>
@@ -255,6 +336,15 @@ namespace RTMS.Plugins.PostgreEFCore.Migrations
             modelBuilder.Entity("RTMS.CoreBusiness.ExerciseTemplate", b =>
                 {
                     b.Navigation("Sets");
+                });
+
+            modelBuilder.Entity("RTMS.CoreBusiness.User", b =>
+                {
+                    b.Navigation("UserLogins");
+
+                    b.Navigation("WorkoutTemplates");
+
+                    b.Navigation("Workouts");
                 });
 
             modelBuilder.Entity("RTMS.CoreBusiness.Workout", b =>

@@ -1,6 +1,5 @@
 ﻿@using RTMS.CoreBusiness
 @inject IViewWorkoutHistoryByUserIdUseCase ViewWorkoutHistoryByUserIdUseCase
-@inject IHttpContextAccessor HttpContextAccessor
 
 <MudText Typo="Typo.h5" GutterBottom>Workout History</MudText>
 
@@ -36,7 +35,7 @@
 
 @code {
     [Parameter]
-    public string UserID { get; set; }
+    public Guid UserID { get; set; }
 
     private List<Workout>? userWorkoutHistory;
 

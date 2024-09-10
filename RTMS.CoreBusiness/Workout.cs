@@ -8,7 +8,7 @@ public class Workout
     public int Id { get; set; }  // Primary key
 
     [Required]
-    public string UserId { get; set; } // Link to ASP.NET Core Identity User
+    public Guid UserId { get; set; } // Link to ASP.NET Core Identity User
     public User User { get; set; }
 
     [Required]

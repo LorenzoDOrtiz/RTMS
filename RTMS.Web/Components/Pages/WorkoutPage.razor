@@ -1,7 +1,6 @@
 ﻿@page "/workouts"
 
 @attribute [Authorize]
-@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserContextService UserContextService
 
 
@@ -14,7 +13,7 @@
 <WorkoutHistory UserID="@userId" />
 
 @code {
-    private string? userId;
+    private Guid userId;
 
     protected override async Task OnInitializedAsync()
     {

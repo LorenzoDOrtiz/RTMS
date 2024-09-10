@@ -30,9 +30,11 @@ public class WorkoutTemplateRepositoryPostgreEFCore(IDbContextFactory<RTMSDBCont
         return await context.WorkoutTemplates.FindAsync(templateId);
     }
 
-    public async Task<List<WorkoutTemplate>> GetWorkoutTemplatesByUserIdAsync(string userId)
+    public async Task<List<WorkoutTemplate>> GetWorkoutTemplatesByUserIdAsync(Guid userId)
     {
-        throw new NotImplementedException();
+        using var context = contextFactory.CreateDbContext();
+
+        return await context.WorkoutTemplates.Where(w => w.UserId == userId).ToListAsync();
     }
 
     public async Task UpdateWorkoutTemplateAsync(WorkoutTemplate workoutTemplate)

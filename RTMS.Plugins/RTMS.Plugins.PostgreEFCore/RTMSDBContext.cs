@@ -12,6 +12,10 @@ public class RTMSDBContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>()
+            .Property(u => u.Id)
+            .HasDefaultValueSql("gen_random_uuid()"); // PostgreSQL-specific UUID generation function
+
+        modelBuilder.Entity<User>()
                 .HasMany(u => u.UserLogins)
                 .WithOne(ul => ul.User)
                 .HasForeignKey(ul => ul.UserId);
@@ -59,6 +63,7 @@ public class RTMSDBContext : DbContext
         modelBuilder.UseIdentityColumns();
     }
     public DbSet<User> Users { get; set; }
+    public DbSet<UserLogin> UserLogins { get; set; }
 
     public DbSet<WorkoutTemplate> WorkoutTemplates { get; set; }
     public DbSet<ExerciseTemplate> ExerciseTemplates { get; set; }

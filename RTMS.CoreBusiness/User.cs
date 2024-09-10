@@ -1,11 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RTMS.CoreBusiness
 {
     public class User
     {
         [Key]
-        public int Id { get; set; }  // Internal system ID
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid Id { get; set; }  // Internal system ID
 
         [Required]
         public string Name { get; set; }
