@@ -4,6 +4,7 @@ using System.Security.Claims;
 
 namespace RTMS.Web.Services
 {
+    // work needds to be done here to make this more effecient
     public class UserContextService(AuthenticationStateProvider authenticationStateProvider, IGetOrCreateUserUseCase getOrCreateUserUseCase)
     {
         public async Task<Guid> GetUserIdAsync()
@@ -32,16 +33,7 @@ namespace RTMS.Web.Services
             }
 
             // Handle case where user is not authenticated
-            throw new InvalidOperationException("User is not authenticated.");
-        }
-
-        public async Task<string?> GetUserEmailAsync()
-        {
-            var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
-            return user.Identity?.IsAuthenticated == true
-                ? user.FindFirst(c => c.Type == ClaimTypes.Email)?.Value
-                : null;
+            throw new UnauthorizedAccessException();
         }
     }
 }

@@ -1,23 +1,30 @@
-﻿@using RTMS.CoreBusiness
-@inject IAddWorkoutUseCase AddWorkoutUseCase
+﻿@inject IAddWorkoutUseCase AddWorkoutUseCase
 @inject IDeleteWorkoutTemplateUseCase DeleteWorkoutUseCase
+@inject IViewWorkoutTemplateByIdUseCase ViewWorkoutTemplateByIdUseCase
+@inject IMapper Mapper
+@inject IGetActiveWorkoutByUserIdUseCase GetActiveWorkoutByUserIdUseCase
+@inject IDialogService DialogService
+@inject IEndWorkoutUseCase EndWorkoutUseCase
+@inject ILocalStorageService LocalStorage
+@inject UserContextService UserContextService
+@inject ActiveWorkoutService ActiveWorkoutService
 @inject NavigationManager NavigationManager
 
 @if (WorkoutTemplate != null)
 {
     <tr>
-        <td>@WorkoutTemplate.Name</td> 
+        <td>@WorkoutTemplate.Name</td>
         <td style="padding: 3px;">
             <MudCardActions Class="justify-end">
                 <MudButton OnClick="StartWorkout" Color="Color.Success" Variant="Variant.Filled">
                     Start
                 </MudButton>
                 <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open workout options">
-                <MudMenuItem Icon="@Icons.Material.Filled.Edit" IconColor="Color.Info" Href="@($"workouts/edit-workout-template/{WorkoutTemplate.Id}")">Edit</MudMenuItem>
+                    <MudMenuItem Icon="@Icons.Material.Filled.Edit" IconColor="Color.Info" Href="@($"/workouts/edit-workout-template/{WorkoutTemplate.Id}")">Edit</MudMenuItem>
                     <MudMenuItem Icon="@Icons.Material.Filled.DeleteForever" IconColor="Color.Error" OnClick="DeleteWorkoutTemplate">Delete</MudMenuItem>
                 </MudMenu>
             </MudCardActions>
-        </td>  
+        </td>
     </tr>
 }
 
@@ -29,9 +36,51 @@
     {
         if (WorkoutTemplate != null)
         {
-            await AddWorkoutUseCase.ExecuteAsync(WorkoutTemplate);
-            NavigationManager.NavigateTo("/workout-in-progress");
+            // let's check if the user has a active workout before they start a new one
+            // and show a dialogue to end the active workout before starting a new one or to
+            // not create a new one and go to the active workout instead
+            var userId = await UserContextService.GetUserIdAsync();
+            var workoutInProgress = await GetActiveWorkoutByUserIdUseCase.ExecuteAsync(userId); // this just has the workout table of the active workout if it exists, otherwise null
+            if (workoutInProgress != null)
+            {
+                var dialog = DialogService.Show<EndActiveWorkoutDialogue>("End Active Workout?");
+                var result = await dialog.Result;
+
+                if (result.Canceled)
+                {
+                    return;
+                }
+                else
+                {
+                    // set the workout status to complete and the end time
+                    await EndWorkoutUseCase.ExecuteAsync(workoutInProgress);   
+
+                    // Clear local storage of the active workout
+                    await LocalStorage.RemoveItemAsync("activeWorkout");
+
+                    // set the activeworkout to null in the service
+                    ActiveWorkoutService.ActiveWorkout = null;
+                }
+            }
+
+            var detailedWorkoutTemplate = await ViewWorkoutTemplateByIdUseCase.ExecuteAsync(WorkoutTemplate.Id);
+            var workout = Mapper.Map<Workout>(detailedWorkoutTemplate);
+            workout.StartTime = DateTime.UtcNow;
+
+            // I'm not sure why the mapping profile I've set isn't working here, so I'm manually setting the template id and workout id...
+            // Though the exercise and set mapping is working fine, so it's still useful
+            // I might get rid of auto mapper later and do mapping in the domain models instead since from my recent research,
+            // auto mapper has a pretty serious performance penalty
+            if (workout.WorkoutTemplateId == 0)
+            {
+                workout.WorkoutTemplateId = WorkoutTemplate.Id;
+                workout.Id = 0;
+            }
+
+            var Id = await AddWorkoutUseCase.ExecuteAsync(workout);
+            NavigationManager.NavigateTo($"/workout-in-progress/{Id}");
         }
+
     }
 
     private async Task DeleteWorkoutTemplate()

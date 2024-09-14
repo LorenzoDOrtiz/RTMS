@@ -1,96 +1,98 @@
-﻿@using RTMS.CoreBusiness
-@inject IEditWorkoutTemplateUseCase EditWorkoutUseCase
+﻿@inject IEditWorkoutTemplateUseCase EditWorkoutUseCase
 @inject IMapper Mapper
 @inject NavigationManager NavigationManager
 
-<MudStack Spacing="4">
-    <WorkoutTemplateHeader WorkoutName="_workoutTemplateViewModel.Name"
-                           OnWorkoutNameChanged="HandleWorkoutNameChange" />
-
-    @if (_workoutTemplateViewModel is not null && 
-         _workoutTemplateViewModel.Exercises is not null 
-         && _workoutTemplateViewModel.Exercises.Any())
-    {
-        foreach (var exercise in _workoutTemplateViewModel.Exercises)
-        {
-            <WorkoutTemplateExercise Exercise="exercise"
-                                     OnExerciseDeleted="HandleExerciseDeleted"
-                                     OnExerciseNameChanged="RecalculateSaveDisabled" />
-        }
-    }
-
-    <WorkoutTemplateButtons Exercises="_workoutTemplateViewModel?.Exercises"
-                            OnSave="HandleValidation"
-                            OnExerciseAdded="HandleExerciseAdded"
-                            IsSaveDisabled="IsSaveDisabled" />
-</MudStack>
+@if (_workoutTemplateViewModel != null)
+{
+    <MudForm @ref="form" @bind-IsValid="@validForm" Validation="() => ValidateForm">
+        <MudStack Spacing="4">
+            <WorkoutTemplateHeader WorkoutName="@_workoutTemplateViewModel.Name" OnWorkoutNameChanged="HandleWorkoutNameChange" />
+            @if (_workoutTemplateViewModel.Exercises != null)
+            {
+                @foreach (var exercise in _workoutTemplateViewModel.Exercises)
+                {
+                    <WorkoutTemplateExercise Exercise="exercise" ExerciseCount="_workoutTemplateViewModel.Exercises.Count" OnExerciseDeleted="HandleExerciseDeleted" />
+                }
+                <WorkoutTemplateButtons OnSave="HandleSave" OnExerciseAdded="HandleExerciseAdded" IsSaveDisabled="@validForm" />
+            }
+        </MudStack>
+    </MudForm>
+}
 
 @code {
+    private WorkoutTemplateViewModel _workoutTemplateViewModel = new();
+    bool validForm;
+    MudForm? form;
+
     [Parameter]
     public WorkoutTemplate? WorkoutTemplate { get; set; }
-    private WorkoutTemplateViewModel? _workoutTemplateViewModel;
-    private bool IsSaveDisabled;
-
-    protected override void OnInitialized()
-    {
-        _workoutTemplateViewModel = new WorkoutTemplateViewModel();
-    }
 
     protected override void OnParametersSet()
     {
-        _workoutTemplateViewModel = Mapper.Map<WorkoutTemplateViewModel>(WorkoutTemplate);
+        // Only map the workout template if it is provided.
+        if (WorkoutTemplate != null)
+        {
+            _workoutTemplateViewModel = Mapper.Map<WorkoutTemplateViewModel>(WorkoutTemplate);
+        }
+    }
+
+    // Make sure that all data loaded into the edit form is valid
+    protected override void OnAfterRender(bool firstRender)
+    {
+        form?.Validate();
+    }
+
+    private void HandleWorkoutNameChange(string newWorkoutName)
+    {
+        _workoutTemplateViewModel.Name = newWorkoutName;
+        ValidateForm();
     }
 
     private void HandleExerciseAdded()
     {
-        if (_workoutTemplateViewModel is not null && _workoutTemplateViewModel.Exercises is not null)
-        {
-            _workoutTemplateViewModel.Exercises.Add(new ExerciseTemplateViewModel
-                {
-                    Id = _workoutTemplateViewModel.Exercises.Any() ? _workoutTemplateViewModel.Exercises.Max(w => w.Id) + 1 : 1,
-                    Sets = new List<ExerciseSetTemplateViewModel>
-                {
-                    new ExerciseSetTemplateViewModel()
-                }
-                });
-
-            RecalculateSaveDisabled();
-        }
-    }
-
-    private void RecalculateSaveDisabled()
-    {
-        IsSaveDisabled = string.IsNullOrWhiteSpace(_workoutTemplateViewModel.Name)
-                         || _workoutTemplateViewModel.Exercises.Any(e => string.IsNullOrWhiteSpace(e.Name));
-    }
-
-    private void HandleWorkoutNameChange(string newName)
-    {
-        _workoutTemplateViewModel.Name = newName;
-        RecalculateSaveDisabled();
+        _workoutTemplateViewModel?.Exercises?.Add(new ExerciseTemplateViewModel
+            {
+                Sets = new() { new() }
+            });
+        ValidateForm();
     }
 
     private void HandleExerciseDeleted(ExerciseTemplateViewModel exerciseTemplateViewModel)
     {
         if (exerciseTemplateViewModel != null)
         {
-            _workoutTemplateViewModel.Exercises.Remove(exerciseTemplateViewModel);
+            _workoutTemplateViewModel.Exercises?.Remove(exerciseTemplateViewModel);
+            ValidateForm();
         }
-        RecalculateSaveDisabled();
     }
 
-    private async Task HandleValidation()
+    private bool ValidateWorkoutName()
     {
-        // Perform validation before saving.
-        if (IsSaveDisabled)
+        if (_workoutTemplateViewModel != null)
         {
-            return; // Prevent save if validation fails.
+            return !string.IsNullOrWhiteSpace(_workoutTemplateViewModel.Name);
         }
+        return true;
+    }
 
+    private bool ValidateExerciseNames()
+    {
+        if (_workoutTemplateViewModel.Exercises != null)
+        {
+            return _workoutTemplateViewModel.Exercises.All(exercise => !string.IsNullOrWhiteSpace(exercise.Name));
+        }
+        return true;
+    }
+
+    private void ValidateForm()
+    {
+        validForm = ValidateWorkoutName() && ValidateExerciseNames();
+    }
+
+    private async Task HandleSave()
+    {
         var workoutTemplate = Mapper.Map<WorkoutTemplate>(_workoutTemplateViewModel);
-
         await EditWorkoutUseCase.ExecuteAsync(workoutTemplate);
-
         NavigationManager.NavigateTo("/workouts");
     }
 }

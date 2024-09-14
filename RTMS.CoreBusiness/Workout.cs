@@ -19,10 +19,10 @@ public class Workout
 
     public DateTime? EndTime { get; set; }  // Timestamp when the workout ended
 
-    [ForeignKey("TemplateId")]
-    public int TemplateId { get; set; }  // Foreign key to WorkoutTemplate
+    [ForeignKey("WorkoutTemplateId")]
+    public int WorkoutTemplateId { get; set; }  // Foreign key to WorkoutTemplate
 
-    public virtual WorkoutTemplate Template { get; set; }  // Navigation property
+    public virtual WorkoutTemplate WorkoutTemplate { get; set; }  // Navigation property
 
     public virtual ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();  // Collection of exercises in the workout
 

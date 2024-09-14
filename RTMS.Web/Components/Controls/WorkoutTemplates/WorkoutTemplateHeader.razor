@@ -1,13 +1,15 @@
 ﻿<MudCard>
     <MudCardContent>
-        <MudTextField Value="WorkoutName"
-                      ValueChanged="OnWorkoutNameChanged"
+        <MudTextField T="string"
+                      Value="@WorkoutName"
+                      ValueChanged="@(value => OnWorkoutNameChanged.InvokeAsync(value))"
                       Label="Workout Name"
                       Variant="Variant.Filled"
-                      Margin="Margin.Dense" 
-                      Required
+                      Margin="Margin.Dense"
+                      Required="true"
+                      RequiredError="Workout Name Required."
                       Clearable="true"
-                      AutoFocus />
+       />
     </MudCardContent>
 </MudCard>
 

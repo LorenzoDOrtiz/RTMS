@@ -1,29 +1,36 @@
-﻿<div style="display: flex; align-items: center; padding: 5px; margin-left: 5px;">
+﻿@inject WorkoutTimerService WorkoutTimerService
+@implements IDisposable
+
+<div style="display: flex; align-items: center; padding: 5px; margin-left: 5px;">
     <MudIcon Icon="@Icons.Material.Filled.AccessTimeFilled" Color="Color.Dark" />
-    <MudText Typo="Typo.subtitle2" Class="ml-2">@WorkoutDuration.ToString(@"hh\:mm\:ss")</MudText>
+    <MudText Typo="Typo.subtitle2" Class="ml-2">@WorkoutTimerService.ElapsedTime.ToString(@"hh\:mm\:ss")</MudText>
 </div>
 
 @code {
     [Parameter]
     public DateTime StartTime { get; set; }
 
-    [Parameter]
-    public CancellationTokenSource CancellationTokenSourceWorkout { get; set; }
-
-    private TimeSpan WorkoutDuration { get; set; }
-
-    protected override async Task OnInitializedAsync()
+    protected override void OnParametersSet()
     {
-        await WorkoutTimerLoop();
+        // Start the timer whenever StartTime is updated
+        WorkoutTimerService.StartTimer(StartTime);
     }
 
-    private async Task WorkoutTimerLoop()
+    protected override void OnInitialized()
     {
-        while (!CancellationTokenSourceWorkout.Token.IsCancellationRequested)
-        {
-            WorkoutDuration = DateTime.Now - StartTime;
-            StateHasChanged();
-            await Task.Delay(1000, CancellationTokenSourceWorkout.Token);
-        }
+        // Subscribe to the WorkoutTimerService's OnTimerChanged event
+        WorkoutTimerService.OnTimerChanged += TimerChangedHandler;
+    }
+
+    private void TimerChangedHandler()
+    {
+        // Trigger a UI update when the timer changes
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe from the event when the component is disposed
+        WorkoutTimerService.OnTimerChanged -= TimerChangedHandler;
     }
 }

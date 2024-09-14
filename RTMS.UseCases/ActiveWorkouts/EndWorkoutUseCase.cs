@@ -8,7 +8,7 @@ public class EndWorkoutUseCase(IWorkoutHistoryRepository workoutRepository) : IE
 {
     public async Task ExecuteAsync(Workout workout)
     {
-        workout.EndTime = DateTime.Now;
+        workout.EndTime = DateTime.UtcNow;
         workout.IsCompleted = true;
 
         await workoutRepository.EndWorkoutAsync(workout);

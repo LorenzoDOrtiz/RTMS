@@ -3,5 +3,7 @@
 namespace RTMS.UseCases.Workouts.Interfaces;
 public interface IAddWorkoutUseCase
 {
-    Task<Workout> ExecuteAsync(WorkoutTemplate workoutTemplate);
+    Task<int> ExecuteAsync(Workout workout);
+
+    Task SaveWorkoutProgressAsync(Workout workout);
 }

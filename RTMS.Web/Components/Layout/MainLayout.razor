@@ -1,5 +1,10 @@
 ﻿@inherits LayoutComponentBase
-@inject NavigationManager  NavigationManager
+@inject NavigationManager NavigationManager
+@inject RestTimerService RestTimerService
+@inject UserContextService UserContextService
+@inject ActiveWorkoutService ActiveWorkoutService
+@inject IGetActiveWorkoutByUserIdUseCase GetActiveWorkoutByUserIdUseCase
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <MudThemeProvider @bind-IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -10,14 +15,22 @@
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         <MudText Typo="Typo.h5" Class="ml-2">RTMS</MudText>
 
-            <div style="margin-left: auto;">
+        @if (_isUserAuthenticated)
+        {
+            @if (ActiveWorkoutService.ActiveWorkout != null && !IsWorkoutInProgressPage())
+            {
+                <div style="margin-left: auto; display: flex; align-items: center; justify-content: space-around;">
                     <MudButton StartIcon="@Icons.Material.Filled.MonitorHeart"
                                Color="Color.Success"
-                               Variant="Variant.Filled">
-                               Workout A
+                               Variant="Variant.Filled"
+                               Href="@($"/workout-in-progress/{ActiveWorkoutService.ActiveWorkout.Id}")">
+                        @ActiveWorkoutService.ActiveWorkout.Name
                     </MudButton>
-            </div>
-        
+                    <MainLayoutRestTimer />
+                </div>
+            }
+        }
+
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <MyNavMenu />
@@ -37,7 +50,39 @@
 
 @code {
     private bool _isDarkMode = true;
-    bool _drawerOpen = true;
+    private bool _drawerOpen = true;
+    private bool _isUserAuthenticated = false; // Field to store authentication status
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadActiveWorkout();
+        _isUserAuthenticated = await IsUserAuthenticated(); // Update the auth status
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private async Task LoadActiveWorkout()
+    {
+        _isUserAuthenticated = await IsUserAuthenticated();
+
+        if (_isUserAuthenticated)
+        {
+            if (ActiveWorkoutService.ActiveWorkout == null)
+            {
+                var userId = await UserContextService.GetUserIdAsync(); // Call only if authenticated
+                ActiveWorkoutService.ActiveWorkout = await GetActiveWorkoutByUserIdUseCase.ExecuteAsync(userId);
+                StateHasChanged(); // Trigger UI update
+            }
+        }
+        else
+        {
+            Console.WriteLine("User is not authenticated, skipping workout load.");
+        }
+    }
+
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        await LoadActiveWorkout(); // Reload active workout on location change
+    }
 
     void DrawerToggle()
     {
@@ -46,6 +91,21 @@
 
     private bool IsWorkoutInProgressPage()
     {
-        return NavigationManager.Uri.EndsWith("/workout-in-progress", StringComparison.OrdinalIgnoreCase);
+        var uri = new Uri(NavigationManager.Uri);
+        return uri.AbsolutePath.StartsWith("/workout-in-progress", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task<bool> IsUserAuthenticated()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        return user.Identity.IsAuthenticated;
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }
+

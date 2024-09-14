@@ -2,24 +2,28 @@
     <thead>
         <tr>
             <th>
-                <MudTextField @bind-Value="Exercise.Name"
+                <MudTextField T="string"
+                              @bind-Value="Exercise.Name"
                               Label="Exercise Name"
                               Variant="Variant.Filled"
                               Margin="Margin.Dense"
-                              Required
-                              Immediate="true" 
-                              OnBlur="ExerciseNameChanged" />
+                              Required="true"
+                              RequiredError="Exercise Name Required."
+                              Clearable="true" 
+                               />
+
             </th>
             <th>Reps</th>
             <th>Weight</th>
             <th>
-                <ExerciseMenu OnSetAdded="HandleSetAdded"
+                <ExerciseMenu ExerciseCount="ExerciseCount"
+                              OnSetAdded="HandleSetAdded"
                               OnRestTimerOpened="HandleRestTimerOpened"
                               OnExerciseDeleted="HandleExerciseDeleted" />
 
                 <RestTimerMenu IsRestTimerOpen="@Exercise.IsRestTimerOpen"
                                RestTimerValue="@Exercise.RestTimerValue"
-                               RestTimerUnit="@Exercise.RestTimerUnit"      
+                               RestTimerUnit="@Exercise.RestTimerUnit"
                                OnRestTimerCancel="HandleRestTimerCancel"
                                OnRestTimerSet="@((args) => HandleRestTimerSet(args.Item1, args.Item2))" />
             </th>
@@ -32,9 +36,7 @@
             {
                 var set = Exercise.Sets[i];
 
-                <WorkoutTemplateSet Set="set" 
-                                    SetIndex="i"
-                                    OnSetDelete="HandleSetDelete" />
+                <WorkoutTemplateSet Set="set" SetIndex="i" SetsCount="Exercise.Sets.Count" OnSetDelete="HandleSetDelete" />
             }
         }
     </tbody>
@@ -45,22 +47,17 @@
     public ExerciseTemplateViewModel Exercise { get; set; }
 
     [Parameter]
+    public int ExerciseCount { get; set; }
+
+    [Parameter]
     public EventCallback<ExerciseTemplateViewModel> OnExerciseDeleted { get; set; }
 
     [Parameter]
     public EventCallback OnExerciseNameChanged { get; set; }
 
-    private async Task ExerciseNameChanged()
-    {
-        await OnExerciseNameChanged.InvokeAsync();
-    }
-
     private void HandleSetAdded()
     {
-        Exercise.Sets?.Add(new ExerciseSetTemplateViewModel
-            { 
-                Id = Exercise.Sets.Any() ? Exercise.Sets.Max(s => s.Id) + 1 : 1,
-            });
+        Exercise.Sets?.Add(new());
     }
 
     private void HandleRestTimerOpened()
@@ -80,21 +77,21 @@
 
     private void HandleRestTimerSet(int restTimerValue, string restTimerUnit)
     {
+        Exercise.IsRestTimerOpen = false;
         Exercise.RestTimerUnit = restTimerUnit;
         Exercise.RestTimerValue = restTimerValue;
-        Exercise.IsRestTimerOpen = false;
     }
 
     private void HandleSetDelete(int setId)
     {
-        if (Exercise.Sets.Count > 0)
-        {
-            var setToDelete = Exercise.Sets.FirstOrDefault(s => s.Id == setId);
 
-            if (setToDelete != null)
-            {
-                Exercise.Sets.Remove(setToDelete);
-            }
+        var setToDelete = Exercise.Sets.FirstOrDefault(s => s.Id == setId);
+
+        if (setToDelete != null)
+        {
+            Exercise.Sets.Remove(setToDelete);
+
         }
+
     }
 }

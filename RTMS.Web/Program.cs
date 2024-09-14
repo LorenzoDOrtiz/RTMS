@@ -1,4 +1,5 @@
 using Auth0.AspNetCore.Authentication;
+using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -36,7 +37,12 @@ builder.Services.AddDbContextFactory<RTMSDBContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("RTMSDB"));
 });
 
+builder.Services.AddBlazoredLocalStorage();
+
 builder.Services.AddScoped<UserContextService>();
+builder.Services.AddSingleton<WorkoutTimerService>();
+builder.Services.AddSingleton<RestTimerService>();
+builder.Services.AddSingleton<ActiveWorkoutService>();
 
 builder.Services.AddSingleton<IWorkoutTemplateRepository, WorkoutTemplateRepositoryPostgreEFCore>();
 builder.Services.AddSingleton<IWorkoutHistoryRepository, WorkoutHistoryRepositoryPostgreEFCore>();
@@ -45,11 +51,12 @@ builder.Services.AddSingleton<IUserRepositoryPostgreEFCore, UserRepositoryPostgr
 builder.Services.AddTransient<IAddWorkoutTemplateUseCase, AddWorkoutTemplateUseCase>();
 builder.Services.AddTransient<IEditWorkoutTemplateUseCase, EditWorkoutTemplateUseCase>();
 builder.Services.AddTransient<IViewWorkoutTemplatesByUserIdUseCase, ViewWorkoutTemplatesByUserIdUseCase>();
-builder.Services.AddTransient<IViewWorkoutTemplateUseCase, ViewWorkoutTemplateByIdUseCase>();
+builder.Services.AddTransient<IViewWorkoutTemplateByIdUseCase, ViewWorkoutTemplateByIdUseCase>();
 builder.Services.AddTransient<IDeleteWorkoutTemplateUseCase, DeleteWorkoutTemplateUseCase>();
 
 builder.Services.AddTransient<IAddWorkoutUseCase, AddWorkoutUseCase>();
-builder.Services.AddTransient<IViewActiveWorkoutByIdUseCase, ViewActiveWorkoutByIdUseCase>();
+builder.Services.AddTransient<IGetActiveWorkoutByUserIdUseCase, GetActiveWorkoutByUserIdUseCase>();
+builder.Services.AddTransient<IViewActiveWorkoutByWorkoutAndUserIdUseCase, ViewActiveWorkoutByWorkoutAndUserIdUseCase>();
 builder.Services.AddTransient<IEndWorkoutUseCase, EndWorkoutUseCase>();
 builder.Services.AddTransient<IViewWorkoutHistoryByUserIdUseCase, ViewWorkoutHistoryByUserIdUseCase>();
 
@@ -58,8 +65,13 @@ builder.Services.AddTransient<IGetOrCreateUserUseCase, GetOrCreateUserUseCase>()
 // Configure AutoMapper
 builder.Services.AddAutoMapper(cfg =>
 {
+    cfg.AddProfile<WorkoutTemplateToWorkoutMappingProfile>();
     cfg.AddProfile<WorkoutTemplateToWorkoutTemplateViewModelMappingProfile>();
     cfg.AddProfile<WorkoutTemplateViewModelToWorkoutTemplateMappingProfile>();
+
+    cfg.AddProfile<WorkoutToWorkoutTemplateMappingProfile>();
+    cfg.AddProfile<WorkoutToWorkoutViewModelMappingProfile>();
+    cfg.AddProfile<WorkoutViewModelToWorkoutMappingProfile>();
 });
 
 var app = builder.Build();

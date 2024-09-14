@@ -9,6 +9,7 @@
 <WorkoutTemplates UserID="@userId" />
 
 <br />
+<br />
 
 <WorkoutHistory UserID="@userId" />
 
@@ -17,6 +18,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        userId = await UserContextService.GetUserIdAsync();
+         userId = await UserContextService.GetUserIdAsync();
     }
 }

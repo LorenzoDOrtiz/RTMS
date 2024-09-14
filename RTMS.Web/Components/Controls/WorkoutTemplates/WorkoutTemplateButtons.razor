@@ -1,34 +1,30 @@
 ﻿<MudGrid>
     <MudItem>
-        @if (Exercises.Any())
-        {
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Success"
-                       OnClick="Save"
-                       Class="mr-4"
-                       Disabled="IsSaveDisabled">
-                Save Workout
-            </MudButton>
-        }
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Success"
+                   OnClick="Save"
+                   Class="mr-4"
+                   Disabled="!IsSaveDisabled">
+            Save Workout
+        </MudButton>
+
         <MudButton Href="/workouts"
                    Variant="Variant.Text"
                    Color="Color.Error">
-                   Cancel
+            Cancel
         </MudButton>
     </MudItem>
     <MudItem Class="ml-auto">
         <MudButton Variant="Variant.Filled"
                    Color="Color.Info"
                    OnClick="AddExercise">
-                   Add Exercise
+            Add Exercise
         </MudButton>
     </MudItem>
 </MudGrid>
 
 @code {
-    [Parameter]
-    public List<ExerciseTemplateViewModel> Exercises { get; set; }
-
     [Parameter]
     public bool IsSaveDisabled { get; set; }
 

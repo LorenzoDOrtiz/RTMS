@@ -1,7 +1,8 @@
 ﻿<tr>
-    <td>@($"Set {SetIndex + 1}")</td>
+    <td>@($"Set {SetIndex + 1} Id: {Set.Id}")</td>
     <td>
-        <MudNumericField @bind-Value="Set.Reps"
+        <MudNumericField 
+                         @bind-Value="Set.Reps"
                          Variant="Variant.Outlined"
                          Margin="Margin.Dense"
                          Min="0" />
@@ -15,18 +16,24 @@
                          AdornmentText="lbs"
                          />
     </td>
-    <td>
-        <MudTooltip Text="Delete Set">
-            <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                           Color="Color.Error"
-                           OnClick="DeleteSet" />
-        </MudTooltip>
-    </td>
+    @if (SetsCount > 1)
+    {
+        <td>
+            <MudTooltip Text="Delete Set">
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error"
+                               OnClick="DeleteSet" />
+            </MudTooltip>
+        </td>
+    }
 </tr>
 
 @code {
     [Parameter]
     public ExerciseSetTemplateViewModel Set { get;  set;}
+
+    [Parameter]
+    public int SetsCount { get; set; }
 
     [Parameter]
     public int SetIndex { get; set; }

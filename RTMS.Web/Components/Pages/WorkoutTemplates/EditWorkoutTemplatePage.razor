@@ -1,4 +1,6 @@
-﻿@inject IViewWorkoutTemplateUseCase ViewWorkoutUseCase
+﻿@page "/workouts/edit-workout-template/{Id:int}"
+@attribute [Authorize]
+@inject IViewWorkoutTemplateByIdUseCase ViewWorkoutTemplateUseCase
 @inject NavigationManager NavigationManager
 
 <PageTitle>Edit Workout</PageTitle>
@@ -13,6 +15,6 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        workoutTemplate = await ViewWorkoutUseCase.ExecuteAsync(Id);
+        workoutTemplate = await ViewWorkoutTemplateUseCase.ExecuteAsync(Id);
     }
 }

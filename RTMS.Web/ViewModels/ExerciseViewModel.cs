@@ -5,7 +5,7 @@ public class ExerciseViewModel
     public int Id { get; set; }
 
     public int WorkoutId { get; set; } // Link to the Workout
-
+    public int ExerciseTemplateId { get; set; }  // Foreign key to ExerciseTemplate
     public string Name { get; set; }
 
     public int RestTimerValue { get; set; } = 0;
@@ -25,7 +25,7 @@ public class ExerciseViewModel
         }
     }
 
-    public List<ExerciseSetViewModel>? Sets { get; set; }
+    public List<ExerciseSetViewModel>? Sets { get; set; } = new();
 
     public string Note { get; set; } = string.Empty;
 

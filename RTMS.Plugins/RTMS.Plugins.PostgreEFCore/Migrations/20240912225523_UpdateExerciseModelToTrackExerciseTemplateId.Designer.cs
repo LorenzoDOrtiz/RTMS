@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RTMS.Plugins.PostgreEFCore;
@@ -11,9 +12,11 @@ using RTMS.Plugins.PostgreEFCore;
 namespace RTMS.Plugins.PostgreEFCore.Migrations
 {
     [DbContext(typeof(RTMSDBContext))]
-    partial class RTMSDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240912225523_UpdateExerciseModelToTrackExerciseTemplateId")]
+    partial class UpdateExerciseModelToTrackExerciseTemplateId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -212,17 +215,17 @@ namespace RTMS.Plugins.PostgreEFCore.Migrations
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("TemplateId")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
-                    b.Property<int?>("WorkoutTemplateId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("TemplateId");
 
-                    b.HasIndex("WorkoutTemplateId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Workouts");
                 });
@@ -309,20 +312,21 @@ namespace RTMS.Plugins.PostgreEFCore.Migrations
 
             modelBuilder.Entity("RTMS.CoreBusiness.Workout", b =>
                 {
+                    b.HasOne("RTMS.CoreBusiness.WorkoutTemplate", "Template")
+                        .WithMany()
+                        .HasForeignKey("TemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("RTMS.CoreBusiness.User", "User")
                         .WithMany("Workouts")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RTMS.CoreBusiness.WorkoutTemplate", "WorkoutTemplate")
-                        .WithMany()
-                        .HasForeignKey("WorkoutTemplateId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                    b.Navigation("Template");
 
                     b.Navigation("User");
-
-                    b.Navigation("WorkoutTemplate");
                 });
 
             modelBuilder.Entity("RTMS.CoreBusiness.WorkoutTemplate", b =>

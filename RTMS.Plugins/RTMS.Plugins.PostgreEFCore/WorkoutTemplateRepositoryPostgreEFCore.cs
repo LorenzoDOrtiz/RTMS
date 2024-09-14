@@ -27,7 +27,7 @@ public class WorkoutTemplateRepositoryPostgreEFCore(IDbContextFactory<RTMSDBCont
     public async Task<WorkoutTemplate> GetWorkoutTemplateByIdAsync(int templateId)
     {
         using var context = contextFactory.CreateDbContext();
-        return await context.WorkoutTemplates.FindAsync(templateId);
+        return await context.WorkoutTemplates.Include(wt => wt.Exercises).ThenInclude(te => te.Sets).FirstOrDefaultAsync(wt => wt.Id == templateId);
     }
 
     public async Task<List<WorkoutTemplate>> GetWorkoutTemplatesByUserIdAsync(Guid userId)
@@ -37,10 +37,75 @@ public class WorkoutTemplateRepositoryPostgreEFCore(IDbContextFactory<RTMSDBCont
         return await context.WorkoutTemplates.Where(w => w.UserId == userId).ToListAsync();
     }
 
+    // EF core doesn't track changes in exercise or sets since we go to and from view models so we have to do this monstrosity
     public async Task UpdateWorkoutTemplateAsync(WorkoutTemplate workoutTemplate)
     {
         using var context = contextFactory.CreateDbContext();
-        context.WorkoutTemplates.Update(workoutTemplate);
-        await context.SaveChangesAsync();
+
+        // Load the existing workout template with related entities
+        var existingTemplate = await context.WorkoutTemplates
+            .Include(wt => wt.Exercises)
+                .ThenInclude(e => e.Sets)
+            .SingleOrDefaultAsync(wt => wt.Id == workoutTemplate.Id);
+
+        if (existingTemplate != null)
+        {
+            // Update properties of existing template
+            context.Entry(existingTemplate).CurrentValues.SetValues(workoutTemplate);
+
+            // Compare existing exercises with new exercises
+            var existingExercises = existingTemplate.Exercises.ToList();
+            var newExercises = workoutTemplate.Exercises.ToList();
+
+            // Find exercises to remove
+            var exercisesToRemove = existingExercises
+                .Where(e => !newExercises.Any(ne => ne.Id == e.Id))
+                .ToList();
+            context.ExerciseTemplates.RemoveRange(exercisesToRemove);
+
+            // Find exercises to update or add
+            foreach (var newExercise in newExercises)
+            {
+                var existingExercise = existingExercises.SingleOrDefault(e => e.Id == newExercise.Id);
+                if (existingExercise != null)
+                {
+                    // Update existing exercise
+                    context.Entry(existingExercise).CurrentValues.SetValues(newExercise);
+
+                    // Compare existing sets with new sets
+                    var existingSets = existingExercise.Sets.ToList();
+                    var newSets = newExercise.Sets.ToList();
+
+                    // Find sets to remove
+                    var setsToRemove = existingSets
+                        .Where(s => !newSets.Any(ns => ns.Id == s.Id))
+                        .ToList();
+                    context.ExerciseSetTemplates.RemoveRange(setsToRemove);
+
+                    // Find sets to add or update
+                    foreach (var newSet in newSets)
+                    {
+                        var existingSet = existingSets.SingleOrDefault(s => s.Id == newSet.Id);
+                        if (existingSet != null)
+                        {
+                            // Update existing set
+                            context.Entry(existingSet).CurrentValues.SetValues(newSet);
+                        }
+                        else
+                        {
+                            // Add new set
+                            existingExercise.Sets.Add(newSet);
+                        }
+                    }
+                }
+                else
+                {
+                    // Add new exercise
+                    existingTemplate.Exercises.Add(newExercise);
+                }
+            }
+
+            await context.SaveChangesAsync();
+        }
     }
 }

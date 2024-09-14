@@ -1,12 +1,13 @@
-﻿namespace RTMS.Web.ViewModels;
-
-public class WorkoutTemplateViewModel
+﻿namespace RTMS.Web.ViewModels
 {
-    public Guid UserId { get; set; }
+    public class WorkoutTemplateViewModel
+    {
+        public Guid UserId { get; set; }
 
-    public int Id { get; set; }
+        public int Id { get; set; }
 
-    public string Name { get; set; } = string.Empty;
+        public string Name { get; set; }
 
-    public List<ExerciseTemplateViewModel>? Exercises { get; set; }
+        public List<ExerciseTemplateViewModel>? Exercises { get; set; } = new List<ExerciseTemplateViewModel>();
+    }
 }

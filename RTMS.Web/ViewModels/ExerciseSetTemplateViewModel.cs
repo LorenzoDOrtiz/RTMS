@@ -1,12 +1,13 @@
-﻿namespace RTMS.Web.ViewModels;
-
-public class ExerciseSetTemplateViewModel
+﻿namespace RTMS.Web.ViewModels
 {
-    public int ExerciseTemplateId { get; set; }
+    public class ExerciseSetTemplateViewModel
+    {
+        public int ExerciseTemplateId { get; set; }
 
-    public int Id { get; set; }
+        public int Id { get; set; }
 
-    public int Reps { get; set; } = 10;
+        public int Reps { get; set; } = 10;
 
-    public double Weight { get; set; } = 0;
+        public double Weight { get; set; } = 0;
+    }
 }

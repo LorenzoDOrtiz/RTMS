@@ -8,17 +8,14 @@
                               Margin="Margin.Dense"
                               Required
                               Clearable="true"
-                              Immediate="true"
-                              OnBlur="WorkoutNameChanged" />
+                              Immediate="true" />
             </MudItem>
 
             <MudItem xs="6" Class="d-flex justify-end align-center">
                 <div style="margin-left: auto; display: flex;">
-                    <WorkoutTimer StartTime="ViewModel.StartTime"
-                                  CancellationTokenSourceWorkout="@CancellationTokenSourceExercise" />
+                    <WorkoutTimer StartTime="ViewModel.StartTime" />
 
-                    <RestTimer RestTimerSecondsBetweenSets="RestTimerSecondsBetweenSets"
-                                CancellationTokenSourceRest="@CancellationTokenSourceRest" />
+                    <RestTimer />
                     
                     <MudMenu Icon="@Icons.Material.Filled.MoreVert"
                              AriaLabel="Open workout options"
@@ -41,18 +38,6 @@
     public WorkoutViewModel? ViewModel { get; set; }
 
     [Parameter]
-    public CancellationTokenSource? CancellationTokenSourceExercise { get; set; }
-
-    [Parameter]
-    public CancellationTokenSource? CancellationTokenSourceRest { get; set; }
-
-    [Parameter]
-    public int RestTimerSecondsBetweenSets { get; set; }
-
-    [Parameter]
-    public EventCallback<string> OnWorkoutNameChanged { get; set; }
-
-    [Parameter]
     public EventCallback OnExerciseAdded { get; set; }
 
     private async Task ExerciseAdded()
@@ -60,14 +45,6 @@
         if (OnExerciseAdded.HasDelegate)
         {
             await OnExerciseAdded.InvokeAsync();
-        }
-    }
-
-    private async Task WorkoutNameChanged()
-    {
-        if (OnWorkoutNameChanged.HasDelegate)
-        {
-            await OnWorkoutNameChanged.InvokeAsync(ViewModel.Name);
         }
     }
 }

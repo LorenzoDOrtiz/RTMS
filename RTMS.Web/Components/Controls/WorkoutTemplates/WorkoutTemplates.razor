@@ -28,14 +28,13 @@
 </MudButton>
 
 
-
 @code {
     [Parameter]
     public Guid UserID { get; set; }
 
     private List<WorkoutTemplate>? userWorkoutTemplates;
-    
-    protected override async Task OnInitializedAsync()
+
+    protected override async Task OnParametersSetAsync()
     {
         userWorkoutTemplates = (await ViewWorkoutsByUserIdUseCase.ExecuteAsync(UserID)).ToList();
     }

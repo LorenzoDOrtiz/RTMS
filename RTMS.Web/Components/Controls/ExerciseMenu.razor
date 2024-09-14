@@ -16,14 +16,20 @@
                  IconColor="Color.Tertiary">
         Note
     </MudMenuItem>
-    <MudMenuItem OnClick="DeleteExercise"
-                 Icon="@Icons.Material.Filled.Delete"
-                 IconColor="Color.Error">
-        Delete Exercise
-    </MudMenuItem>
+    @if (ExerciseCount > 1)
+    {
+        <MudMenuItem OnClick="DeleteExercise"
+                     Icon="@Icons.Material.Filled.Delete"
+                     IconColor="Color.Error">
+            Delete Exercise
+        </MudMenuItem>
+    }
 </MudMenu>
 
 @code {
+    [Parameter]
+    public int ExerciseCount { get; set; }
+
     [Parameter]
     public EventCallback OnSetAdded { get; set; }
 

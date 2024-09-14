@@ -15,6 +15,11 @@ public class Exercise
 
     public virtual Workout Workout { get; set; }  // Navigation property
 
+    [ForeignKey("ExerciseTemplateId")]
+    public int? ExerciseTemplateId { get; set; }  // Foreign key to ExerciseTemplate
+
+    public virtual ExerciseTemplate ExerciseTemplate { get; set; }  // Navigation property to the template
+
     public int RestTimerValue { get; set; } = 0;
 
     public string RestTimerUnit { get; set; } = "minutes";

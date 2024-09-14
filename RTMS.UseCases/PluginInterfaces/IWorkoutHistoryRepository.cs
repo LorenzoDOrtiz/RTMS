@@ -3,9 +3,10 @@
 namespace RTMS.UseCases.PluginInterfaces;
 public interface IWorkoutHistoryRepository
 {
-    Task AddWorkoutAsync(Workout workout);
+    Task<int> AddWorkoutAsync(Workout workout);
     Task UpdateWorkoutAsync(Workout workout);
     Task EndWorkoutAsync(Workout workout);
-    Task<Workout> ViewActiveWorkoutByUserIdAsync(Guid userId);
+    Task<Workout> ViewActiveWorkoutByWorkoutAndUserIdAsync(int workoutId, Guid userId);
     Task<List<Workout>> ViewWorkoutHistoryByUserIdAsync(Guid userId);
+    Task<Workout> GetActiveWorkoutIdByUserId(Guid userId);
 }

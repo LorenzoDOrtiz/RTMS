@@ -49,6 +49,12 @@ public class RTMSDBContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Workout>()
+                .HasOne(w => w.WorkoutTemplate)
+                .WithMany()
+                .HasForeignKey(w => w.WorkoutTemplateId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Workout>()
                 .HasMany(w => w.Exercises)
                 .WithOne(e => e.Workout)
                 .HasForeignKey(e => e.WorkoutId)
@@ -59,6 +65,12 @@ public class RTMSDBContext : DbContext
                 .WithOne(s => s.Exercise)
                 .HasForeignKey(s => s.ExerciseId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Exercise>()
+                .HasOne(e => e.ExerciseTemplate)
+                .WithMany()
+                .HasForeignKey(e => e.ExerciseTemplateId)
+                .OnDelete(DeleteBehavior.SetNull);
 
         modelBuilder.UseIdentityColumns();
     }
