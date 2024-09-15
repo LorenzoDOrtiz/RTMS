@@ -13,18 +13,6 @@ public class WorkoutHistoryRepositoryPostgreEFCore(IDbContextFactory<RTMSDBConte
         var test = workout.Id;
         return test;
     }
-    public async Task EndWorkoutAsync(Workout workout)
-    {
-        using var context = contextFactory.CreateDbContext();
-        var workoutToEnd = await context.Workouts.FindAsync(workout.Id);
-
-        if (workoutToEnd != null)
-        {
-            workoutToEnd.IsCompleted = true;
-            workoutToEnd.EndTime = DateTime.UtcNow;
-            await context.SaveChangesAsync();
-        }
-    }
 
     public async Task UpdateWorkoutAsync(Workout workout)
     {

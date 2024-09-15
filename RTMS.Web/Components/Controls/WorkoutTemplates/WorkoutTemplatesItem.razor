@@ -56,7 +56,7 @@
                     await EndWorkoutUseCase.ExecuteAsync(workoutInProgress);   
 
                     // Clear local storage of the active workout
-                    await LocalStorage.RemoveItemAsync("activeWorkout");
+                    await LocalStorage.RemoveItemAsync("rtms_active_workout");
 
                     // set the activeworkout to null in the service
                     ActiveWorkoutService.ActiveWorkout = null;

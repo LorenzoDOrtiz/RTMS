@@ -2,18 +2,20 @@
     <MudCardContent>
         <MudGrid>
             <MudItem xs="6">
-                <MudTextField Value="ViewModel?.Name"
+                <MudTextField T="string"
+                              Value="@WorkoutViewModel.Name"
+                              ValueChanged="@(value => OnWorkoutNameChanged.InvokeAsync(value))"
                               Label="Workout Name"
                               Variant="Variant.Filled"
                               Margin="Margin.Dense"
-                              Required
-                              Clearable="true"
-                              Immediate="true" />
+                              Required="true"
+                              RequiredError="Workout Name Required."
+                              Clearable="true" />
             </MudItem>
 
             <MudItem xs="6" Class="d-flex justify-end align-center">
                 <div style="margin-left: auto; display: flex;">
-                    <WorkoutTimer StartTime="ViewModel.StartTime" />
+                    <WorkoutTimer StartTime="WorkoutViewModel.StartTime" />
 
                     <RestTimer />
                     
@@ -35,7 +37,10 @@
 
 @code {
     [Parameter]
-    public WorkoutViewModel? ViewModel { get; set; }
+    public WorkoutViewModel? WorkoutViewModel { get; set; }
+     
+    [Parameter]
+    public EventCallback<string> OnWorkoutNameChanged { get; set; }
 
     [Parameter]
     public EventCallback OnExerciseAdded { get; set; }

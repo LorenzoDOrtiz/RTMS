@@ -12,6 +12,11 @@ public class ExerciseSet
 
     public virtual Exercise Exercise { get; set; }  // Navigation property
 
+    [ForeignKey("SetTemplateId")]
+    public int SetTemplateId { get; set; }  // Foreign key to ExerciseTemplate
+
+    public virtual ExerciseSetTemplate ExerciseSetTemplate { get; set; }  // Navigation property to the template
+
     [Required]
     public int Reps { get; set; }  // Number of repetitions
 

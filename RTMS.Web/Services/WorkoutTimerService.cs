@@ -46,7 +46,7 @@ namespace RTMS.Web.Services
             OnTimerChanged?.Invoke();
         }
 
-        public void Dispose()
+        void IDisposable.Dispose()
         {
             // Ensure the timer is properly cleaned up
             StopTimer();

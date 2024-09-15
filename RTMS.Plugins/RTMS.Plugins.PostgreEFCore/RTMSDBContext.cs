@@ -72,6 +72,12 @@ public class RTMSDBContext : DbContext
                 .HasForeignKey(e => e.ExerciseTemplateId)
                 .OnDelete(DeleteBehavior.SetNull);
 
+        modelBuilder.Entity<ExerciseSet>()
+                .HasOne(st => st.ExerciseSetTemplate)
+                .WithMany()
+                .HasForeignKey(e => e.SetTemplateId)
+                .OnDelete(DeleteBehavior.SetNull);
+
         modelBuilder.UseIdentityColumns();
     }
     public DbSet<User> Users { get; set; }

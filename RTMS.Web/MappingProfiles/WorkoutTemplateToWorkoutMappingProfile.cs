@@ -28,7 +28,8 @@ namespace RTMS.Web.MappingProfiles
 
             // Map ExerciseSetTemplate to ExerciseSet
             CreateMap<ExerciseSetTemplate, ExerciseSet>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore());  // Ignore the Id of the ExerciseSet
+                .ForMember(dest => dest.Id, opt => opt.Ignore())  // Ignore the Id of the ExerciseSet
+                .ForMember(dest => dest.SetTemplateId, opt => opt.MapFrom(src => src.Id));
         }
     }
 }

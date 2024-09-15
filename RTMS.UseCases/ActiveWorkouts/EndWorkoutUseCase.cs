@@ -11,6 +11,6 @@ public class EndWorkoutUseCase(IWorkoutHistoryRepository workoutRepository) : IE
         workout.EndTime = DateTime.UtcNow;
         workout.IsCompleted = true;
 
-        await workoutRepository.EndWorkoutAsync(workout);
+        await workoutRepository.UpdateWorkoutAsync(workout);
     }
 }

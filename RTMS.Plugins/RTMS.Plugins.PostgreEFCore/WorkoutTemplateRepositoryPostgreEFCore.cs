@@ -50,7 +50,7 @@ public class WorkoutTemplateRepositoryPostgreEFCore(IDbContextFactory<RTMSDBCont
 
         if (existingTemplate != null)
         {
-            // Update properties of existing template
+            // Update properties of the existing template
             context.Entry(existingTemplate).CurrentValues.SetValues(workoutTemplate);
 
             // Compare existing exercises with new exercises
@@ -105,7 +105,18 @@ public class WorkoutTemplateRepositoryPostgreEFCore(IDbContextFactory<RTMSDBCont
                 }
             }
 
+            // Update workout history to reflect the new template name
+            var completedWorkouts = await context.Workouts
+                .Where(w => w.WorkoutTemplateId == workoutTemplate.Id)
+                .ToListAsync();
+
+            foreach (var workout in completedWorkouts)
+            {
+                workout.Name = workoutTemplate.Name; // Sync workout name with updated template name
+            }
+
             await context.SaveChangesAsync();
         }
     }
+
 }

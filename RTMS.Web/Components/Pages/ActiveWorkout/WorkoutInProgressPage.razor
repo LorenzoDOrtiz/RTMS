@@ -1,5 +1,4 @@
 ﻿@page "/workout-in-progress/{Id:int}"
-
 @attribute [Authorize]
 
 @* need to move the method used from this into it's own use case later *@
@@ -20,7 +19,8 @@
 
 @if (_workoutViewModel != null)
 {
-    <ActiveWorkoutHeader ViewModel="_workoutViewModel"
+    <ActiveWorkoutHeader WorkoutViewModel="_workoutViewModel"
+                         OnWorkoutNameChanged="HandleWorkoutNameChange"
                          OnExerciseAdded="HandleExerciseAdded" />
 
     foreach (var exercise in _workoutViewModel.Exercises)
@@ -87,7 +87,7 @@ else
 
     private async Task LoadStateFromLocalStorage()
     {
-        var serialized = await LocalStorage.GetItemAsync<string>("activeWorkout");
+        var serialized = await LocalStorage.GetItemAsync<string>("rtms_active_workout");
         if (serialized != null)
         {
             _workoutViewModel = JsonSerializer.Deserialize<WorkoutViewModel>(serialized);
@@ -223,7 +223,7 @@ else
         _workout = Mapper.Map<Workout>(_workoutViewModel);
 
         // Check if changes are present
-        var changesPresent = !WorkoutTemplateDiffersFromWorkout(_workoutTemplate, _workout);
+        var changesPresent = WorkoutTemplateDiffersFromWorkout(_workoutTemplate, _workout);
 
         if (changesPresent)
         {
@@ -231,20 +231,39 @@ else
 
             if (!dialogResult.Canceled)
             {
-                // Update the WorkoutTemplate with the changes from the WorkoutViewModel
-                _workoutTemplate = Mapper.Map<WorkoutTemplate>(_workout);
+                // create the updated workout template to update the workout template in the database
+                var _updatedWorkoutTemplate = new WorkoutTemplate
+                    {
+                        Id = _workout.WorkoutTemplateId,
+                        UserId = _workout.UserId,
+                        Name = _workout.Name,
+                        Exercises = _workout.Exercises.Select(exercise => new ExerciseTemplate
+                        {
+                            Id = exercise.ExerciseTemplateId,
+                            WorkoutTemplateId = _workout.WorkoutTemplateId,
+                            Name = exercise.Name,
+                            RestTimerValue = exercise.RestTimerValue,
+                            RestTimerUnit = exercise.RestTimerUnit,
+                            Sets = exercise.Sets.Select(set => new ExerciseSetTemplate
+                            {
+                                Id = set.SetTemplateId,
+                                ExerciseTemplateId = exercise.ExerciseTemplateId
+                            }).ToList(),
+                            Note = exercise.Note
+                        }).ToList()
+                    };
 
-                await EditWorkoutTemplateUseCase.ExecuteAsync(_workoutTemplate);
+                await EditWorkoutTemplateUseCase.ExecuteAsync(_updatedWorkoutTemplate);
             }
-        }
+        } 
 
-        // Save the active workout
+        // udpate the active workout and set end time and IsCompleted to true
         await EndWorkoutUseCase.ExecuteAsync(_workout);
 
         // Clear local storage before resetting
-        await LocalStorage.RemoveItemAsync("activeWorkout");
+        await LocalStorage.RemoveItemAsync("rtms_active_workout");
 
-        ActiveWorkoutService.ActiveWorkout = null; 
+        ActiveWorkoutService.ActiveWorkout = null;
 
         // Reset view model
         _workoutViewModel = null;

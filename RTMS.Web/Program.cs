@@ -40,8 +40,8 @@ builder.Services.AddDbContextFactory<RTMSDBContext>(options =>
 builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddScoped<UserContextService>();
-builder.Services.AddSingleton<WorkoutTimerService>();
-builder.Services.AddSingleton<RestTimerService>();
+builder.Services.AddScoped<WorkoutTimerService>();
+builder.Services.AddScoped<RestTimerService>();
 builder.Services.AddSingleton<ActiveWorkoutService>();
 
 builder.Services.AddSingleton<IWorkoutTemplateRepository, WorkoutTemplateRepositoryPostgreEFCore>();
