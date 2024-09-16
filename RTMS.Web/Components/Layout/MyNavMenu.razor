@@ -1,8 +1,28 @@
 ﻿<MudNavMenu>
     <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
+
     <AuthorizeView>
         <Authorized>
             <MudNavLink Href="/workouts" Match="NavLinkMatch.Prefix">Workouts</MudNavLink>
+            <MudNavLink Href="/workout-history" Match="NavLinkMatch.Prefix">Workout History</MudNavLink>
+            <MudNavLink Href="/workout-analytics" Match="NavLinkMatch.Prefix">Workout Analytics</MudNavLink>
+        </Authorized>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="Admin, Trainer">
+        <Authorized>
+            <MudNavLink Href="/user-management" Match="NavLinkMatch.Prefix">User Management</MudNavLink>
+        </Authorized>
+    </AuthorizeView>
+
+    <AuthorizeView>
+        <Authorized>
+            <MudNavLink Href="/settings" Match="NavLinkMatch.Prefix">Settings</MudNavLink>
+        </Authorized>
+    </AuthorizeView>
+
+    <AuthorizeView>
+        <Authorized>
             <MudNavLink Href="Account/Logout" Match="NavLinkMatch.Prefix">Logout</MudNavLink>
         </Authorized>
         <NotAuthorized>

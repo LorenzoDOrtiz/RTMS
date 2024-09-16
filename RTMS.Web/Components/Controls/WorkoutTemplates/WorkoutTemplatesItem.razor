@@ -6,7 +6,7 @@
 @inject IDialogService DialogService
 @inject IEndWorkoutUseCase EndWorkoutUseCase
 @inject ILocalStorageService LocalStorage
-@inject UserContextService UserContextService
+@inject UserService UserContextService
 @inject ActiveWorkoutService ActiveWorkoutService
 @inject NavigationManager NavigationManager
 
@@ -39,7 +39,7 @@
             // let's check if the user has a active workout before they start a new one
             // and show a dialogue to end the active workout before starting a new one or to
             // not create a new one and go to the active workout instead
-            var userId = await UserContextService.GetUserIdAsync();
+            var userId = UserContextService.UserId;
             var workoutInProgress = await GetActiveWorkoutByUserIdUseCase.ExecuteAsync(userId); // this just has the workout table of the active workout if it exists, otherwise null
             if (workoutInProgress != null)
             {

@@ -1,5 +1,6 @@
 ﻿@page "/workout-in-progress/{Id:int}"
 @attribute [Authorize]
+<PageTitle>@_workoutViewModel?.Name</PageTitle>
 
 @* need to move the method used from this into it's own use case later *@
 @inject IAddWorkoutUseCase AddWorkoutUseCase
@@ -11,7 +12,7 @@
 @inject IDialogService DialogService
 @inject IMapper Mapper
 @inject ILocalStorageService LocalStorage
-@inject UserContextService UserContextService
+@inject UserService UserContextService
 @inject RestTimerService RestTimerService
 @inject NavigationManager NavigationManager
 @inject ActiveWorkoutService ActiveWorkoutService
@@ -78,7 +79,7 @@ else
             // If local storage is empty, then hit the database
             if (_workoutViewModel == null)
             {
-                var userId = await UserContextService.GetUserIdAsync();
+                var userId = UserContextService.UserId;
                 var workout = await ViewActiveWorkoutByWorkoutAndUserIdUseCase.ExecuteAsync(Id, userId);
                 _workoutViewModel = Mapper.Map<WorkoutViewModel>(workout);
             }

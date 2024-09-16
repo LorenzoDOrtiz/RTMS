@@ -1,13 +1,10 @@
-﻿@page "/workouts"
+﻿@page "/workout-history"
 @attribute [Authorize]
-<PageTitle>Workouts</PageTitle>
+<PageTitle>Workout History</PageTitle>
 
 @inject UserService UserContextService
 
-
-<PageTitle>Workouts</PageTitle>
-
-<WorkoutTemplates UserID="@userId" />
+<WorkoutHistory UserID="@userId" />
 
 @code {
     private Guid userId;

@@ -1,7 +1,7 @@
 ﻿@inject IAddWorkoutTemplateUseCase AddWorkoutUseCase
 @inject IMapper Mapper
 @inject NavigationManager NavigationManager
-@inject UserContextService UserContextService
+@inject UserService UserContextService
 
 @if (_workoutTemplateViewModel != null)
 {
@@ -25,9 +25,9 @@
     bool validForm;
     MudForm? form;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        _workoutTemplateViewModel.UserId = await UserContextService.GetUserIdAsync();
+        _workoutTemplateViewModel.UserId = UserContextService.UserId;
         HandleExerciseAdded();
     }
 

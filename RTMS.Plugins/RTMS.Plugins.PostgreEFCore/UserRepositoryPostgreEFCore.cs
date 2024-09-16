@@ -2,61 +2,53 @@
 using RTMS.CoreBusiness;
 using RTMS.UseCases.PluginInterfaces;
 
-namespace RTMS.Plugins.PostgreEFCore;
-
-public class UserRepositoryPostgreEFCore(IDbContextFactory<RTMSDBContext> contextFactory) : IUserRepositoryPostgreEFCore
+namespace RTMS.Plugins.PostgreEFCore
 {
-    public async Task<User> GetOrCreateUserAsync(string provider, string providerKey, string email, string name)
+    public class UserRepositoryPostgreEFCore(IDbContextFactory<RTMSDBContext> contextFactory) : IUserRepositoryPostgreEFCore
     {
-        using var context = contextFactory.CreateDbContext();
 
-        // Check if the user login already exists based on provider and provider key
-        var existingUserLogin = await context.UserLogins
-            .Include(ul => ul.User)
-            .FirstOrDefaultAsync(ul => ul.Provider == provider && ul.ProviderKey == providerKey);
-
-        if (existingUserLogin != null)
+        // Get a user by Auth0 ID (or any other identifier like email)
+        public async Task<User?> GetUserByAuth0IdAsync(string auth0Id)
         {
-            // If the login already exists, check if the associated user's name and email match
-            var user = existingUserLogin.User;
+            using var context = contextFactory.CreateDbContext();
+            return await context.Users
+                .AsNoTracking() // Use AsNoTracking to improve performance if the entity isn't being updated
+                .FirstOrDefaultAsync(u => u.Auth0Id == auth0Id);
+        }
 
-            if (user.Email != email || user.Name != name)
-            {
-                // Update the user's details if they don't match
-                user.Email = email;
-                user.Name = name;
-
-                // Save the changes
-                context.Users.Update(user);
-                await context.SaveChangesAsync();
-            }
-
-            // Return the updated user
+        // Create a new user
+        public async Task<User> CreateUserAsync(User user)
+        {
+            using var context = contextFactory.CreateDbContext();
+            context.Users.Add(user);
+            await context.SaveChangesAsync();
             return user;
         }
 
-        // Create a new user if no login was found
-        var newUser = new User
+        // Update an existing user
+        public async Task<User> UpdateUserAsync(User user)
         {
-            Name = name,
-            Email = email
-        };
+            using var context = contextFactory.CreateDbContext();
+            context.Users.Update(user);
+            await context.SaveChangesAsync();
+            return user;
+        }
 
-        // Add the new user to the database
-        context.Users.Add(newUser);
-        await context.SaveChangesAsync();
-
-        // Now create the UserLogin record associated with this user
-        var newUserLogin = new UserLogin
+        // Check if a user exists by their Auth0 ID
+        public async Task<bool> UserExistsAsync(string auth0Id)
         {
-            Provider = provider,
-            ProviderKey = providerKey,
-            UserId = newUser.Id // Associate the login with the newly created user
-        };
+            using var context = contextFactory.CreateDbContext();
+            return await context.Users
+                .AnyAsync(u => u.Auth0Id == auth0Id);
+        }
 
-        context.UserLogins.Add(newUserLogin);
-        await context.SaveChangesAsync();
-
-        return newUser;
+        // Get a user by their internal ID (for example, when managing local user IDs)
+        public async Task<User?> GetUserByIdAsync(Guid userId)
+        {
+            using var context = contextFactory.CreateDbContext();
+            return await context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == userId);
+        }
     }
 }

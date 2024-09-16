@@ -2,23 +2,14 @@
 using RTMS.CoreBusiness;
 
 namespace RTMS.Plugins.PostgreEFCore;
-public class RTMSDBContext : DbContext
-{
-    public RTMSDBContext(DbContextOptions<RTMSDBContext> options) :
-        base(options)
-    {
-    }
 
+public class RTMSDBContext(DbContextOptions<RTMSDBContext> options) : DbContext(options)
+{
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>()
             .Property(u => u.Id)
             .HasDefaultValueSql("gen_random_uuid()"); // PostgreSQL-specific UUID generation function
-
-        modelBuilder.Entity<User>()
-                .HasMany(u => u.UserLogins)
-                .WithOne(ul => ul.User)
-                .HasForeignKey(ul => ul.UserId);
 
         modelBuilder.Entity<User>()
                 .HasMany(u => u.WorkoutTemplates)
@@ -31,10 +22,6 @@ public class RTMSDBContext : DbContext
                 .WithOne(w => w.User)
                 .HasForeignKey(w => w.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<UserLogin>()
-                .HasIndex(ul => new { ul.Provider, ul.ProviderKey })
-                .IsUnique();
 
         modelBuilder.Entity<WorkoutTemplate>()
                 .HasMany(w => w.Exercises)
@@ -81,7 +68,6 @@ public class RTMSDBContext : DbContext
         modelBuilder.UseIdentityColumns();
     }
     public DbSet<User> Users { get; set; }
-    public DbSet<UserLogin> UserLogins { get; set; }
 
     public DbSet<WorkoutTemplate> WorkoutTemplates { get; set; }
     public DbSet<ExerciseTemplate> ExerciseTemplates { get; set; }

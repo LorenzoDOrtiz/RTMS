@@ -1,0 +1,25 @@
+﻿@inject WorkoutTimerService WorkoutTimerService
+
+
+<div style="display: flex; align-items: center; padding: 8px 8px; border-radius: 4px; border: 1px solid #0288d1; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); margin-left: 4px;">
+    <MudIcon Icon="@Icons.Material.Filled.AccessTimeFilled" Size="Size.Small" />
+    <MudText Typo="Typo.subtitle2" Class="ml-2">@WorkoutTimerService.ElapsedTime.ToString(@"hh\:mm\:ss")</MudText>
+</div>
+
+
+@code {
+    protected override void OnInitialized()
+    {
+        WorkoutTimerService.OnTimerChanged += TimerChangedHandler;
+    }
+
+    private void TimerChangedHandler()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        WorkoutTimerService.OnTimerChanged -= TimerChangedHandler;
+    }
+}

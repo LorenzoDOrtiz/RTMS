@@ -7,7 +7,8 @@ namespace RTMS.CoreBusiness
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; }  // Internal system ID
+        public Guid Id { get; set; }  // Internal User ID
+        public string Auth0Id { get; set; } // Store the Auth0 UserId
 
         [Required]
         public string Name { get; set; }
@@ -15,8 +16,6 @@ namespace RTMS.CoreBusiness
         [Required]
         public string Email { get; set; }
 
-        // Navigation property for external logins
-        public ICollection<UserLogin> UserLogins { get; set; }
         public ICollection<WorkoutTemplate> WorkoutTemplates { get; set; }
         public ICollection<Workout> Workouts { get; set; }
     }

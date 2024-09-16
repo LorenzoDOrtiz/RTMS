@@ -1,5 +1,8 @@
 ﻿@page "/workouts/edit-workout-template/{Id:int}"
+
 @attribute [Authorize]
+<PageTitle>Edit Workout</PageTitle>
+
 @inject IViewWorkoutTemplateByIdUseCase ViewWorkoutTemplateUseCase
 @inject NavigationManager NavigationManager
 

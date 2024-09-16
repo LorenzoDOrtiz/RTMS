@@ -1,0 +1,101 @@
+﻿@page "/user-management"
+@attribute [Authorize]
+<PageTitle>User Management</PageTitle>
+
+@inject Auth0UserService auth0UserService
+@inject NavigationManager NavigationManager
+@inject UserService userService
+
+<MudTable Items="@Users" Filter="new Func<Auth0UserDto,bool>(FilterFunc1)" @bind-SelectedItem="selectedUser" Virtualize>
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">User Management</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Id</MudTh>
+        <MudTh>Name</MudTh>
+        <MudTh>Email</MudTh>
+        <MudTh>Role</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Id">@context.UserId</MudTd>
+        <MudTd DataLabel="Name">@context.FullName</MudTd>
+        <MudTd DataLabel="Email">@context.Email</MudTd>
+        <MudTd DataLabel="Role">
+            @string.Join(", ", context.Roles)
+        </MudTd>
+        <MudTd DataLabel="Actions">
+            <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open user options">
+                @if (userService.IsAdmin)
+                {
+                    <MudMenuItem Icon="@Icons.Material.Filled.Edit" IconColor="Color.Info" OnClick="() => NavigateToEditPage(context.UserId)">Edit</MudMenuItem>
+                    <MudMenuItem Icon="@Icons.Material.Filled.DeleteForever" IconColor="Color.Error" OnClick="() => DeleteUser(context.UserId)">Delete</MudMenuItem>
+                }
+            </MudMenu>
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+<br />
+<MudButton Color="Color.Info" Variant="Variant.Filled" Href="/add-user">
+    Add User
+</MudButton>
+
+@code {
+    private string searchString1 = "";
+    private Auth0UserDto selectedUser = null;
+    private IEnumerable<Auth0UserDto> Users = new List<Auth0UserDto>();
+
+    private static readonly Dictionary<string, int> RolePriority = new()
+    {
+        { "Admin", 1 },
+        { "Trainer", 2 },
+        { "Client", 3 }
+    };
+
+    private IEnumerable<Auth0UserDto> SortUsersByRole(IEnumerable<Auth0UserDto> users)
+    {
+        return users.OrderBy(user => RolePriority.ContainsKey(user.Roles.FirstOrDefault())
+                                      ? RolePriority[user.Roles.FirstOrDefault()]
+                                      : int.MaxValue);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await userService.LoadUserAsync();
+
+        var roleFilter = userService.IsAdmin ? null : "Admin";
+        var unsortedUsers = await auth0UserService.GetUsersAsync(roleFilter);
+        Users = SortUsersByRole(unsortedUsers);
+    }
+
+    private bool FilterFunc1(Auth0UserDto user) => FilterFunc(user, searchString1);
+
+    private bool FilterFunc(Auth0UserDto user, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (user.FullName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (user.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private void NavigateToEditPage(string userId)
+    {
+        NavigationManager.NavigateTo($"/edit-user/{userId}");
+    }
+
+    private async Task DeleteUser(string userId)
+    {
+        await auth0UserService.DeleteUserAsync(userId);
+        var roleFilter = userService.IsAdmin ? null : "Admin";
+        var unsortedUsers = await auth0UserService.GetUsersAsync(roleFilter);
+        Users = SortUsersByRole(unsortedUsers);
+    }
+}

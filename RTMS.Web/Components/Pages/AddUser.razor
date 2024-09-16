@@ -1,0 +1,45 @@
+﻿@page "/add-user"
+@attribute [Authorize]
+@inject Auth0UserService auth0UserService
+@inject NavigationManager Navigation
+
+<PageTitle>Add User</PageTitle>
+
+<MudContainer>
+    <MudText Typo="Typo.h6">Add User</MudText>
+
+    <MudTextField @bind-Value="userEmail" Label="User Email" Placeholder="Enter user email" />
+
+    <MudSelect @bind-Value="selectedRoleId" Label="Role" T="string">
+        @foreach (var role in Roles)
+        {
+            <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
+        }
+    </MudSelect>
+    <br />
+    <MudButton OnClick="SendInvitation" Variant="Variant.Filled" Color="Color.Primary">Send Invitation</MudButton>
+    <MudButton OnClick="Cancel" Variant="Variant.Text" Color="Color.Secondary">Cancel</MudButton>
+</MudContainer>
+
+@code {
+    private string userEmail;
+    private string selectedRoleId;
+    private IList<Role> Roles = new List<Role>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Roles = await auth0UserService.GetAllRolesAsync();
+    }
+
+    private async Task SendInvitation()
+    {
+
+        await auth0UserService.CreateUserAndSendResetEmailAsync(userEmail, selectedRoleId);
+        Navigation.NavigateTo("/user-management");
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/user-management");
+    }
+}

@@ -1,4 +1,5 @@
 using Auth0.AspNetCore.Authentication;
+using Auth0.ManagementApi;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -25,11 +26,38 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddMudServices();
 
+
 builder.Services.AddAuth0WebAppAuthentication(options =>
 {
     options.Domain = builder.Configuration["Auth0:Domain"];
     options.ClientId = builder.Configuration["Auth0:ClientId"];
     options.Scope = "openid profile email"; // Add the email scope
+});
+
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("Admin", policy => policy.RequireRole("Admin"))
+    .AddPolicy("Trainer", policy => policy.RequireRole("Trainer"))
+    .AddPolicy("Client", policy => policy.RequireRole("Client"));
+
+// Register HttpClient
+builder.Services.AddHttpClient();
+
+// Register ManagementApiClient
+builder.Services.AddSingleton(sp =>
+{
+    var managementApiToken = builder.Configuration["Auth0:ManagementApiToken"];
+    var managementApiUrl = new Uri("https://dev-njjrui7wcq7kliho.us.auth0.com/api/v2/");
+    return new ManagementApiClient(managementApiToken, managementApiUrl);
+});
+
+// Register Auth0UserService
+builder.Services.AddSingleton(sp =>
+{
+    var managementClient = sp.GetRequiredService<ManagementApiClient>();
+    var httpClient = sp.GetRequiredService<HttpClient>();
+    var auth0Domain = builder.Configuration["Auth0:Domain"];
+    var clientId = builder.Configuration["Auth0:ClientId"];
+    return new Auth0UserService(managementClient, httpClient, auth0Domain, clientId);
 });
 
 builder.Services.AddDbContextFactory<RTMSDBContext>(options =>
@@ -39,7 +67,7 @@ builder.Services.AddDbContextFactory<RTMSDBContext>(options =>
 
 builder.Services.AddBlazoredLocalStorage();
 
-builder.Services.AddScoped<UserContextService>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<WorkoutTimerService>();
 builder.Services.AddScoped<RestTimerService>();
 builder.Services.AddSingleton<ActiveWorkoutService>();

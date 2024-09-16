@@ -1,0 +1,63 @@
+﻿@page "/edit-user/{UserId}"
+@attribute [Authorize]
+@inject Auth0UserService auth0UserService
+@inject NavigationManager Navigation
+
+<PageTitle>Edit User</PageTitle>
+
+<MudContainer>
+    <MudText Typo="Typo.h6">Edit User</MudText>
+
+    <MudText Typo="Typo.subtitle1">Full Name: @userFullName</MudText>
+    <MudText Typo="Typo.subtitle1">Email: @userEmail</MudText>
+    <MudText Typo="Typo.subtitle1">Role</MudText>
+    <MudSelect @bind-Value="selectedRoleId" T="string">
+        @foreach (var role in Roles)
+        {
+            <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
+        }
+    </MudSelect>
+    <br />
+    <MudButton OnClick="SaveUser" Variant="Variant.Filled" Color="Color.Primary">Save</MudButton>
+    <MudButton OnClick="Cancel" Variant="Variant.Text" Color="Color.Secondary">Cancel</MudButton>
+</MudContainer>
+
+@code {
+    [Parameter] public string UserId { get; set; }
+    private IList<Role> Roles = new List<Role>();
+    private string selectedRoleId;
+
+    // Variables to hold user details
+    private string userFullName;
+    private string userEmail;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch the user's current role and all available roles
+        var user = await auth0UserService.GetUserByIdAsync(UserId);
+        Roles = await auth0UserService.GetAllRolesAsync();
+
+        // Initialize the selectedRoleId with the user's current role ID
+        selectedRoleId = user?.SelectedRoleId ?? string.Empty;
+
+        // Set user details for display
+        userFullName = user?.FullName ?? "N/A";
+        userEmail = user?.Email ?? "N/A";
+
+        // Ensure the MudSelect component reflects the selectedRoleId
+        StateHasChanged();
+    }
+
+    private async Task SaveUser()
+    {
+        // Update the user's role and navigate back to the user management page
+        await auth0UserService.UpdateUserRoleAsync(UserId, selectedRoleId);
+        Navigation.NavigateTo("/user-management");
+    }
+
+    private void Cancel()
+    {
+        // Navigate back to the user management page without saving changes
+        Navigation.NavigateTo("/user-management");
+    }
+}
