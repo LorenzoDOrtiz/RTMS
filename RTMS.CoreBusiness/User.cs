@@ -11,7 +11,9 @@ namespace RTMS.CoreBusiness
         public string Auth0Id { get; set; } // Store the Auth0 UserId
 
         [Required]
-        public string Name { get; set; }
+        public string FirstName { get; set; }
+
+        public string LastName { get; set; }
 
         [Required]
         public string Email { get; set; }

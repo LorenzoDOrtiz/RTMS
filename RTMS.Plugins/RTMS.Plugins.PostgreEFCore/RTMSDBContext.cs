@@ -23,6 +23,21 @@ public class RTMSDBContext(DbContextOptions<RTMSDBContext> options) : DbContext(
                 .HasForeignKey(w => w.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+        modelBuilder.Entity<TrainerClient>()
+                .HasKey(tc => new { tc.TrainerId, tc.ClientId });
+
+        modelBuilder.Entity<TrainerClient>()
+            .HasOne(tc => tc.Trainer)
+            .WithMany()
+            .HasForeignKey(tc => tc.TrainerId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<TrainerClient>()
+            .HasOne(tc => tc.Client)
+            .WithMany()
+            .HasForeignKey(tc => tc.ClientId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<WorkoutTemplate>()
                 .HasMany(w => w.Exercises)
                 .WithOne()
@@ -68,6 +83,7 @@ public class RTMSDBContext(DbContextOptions<RTMSDBContext> options) : DbContext(
         modelBuilder.UseIdentityColumns();
     }
     public DbSet<User> Users { get; set; }
+    public DbSet<TrainerClient> TrainerClients { get; set; }
 
     public DbSet<WorkoutTemplate> WorkoutTemplates { get; set; }
     public DbSet<ExerciseTemplate> ExerciseTemplates { get; set; }

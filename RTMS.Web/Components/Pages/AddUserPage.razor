@@ -1,0 +1,75 @@
+﻿@page "/add-user"
+@attribute [Authorize]
+@inject Auth0UserService Auth0UserService
+@inject NavigationManager NavigationManager
+@inject IAddTrainerClientRelationshipUseCase AddTrainerClientRelationshipUseCase
+@inject IGetUserIdByAuth0IdUseCase GetUserIdByAuth0IdUseCase
+<PageTitle>Add User</PageTitle>
+
+<MudContainer>
+    <MudText Typo="Typo.h6">Add User</MudText>
+
+    <MudTextField @bind-Value="firstName" Label="First Name" Placeholder="Enter user first name" AutoFocus />
+    <MudTextField @bind-Value="lastName" Label="Last Name" Placeholder="Enter user last name" />
+    <MudNumericField @bind-Value="phoneNumber" Label="Phone Number" Placeholder="Enter user phone number" />
+    <MudTextField @bind-Value="email" Label="User Email" Placeholder="Enter user email" />
+    <br />
+    <MudSelect @bind-Value="selectedRoleId" Label="Role" T="string">
+        @foreach (var role in Roles)
+        {
+            <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
+        }
+    </MudSelect>
+    <br />
+    <MudSelect @bind-Value="selectedTrainerAuth0Id" Label="Trainer" T="string">
+        @foreach (var trainer in Trainers)
+        {
+            <MudSelectItem Value="@trainer.UserId">@trainer.FullName</MudSelectItem>
+        }
+    </MudSelect>
+    <br />
+    <MudButton OnClick="SendInvitation" Variant="Variant.Filled" Color="Color.Primary">Send Invitation</MudButton>
+    <MudButton OnClick="Cancel" Variant="Variant.Text" Color="Color.Secondary">Cancel</MudButton>
+</MudContainer>
+
+@code {
+    private string firstName;
+    private string lastName;
+    private string fullName => $"{firstName} {lastName}";
+    private string phoneNumber;
+    private string email;
+    private string selectedRoleId;
+    private IList<Role> Roles = new List<Role>();
+    private string selectedTrainerAuth0Id;
+    private IList<Auth0UserDto> Trainers = new List<Auth0UserDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Roles = await Auth0UserService.GetAllRolesAsync();
+        Trainers = await Auth0UserService.GetUsersByRole("rol_r6m4hjYSOGhc3HWp");
+    }
+
+    private async Task SendInvitation()
+    {
+        // Create client user and get their Auth0 ID
+        var clientAuth0Id = await Auth0UserService.CreateUserAndSendResetEmailAsync(firstName, lastName, fullName, phoneNumber, email, selectedRoleId);
+
+        // Get the user's internal ID based on the Auth0 ID
+        var clientUserId = await GetUserIdByAuth0IdUseCase.ExecuteAsync(clientAuth0Id);
+        var trainerUserId = await GetUserIdByAuth0IdUseCase.ExecuteAsync(selectedTrainerAuth0Id);
+
+        // Add the trainer-client relationship if both IDs are valid
+        if (clientUserId.HasValue && trainerUserId.HasValue)
+        {
+            await AddTrainerClientRelationshipUseCase.ExecuteAsync(clientUserId.Value, trainerUserId.Value);
+        }
+
+        // Redirect to user management page
+        NavigationManager.NavigateTo("/user-management");
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/user-management");
+    }
+}

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RTMS.Plugins.PostgreEFCore;
@@ -11,9 +12,11 @@ using RTMS.Plugins.PostgreEFCore;
 namespace RTMS.Plugins.PostgreEFCore.Migrations
 {
     [DbContext(typeof(RTMSDBContext))]
-    partial class RTMSDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240917214340_Change name to first name and last name in user table")]
+    partial class Changenametofirstnameandlastnameinusertable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

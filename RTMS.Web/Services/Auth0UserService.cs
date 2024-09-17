@@ -1,12 +1,14 @@
 ﻿using Auth0.ManagementApi;
 using Auth0.ManagementApi.Models;
 using Newtonsoft.Json;
+using RTMS.UseCases.Users.Interfaces;
 using RTMS.Web.Dtos;
 using System.Text;
 
 namespace RTMS.Web.Services;
 
-public class Auth0UserService(ManagementApiClient managementClient, HttpClient httpClient, string auth0Domain, string clientId)
+public class Auth0UserService(ManagementApiClient managementClient, HttpClient httpClient, IGetOrCreateUserUseCase getOrCreateUserUseCase,
+string auth0Domain, string clientId)
 {
     public async Task<IList<Auth0UserDto>> GetUsersAsync(string roleFilter = null)
     {
@@ -26,7 +28,10 @@ public class Auth0UserService(ManagementApiClient managementClient, HttpClient h
                         users.Add(new Auth0UserDto
                         {
                             UserId = user.UserId,
+                            FirstName = user.FirstName,
+                            LastName = user.LastName,
                             FullName = user.FullName,
+                            PhoneNumber = user.PhoneNumber,
                             Email = user.Email,
                             Roles = userRoles
                         });
@@ -47,6 +52,33 @@ public class Auth0UserService(ManagementApiClient managementClient, HttpClient h
 
         return users;
     }
+
+    public async Task<IList<Auth0UserDto>> GetUsersByRole(string roleId)
+    {
+        var users = new List<Auth0UserDto>();  // Corrected from AssignedUser
+        try
+        {
+            // Fetch all users for the given role
+            var auth0Users = await managementClient.Roles.GetUsersAsync(roleId);
+
+            foreach (var user in auth0Users)
+            {
+                users.Add(new Auth0UserDto
+                {
+                    UserId = user.UserId,
+                    FullName = user.FullName
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log general error during fetching users
+            Console.Error.WriteLine($"Failed to fetch users for role {roleId}: {ex.Message}");
+        }
+
+        return users;
+    }
+
 
     public async Task<IList<Role>> GetAllRolesAsync()
     {
@@ -73,7 +105,9 @@ public class Auth0UserService(ManagementApiClient managementClient, HttpClient h
         return new Auth0UserDto
         {
             UserId = user.UserId,
-            FullName = user.FullName,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            PhoneNumber = user.PhoneNumber,
             Email = user.Email,
             Roles = roles.Select(r => r.Name).ToList(),
             SelectedRoleId = roles.FirstOrDefault()?.Id
@@ -85,11 +119,15 @@ public class Auth0UserService(ManagementApiClient managementClient, HttpClient h
         await managementClient.Users.DeleteAsync(userId);
     }
 
-    public async Task CreateUserAndSendResetEmailAsync(string email, string roleId)
+    public async Task<string> CreateUserAndSendResetEmailAsync(string firstName, string lastName, string fullName, string phoneNumber, string email, string roleId)
     {
         // Create the user
         var user = new UserCreateRequest
         {
+            FirstName = firstName,
+            LastName = lastName,
+            FullName = fullName,
+            PhoneNumber = $"+1{phoneNumber}",
             Email = email,
             Password = GenerateRandomPassword(),
             Connection = "Username-Password-Authentication",
@@ -110,6 +148,11 @@ public class Auth0UserService(ManagementApiClient managementClient, HttpClient h
 
         // Send password reset email
         await SendPasswordResetEmailAsync(email, "Username-Password-Authentication");
+
+        // Manually add the user to the database
+        await getOrCreateUserUseCase.ExecuteAsync(createdUser.UserId, createdUser.FirstName, createdUser.LastName, createdUser.Email);
+
+        return createdUser.UserId;
     }
 
     private async Task SendPasswordResetEmailAsync(string email, string connection)
@@ -133,7 +176,8 @@ public class Auth0UserService(ManagementApiClient managementClient, HttpClient h
         else
         {
             var errorContent = await response.Content.ReadAsStringAsync();
-            Console.Error.WriteLine($"Failed to send password reset email: {errorContent}");
+
+            Console.Error.WriteLine($"Failed to send password reset email:0. {errorContent}");
         }
     }
 

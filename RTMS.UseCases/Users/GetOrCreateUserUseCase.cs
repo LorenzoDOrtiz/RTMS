@@ -5,7 +5,7 @@ using RTMS.UseCases.Users.Interfaces;
 namespace RTMS.UseCases.Users;
 public class GetOrCreateUserUseCase(IUserRepositoryPostgreEFCore userRepositoryPostgreEFCore) : IGetOrCreateUserUseCase
 {
-    public async Task<User> ExecuteAsync(string auth0Id, string email, string name)
+    public async Task<User> ExecuteAsync(string auth0Id, string firstName, string lastName, string email)
     {
         // Check if the user already exists based on Auth0 user ID
         var existingUser = await userRepositoryPostgreEFCore.GetUserByAuth0IdAsync(auth0Id);
@@ -13,10 +13,12 @@ public class GetOrCreateUserUseCase(IUserRepositoryPostgreEFCore userRepositoryP
         if (existingUser != null)
         {
             // Update the user's details if necessary
-            if (existingUser.Email != email || existingUser.Name != name)
+            if (existingUser.FirstName != firstName || existingUser.LastName != lastName || existingUser.Email != email)
             {
+                existingUser.FirstName = firstName;
+                existingUser.LastName = lastName;
                 existingUser.Email = email;
-                existingUser.Name = name;
+
                 await userRepositoryPostgreEFCore.UpdateUserAsync(existingUser);
             }
 
@@ -28,7 +30,8 @@ public class GetOrCreateUserUseCase(IUserRepositoryPostgreEFCore userRepositoryP
         {
             Auth0Id = auth0Id,
             Email = email,
-            Name = name
+            FirstName = firstName,
+            LastName = lastName
         };
 
         await userRepositoryPostgreEFCore.CreateUserAsync(newUser);

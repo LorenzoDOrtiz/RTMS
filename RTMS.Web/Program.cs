@@ -55,9 +55,10 @@ builder.Services.AddSingleton(sp =>
 {
     var managementClient = sp.GetRequiredService<ManagementApiClient>();
     var httpClient = sp.GetRequiredService<HttpClient>();
+    var getOrCreateUserUseCase = sp.GetRequiredService<IGetOrCreateUserUseCase>();
     var auth0Domain = builder.Configuration["Auth0:Domain"];
     var clientId = builder.Configuration["Auth0:ClientId"];
-    return new Auth0UserService(managementClient, httpClient, auth0Domain, clientId);
+    return new Auth0UserService(managementClient, httpClient, getOrCreateUserUseCase, auth0Domain, clientId);
 });
 
 builder.Services.AddDbContextFactory<RTMSDBContext>(options =>
@@ -89,6 +90,8 @@ builder.Services.AddTransient<IEndWorkoutUseCase, EndWorkoutUseCase>();
 builder.Services.AddTransient<IViewWorkoutHistoryByUserIdUseCase, ViewWorkoutHistoryByUserIdUseCase>();
 
 builder.Services.AddTransient<IGetOrCreateUserUseCase, GetOrCreateUserUseCase>();
+builder.Services.AddTransient<IAddTrainerClientRelationshipUseCase, AddTrainerClientRelationshipUseCase>();
+builder.Services.AddTransient<IGetUserIdByAuth0IdUseCase, GetUserIdByAuth0IdUseCase>();
 
 // Configure AutoMapper
 builder.Services.AddAutoMapper(cfg =>
