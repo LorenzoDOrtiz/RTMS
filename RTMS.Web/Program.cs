@@ -82,6 +82,9 @@ builder.Services.AddTransient<IEditWorkoutTemplateUseCase, EditWorkoutTemplateUs
 builder.Services.AddTransient<IViewWorkoutTemplatesByUserIdUseCase, ViewWorkoutTemplatesByUserIdUseCase>();
 builder.Services.AddTransient<IViewWorkoutTemplateByIdUseCase, ViewWorkoutTemplateByIdUseCase>();
 builder.Services.AddTransient<IDeleteWorkoutTemplateUseCase, DeleteWorkoutTemplateUseCase>();
+builder.Services.AddTransient<IAddClientWorkoutTemplateUseCase, AddClientWorkoutTemplateUseCase>();
+builder.Services.AddTransient<IViewClientWorkoutTemplatesUseCase, ViewClientWorkoutTemplatesUseCase>();
+builder.Services.AddTransient<IRemoveTrainerTemplateFromClientUseCase, RemoveTrainerTemplateFromClientUseCase>();
 
 builder.Services.AddTransient<IAddWorkoutUseCase, AddWorkoutUseCase>();
 builder.Services.AddTransient<IGetActiveWorkoutByUserIdUseCase, GetActiveWorkoutByUserIdUseCase>();
@@ -92,6 +95,13 @@ builder.Services.AddTransient<IViewWorkoutHistoryByUserIdUseCase, ViewWorkoutHis
 builder.Services.AddTransient<IGetOrCreateUserUseCase, GetOrCreateUserUseCase>();
 builder.Services.AddTransient<IAddTrainerClientRelationshipUseCase, AddTrainerClientRelationshipUseCase>();
 builder.Services.AddTransient<IGetUserIdByAuth0IdUseCase, GetUserIdByAuth0IdUseCase>();
+builder.Services.AddTransient<IGetUserIdsByAuth0IdsUseCase, GetUserIdsByAuth0IdsUseCase>();
+builder.Services.AddTransient<IGetAuth0UserIdsByUserIdsUseCase, GetAuth0UserIdsByUserIdsUseCase>();
+builder.Services.AddTransient<IGetTrainerIdsByUserIdUseCase, GetTrainerIdsByUserIdUseCase>();
+builder.Services.AddTransient<IUpdateClientTrainersUseCase, UpdateClientTrainersUseCase>();
+builder.Services.AddTransient<IGetClientsAssignedToTrainerUseCase, GetClientsAssignedToTrainerUseCase>();
+builder.Services.AddTransient<IRemoveClientFromTrainerUseCase, RemoveClientFromTrainerUseCase>();
+builder.Services.AddTransient<IDeleteUserUseCase, DeleteUserUseCase>();
 
 // Configure AutoMapper
 builder.Services.AddAutoMapper(cfg =>

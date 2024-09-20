@@ -30,13 +30,28 @@ public class RTMSDBContext(DbContextOptions<RTMSDBContext> options) : DbContext(
             .HasOne(tc => tc.Trainer)
             .WithMany()
             .HasForeignKey(tc => tc.TrainerId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<TrainerClient>()
             .HasOne(tc => tc.Client)
             .WithMany()
             .HasForeignKey(tc => tc.ClientId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ClientWorkoutTemplate>()
+            .HasKey(cwt => new { cwt.ClientId, cwt.WorkoutTemplateId });
+
+        modelBuilder.Entity<ClientWorkoutTemplate>()
+            .HasOne(cwt => cwt.Client)
+            .WithMany(u => u.ClientWorkoutTemplates)
+            .HasForeignKey(cwt => cwt.ClientId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ClientWorkoutTemplate>()
+            .HasOne(cwt => cwt.WorkoutTemplate)
+            .WithMany(wt => wt.ClientWorkoutTemplates)
+            .HasForeignKey(cwt => cwt.WorkoutTemplateId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<WorkoutTemplate>()
                 .HasMany(w => w.Exercises)
@@ -54,7 +69,7 @@ public class RTMSDBContext(DbContextOptions<RTMSDBContext> options) : DbContext(
                 .HasOne(w => w.WorkoutTemplate)
                 .WithMany()
                 .HasForeignKey(w => w.WorkoutTemplateId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
 
         modelBuilder.Entity<Workout>()
                 .HasMany(w => w.Exercises)
@@ -84,6 +99,7 @@ public class RTMSDBContext(DbContextOptions<RTMSDBContext> options) : DbContext(
     }
     public DbSet<User> Users { get; set; }
     public DbSet<TrainerClient> TrainerClients { get; set; }
+    public DbSet<ClientWorkoutTemplate> ClientWorkoutTemplates { get; set; }
 
     public DbSet<WorkoutTemplate> WorkoutTemplates { get; set; }
     public DbSet<ExerciseTemplate> ExerciseTemplates { get; set; }

@@ -22,6 +22,7 @@ string auth0Domain, string clientId)
                 {
                     var roles = await managementClient.Users.GetRolesAsync(user.UserId);
                     var userRoles = roles.Select(r => r.Name).ToList();
+
                     // Apply role filter if provided
                     if (roleFilter == null || userRoles.Contains(roleFilter))
                     {
@@ -53,6 +54,7 @@ string auth0Domain, string clientId)
         return users;
     }
 
+
     public async Task<IList<Auth0UserDto>> GetUsersByRole(string roleId)
     {
         var users = new List<Auth0UserDto>();  // Corrected from AssignedUser
@@ -79,13 +81,27 @@ string auth0Domain, string clientId)
         return users;
     }
 
-
-    public async Task<IList<Role>> GetAllRolesAsync()
+    public async Task<IList<Role>> GetAllRolesAsync(string roleFilter = null)
     {
-        return await managementClient.Roles.GetAllAsync(new GetRolesRequest());
+        var roles = new List<Role>();
+
+        var allRoles = await managementClient.Roles.GetAllAsync(new GetRolesRequest());
+
+        // Apply role filter if provided
+        if (roleFilter == null)
+        {
+            roles = allRoles.ToList();
+        }
+        else
+        {
+            roles = allRoles.Where(role => role.Name == roleFilter).ToList();
+        }
+
+
+        return roles;
     }
 
-    public async Task UpdateUserRoleAsync(string userId, string roleId)
+    public async Task UpdateUserRoleAsync(string userId, IEnumerable<string> roleIds)
     {
         var currentRoles = await managementClient.Users.GetRolesAsync(userId);
         var currentRoleIds = currentRoles.Select(r => r.Id).ToArray();
@@ -95,7 +111,11 @@ string auth0Domain, string clientId)
             await managementClient.Users.RemoveRolesAsync(userId, new AssignRolesRequest { Roles = currentRoleIds });
         }
 
-        await managementClient.Users.AssignRolesAsync(userId, new AssignRolesRequest { Roles = [roleId] });
+        if (roleIds.Any())
+        {
+            await managementClient.Users.AssignRolesAsync(userId, new AssignRolesRequest { Roles = roleIds.ToArray() });
+
+        }
     }
 
     public async Task<Auth0UserDto> GetUserByIdAsync(string userId)
@@ -110,7 +130,7 @@ string auth0Domain, string clientId)
             PhoneNumber = user.PhoneNumber,
             Email = user.Email,
             Roles = roles.Select(r => r.Name).ToList(),
-            SelectedRoleId = roles.FirstOrDefault()?.Id
+            SelectedRoleIds = roles.Select(r => r.Id).ToList()
         };
     }
 

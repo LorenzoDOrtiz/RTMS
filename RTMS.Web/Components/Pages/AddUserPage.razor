@@ -1,9 +1,11 @@
 ﻿@page "/add-user"
-@attribute [Authorize]
-@inject Auth0UserService Auth0UserService
-@inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = "Trainer, Admin")]
 @inject IAddTrainerClientRelationshipUseCase AddTrainerClientRelationshipUseCase
 @inject IGetUserIdByAuth0IdUseCase GetUserIdByAuth0IdUseCase
+@inject IGetUserIdsByAuth0IdsUseCase GetUserIdsByAuth0IdsUseCase
+@inject Auth0UserService Auth0UserService
+@inject NavigationManager NavigationManager
+@inject UserService UserService
 <PageTitle>Add User</PageTitle>
 
 <MudContainer>
@@ -21,7 +23,7 @@
         }
     </MudSelect>
     <br />
-    <MudSelect @bind-Value="selectedTrainerAuth0Id" Label="Trainer" T="string">
+    <MudSelect @bind-SelectedValues="selectedTrainerAuth0Ids" Label="Trainer" MultiSelection MultiSelectionTextFunc="@ToStringFuncMulti">
         @foreach (var trainer in Trainers)
         {
             <MudSelectItem Value="@trainer.UserId">@trainer.FullName</MudSelectItem>
@@ -40,13 +42,20 @@
     private string email;
     private string selectedRoleId;
     private IList<Role> Roles = new List<Role>();
-    private string selectedTrainerAuth0Id;
+    private IEnumerable<string> selectedTrainerAuth0Ids = new List<string>();
     private IList<Auth0UserDto> Trainers = new List<Auth0UserDto>();
+    private Func<IEnumerable<string>, string> ToStringFuncMulti;
 
     protected override async Task OnInitializedAsync()
     {
-        Roles = await Auth0UserService.GetAllRolesAsync();
+        string roleFilter = UserService.IsAdmin ? null : "Client";
+        Roles = await Auth0UserService.GetAllRolesAsync(roleFilter);
         Trainers = await Auth0UserService.GetUsersByRole("rol_r6m4hjYSOGhc3HWp");
+        ToStringFuncMulti = (selectedIds) =>
+        {
+            var selectedTrainers = Trainers.Where(t => selectedIds.Contains(t.UserId)).Select(t => t.FullName);
+            return string.Join(", ", selectedTrainers);
+        };
     }
 
     private async Task SendInvitation()
@@ -56,12 +65,12 @@
 
         // Get the user's internal ID based on the Auth0 ID
         var clientUserId = await GetUserIdByAuth0IdUseCase.ExecuteAsync(clientAuth0Id);
-        var trainerUserId = await GetUserIdByAuth0IdUseCase.ExecuteAsync(selectedTrainerAuth0Id);
+        var trainerUserId = await GetUserIdsByAuth0IdsUseCase.ExecuteAsync(selectedTrainerAuth0Ids);
 
         // Add the trainer-client relationship if both IDs are valid
-        if (clientUserId.HasValue && trainerUserId.HasValue)
+        if (trainerUserId.Any())
         {
-            await AddTrainerClientRelationshipUseCase.ExecuteAsync(clientUserId.Value, trainerUserId.Value);
+            await AddTrainerClientRelationshipUseCase.ExecuteAsync(clientUserId, trainerUserId);
         }
 
         // Redirect to user management page

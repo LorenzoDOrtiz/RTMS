@@ -7,6 +7,7 @@ public class AddWorkoutTemplateUseCase(IWorkoutTemplateRepository workoutReposit
 {
     public async Task ExecuteAsync(WorkoutTemplate workoutTemplate)
     {
+        workoutTemplate.CreatedAt = DateTime.UtcNow;
         await workoutRepository.AddWorkoutTemplateAsync(workoutTemplate);
     }
 }

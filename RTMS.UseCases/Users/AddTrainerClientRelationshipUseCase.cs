@@ -5,7 +5,7 @@ namespace RTMS.UseCases.Users;
 
 public class AddTrainerClientRelationshipUseCase(IUserRepositoryPostgreEFCore userRepositoryPostgreEF) : IAddTrainerClientRelationshipUseCase
 {
-    public async Task ExecuteAsync(Guid clientUserId, Guid trainerUserId)
+    public async Task ExecuteAsync(Guid clientUserId, IEnumerable<Guid> trainerUserId)
     {
         await userRepositoryPostgreEF.AddTrainerClientRelationshipAsync(clientUserId, trainerUserId);
     }

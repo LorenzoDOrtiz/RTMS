@@ -2,5 +2,5 @@
 
 public interface IAddTrainerClientRelationshipUseCase
 {
-    Task ExecuteAsync(Guid clientUserId, Guid trainerUserId);
+    Task ExecuteAsync(Guid clientUserId, IEnumerable<Guid> trainerUserId);
 }

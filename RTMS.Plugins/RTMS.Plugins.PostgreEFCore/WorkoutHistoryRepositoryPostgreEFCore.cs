@@ -10,8 +10,7 @@ public class WorkoutHistoryRepositoryPostgreEFCore(IDbContextFactory<RTMSDBConte
         using var context = contextFactory.CreateDbContext();
         var newWorkout = await context.AddAsync(workout);
         await context.SaveChangesAsync();
-        var test = workout.Id;
-        return test;
+        return workout.Id;
     }
 
     public async Task UpdateWorkoutAsync(Workout workout)

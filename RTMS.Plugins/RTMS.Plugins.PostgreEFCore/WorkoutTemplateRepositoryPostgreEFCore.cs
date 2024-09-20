@@ -12,6 +12,27 @@ public class WorkoutTemplateRepositoryPostgreEFCore(IDbContextFactory<RTMSDBCont
         await context.SaveChangesAsync();
     }
 
+    public async Task AddClientWorkoutTemplateAsync(ClientWorkoutTemplate clientWorkoutTemplate)
+    {
+        using var context = contextFactory.CreateDbContext();
+        await context.AddAsync(clientWorkoutTemplate);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task RemoveTrainerTemplateFromClientAsync(int workoutTemplateId, Guid clientId)
+    {
+        using var context = contextFactory.CreateDbContext();
+
+        var clientWorkoutTemplate = await context.ClientWorkoutTemplates
+            .FirstOrDefaultAsync(cwt => cwt.WorkoutTemplateId == workoutTemplateId && cwt.ClientId == clientId);  // You need to pass the clientId
+
+        if (clientWorkoutTemplate != null)
+        {
+            context.ClientWorkoutTemplates.Remove(clientWorkoutTemplate);
+            await context.SaveChangesAsync();
+        }
+    }
+
     public async Task DeleteWorkoutTemplateAsync(int templateId)
     {
         using var context = contextFactory.CreateDbContext();
@@ -34,7 +55,42 @@ public class WorkoutTemplateRepositoryPostgreEFCore(IDbContextFactory<RTMSDBCont
     {
         using var context = contextFactory.CreateDbContext();
 
-        return await context.WorkoutTemplates.Where(w => w.UserId == userId).ToListAsync();
+        // Get workout templates assigned to the client
+        var assignedTemplates = await context.ClientWorkoutTemplates
+            .Where(cwt => cwt.ClientId == userId)
+            .Include(cwt => cwt.WorkoutTemplate)
+                .ThenInclude(wt => wt.Exercises)
+                    .ThenInclude(e => e.Sets)
+            .Include(cwt => cwt.WorkoutTemplate.User) // Include User information
+            .Select(cwt => cwt.WorkoutTemplate)
+            .ToListAsync();
+
+        // Get workout templates created by the user
+        var createdTemplates = await context.WorkoutTemplates
+            .Where(wt => wt.UserId == userId)
+            .Include(wt => wt.Exercises)
+                .ThenInclude(e => e.Sets)
+            .Include(wt => wt.User) // Include User information
+            .ToListAsync();
+
+        // Combine the two lists
+        var allTemplates = assignedTemplates.Concat(createdTemplates).ToList();
+
+        return allTemplates;
+    }
+
+
+    public async Task<List<WorkoutTemplate>> ViewClientWorkoutTemplatesAsync(Guid clientId)
+    {
+        using var context = contextFactory.CreateDbContext();
+
+        // Get workouts assigned to the client via the join table
+        return await context.ClientWorkoutTemplates
+            .Where(cwt => cwt.ClientId == clientId)
+            .Include(cwt => cwt.WorkoutTemplate)
+            .ThenInclude(wt => wt.User)
+            .Select(cwt => cwt.WorkoutTemplate)
+            .ToListAsync();
     }
 
     // EF core doesn't track changes in exercise or sets since we go to and from view models so we have to do this monstrosity
@@ -118,5 +174,4 @@ public class WorkoutTemplateRepositoryPostgreEFCore(IDbContextFactory<RTMSDBCont
             await context.SaveChangesAsync();
         }
     }
-
 }

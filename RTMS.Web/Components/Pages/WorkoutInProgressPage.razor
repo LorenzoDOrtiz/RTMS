@@ -235,20 +235,20 @@ else
                 // create the updated workout template to update the workout template in the database
                 var _updatedWorkoutTemplate = new WorkoutTemplate
                     {
-                        Id = _workout.WorkoutTemplateId,
+                        Id = _workout.WorkoutTemplateId.Value,
                         UserId = _workout.UserId,
                         Name = _workout.Name,
                         Exercises = _workout.Exercises.Select(exercise => new ExerciseTemplate
                         {
-                            Id = exercise.ExerciseTemplateId,
-                            WorkoutTemplateId = _workout.WorkoutTemplateId,
+                            Id = exercise.ExerciseTemplateId.Value,
+                            WorkoutTemplateId = _workout.WorkoutTemplateId.Value,
                             Name = exercise.Name,
                             RestTimerValue = exercise.RestTimerValue,
                             RestTimerUnit = exercise.RestTimerUnit,
                             Sets = exercise.Sets.Select(set => new ExerciseSetTemplate
                             {
-                                Id = set.SetTemplateId,
-                                ExerciseTemplateId = exercise.ExerciseTemplateId
+                                Id = set.SetTemplateId.Value,
+                                ExerciseTemplateId = exercise.ExerciseTemplateId.Value
                             }).ToList(),
                             Note = exercise.Note
                         }).ToList()

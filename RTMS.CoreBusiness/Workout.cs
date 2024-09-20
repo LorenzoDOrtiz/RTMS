@@ -20,7 +20,7 @@ public class Workout
     public DateTime? EndTime { get; set; }  // Timestamp when the workout ended
 
     [ForeignKey("WorkoutTemplateId")]
-    public int WorkoutTemplateId { get; set; }  // Foreign key to WorkoutTemplate
+    public int? WorkoutTemplateId { get; set; }  // Foreign key to WorkoutTemplate
 
     public virtual WorkoutTemplate WorkoutTemplate { get; set; }  // Navigation property
 

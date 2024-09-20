@@ -6,7 +6,7 @@
 @inject IDialogService DialogService
 @inject IEndWorkoutUseCase EndWorkoutUseCase
 @inject ILocalStorageService LocalStorage
-@inject UserService UserContextService
+@inject UserService UserService
 @inject ActiveWorkoutService ActiveWorkoutService
 @inject NavigationManager NavigationManager
 
@@ -39,7 +39,7 @@
             // let's check if the user has a active workout before they start a new one
             // and show a dialogue to end the active workout before starting a new one or to
             // not create a new one and go to the active workout instead
-            var userId = UserContextService.UserId;
+            var userId = UserService.UserId;
             var workoutInProgress = await GetActiveWorkoutByUserIdUseCase.ExecuteAsync(userId); // this just has the workout table of the active workout if it exists, otherwise null
             if (workoutInProgress != null)
             {
@@ -62,20 +62,12 @@
                     ActiveWorkoutService.ActiveWorkout = null;
                 }
             }
-
             var detailedWorkoutTemplate = await ViewWorkoutTemplateByIdUseCase.ExecuteAsync(WorkoutTemplate.Id);
             var workout = Mapper.Map<Workout>(detailedWorkoutTemplate);
             workout.StartTime = DateTime.UtcNow;
-
-            // I'm not sure why the mapping profile I've set isn't working here, so I'm manually setting the template id and workout id...
-            // Though the exercise and set mapping is working fine, so it's still useful
-            // I might get rid of auto mapper later and do mapping in the domain models instead since from my recent research,
-            // auto mapper has a pretty serious performance penalty
-            if (workout.WorkoutTemplateId == 0)
-            {
-                workout.WorkoutTemplateId = WorkoutTemplate.Id;
-                workout.Id = 0;
-            }
+            workout.WorkoutTemplateId = WorkoutTemplate.Id;
+            workout.Id = 0;
+            workout.UserId = userId;
 
             var Id = await AddWorkoutUseCase.ExecuteAsync(workout);
             NavigationManager.NavigateTo($"/workout-in-progress/{Id}");

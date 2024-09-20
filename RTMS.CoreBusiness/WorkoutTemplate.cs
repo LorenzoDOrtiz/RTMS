@@ -15,5 +15,9 @@ public class WorkoutTemplate
     [Required]
     public string Name { get; set; }
 
+    public DateTime CreatedAt { get; set; }
+
     public virtual ICollection<ExerciseTemplate> Exercises { get; set; } = new List<ExerciseTemplate>();
+    public ICollection<ClientWorkoutTemplate> ClientWorkoutTemplates { get; set; } = new List<ClientWorkoutTemplate>();
+
 }

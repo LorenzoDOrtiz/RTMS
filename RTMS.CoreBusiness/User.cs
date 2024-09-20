@@ -12,13 +12,17 @@ namespace RTMS.CoreBusiness
 
         [Required]
         public string FirstName { get; set; }
-
+        [Required]
         public string LastName { get; set; }
+
+        public string FullName => $"{FirstName} {LastName}";
 
         [Required]
         public string Email { get; set; }
 
         public ICollection<WorkoutTemplate> WorkoutTemplates { get; set; }
         public ICollection<Workout> Workouts { get; set; }
+        public ICollection<ClientWorkoutTemplate> ClientWorkoutTemplates { get; set; } = new List<ClientWorkoutTemplate>();
+
     }
 }

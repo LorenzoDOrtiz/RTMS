@@ -1,57 +1,103 @@
 ﻿@page "/edit-user/{UserId}"
-@attribute [Authorize]
-@inject Auth0UserService auth0UserService
+@attribute [Authorize(Roles = "Trainer, Admin")]
+@inject IGetTrainerIdsByUserIdUseCase GetTrainerIdsByUserIdUseCase
+@inject IGetAuth0UserIdsByUserIdsUseCase GetAuth0UserIdsByUserIds
+@inject IGetUserIdByAuth0IdUseCase GetUserIdByAuth0IdUseCase
+@inject IUpdateClientTrainersUseCase UpdateClientTrainersUseCase
+@inject IGetUserIdsByAuth0IdsUseCase GetUserIdsByAuth0IdsUseCase
+@inject Auth0UserService Auth0UserService
 @inject NavigationManager Navigation
+@inject UserService UserService
 
 <PageTitle>Edit User</PageTitle>
 
 <MudContainer>
     <MudText Typo="Typo.h6">Edit User</MudText>
 
-    <MudText Typo="Typo.subtitle1">Full Name: @userFullName</MudText>
-    <MudText Typo="Typo.subtitle1">Email: @userEmail</MudText>
+    <MudText Typo="Typo.subtitle1">Full Name: @firstName @lastName</MudText>
+    <MudText Typo="Typo.subtitle1">Email: @email</MudText>
     <MudText Typo="Typo.subtitle1">Role</MudText>
-    <MudSelect @bind-Value="selectedRoleId" T="string">
+    <MudSelect @bind-SelectedValues="selectedRoleIds" Label="Role" MultiSelection MultiSelectionTextFunc="@RoleIdToRoleName">
         @foreach (var role in Roles)
         {
             <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
         }
     </MudSelect>
     <br />
+    <MudText Typo="Typo.subtitle1">Trainer</MudText>
+    <MudSelect @bind-SelectedValues="selectedTrainerAuth0Ids" Label="Trainer" MultiSelection MultiSelectionTextFunc="@TrainerAuth0IdToFullName">
+        @foreach (var trainer in Trainers)
+        {
+            <MudSelectItem Value="@trainer.UserId">@trainer.FullName</MudSelectItem>
+        }
+    </MudSelect>
     <MudButton OnClick="SaveUser" Variant="Variant.Filled" Color="Color.Primary">Save</MudButton>
+
     <MudButton OnClick="Cancel" Variant="Variant.Text" Color="Color.Secondary">Cancel</MudButton>
 </MudContainer>
 
 @code {
     [Parameter] public string UserId { get; set; }
+    private IEnumerable<string> selectedRoleIds;
     private IList<Role> Roles = new List<Role>();
-    private string selectedRoleId;
+    private IEnumerable<string> selectedTrainerAuth0Ids = new List<string>();
+    private IList<Auth0UserDto> Trainers = new List<Auth0UserDto>();
 
     // Variables to hold user details
-    private string userFullName;
-    private string userEmail;
+    private string firstName;
+    private string lastName;
+    private string email;
+
+    private Guid userId;
+    private Func<IEnumerable<string>, string> RoleIdToRoleName;
+    private Func<IEnumerable<string>, string> TrainerAuth0IdToFullName;
+
 
     protected override async Task OnInitializedAsync()
     {
         // Fetch the user's current role and all available roles
-        var user = await auth0UserService.GetUserByIdAsync(UserId);
-        Roles = await auth0UserService.GetAllRolesAsync();
-
-        // Initialize the selectedRoleId with the user's current role ID
-        selectedRoleId = user?.SelectedRoleId ?? string.Empty;
+        var auth0User = await Auth0UserService.GetUserByIdAsync(UserId);
 
         // Set user details for display
-        userFullName = user?.FullName ?? "N/A";
-        userEmail = user?.Email ?? "N/A";
+        firstName = auth0User?.FirstName ?? "N/A";
+        lastName = auth0User?.LastName ?? "N/A";
+        email = auth0User?.Email ?? "N/A";
 
-        // Ensure the MudSelect component reflects the selectedRoleId
-        StateHasChanged();
+        // Initialize the selectedRoleId with the user's current role ID
+        selectedRoleIds = auth0User?.SelectedRoleIds;
+        string roleFilter = UserService.IsAdmin ? null : "Client";
+        Roles = await Auth0UserService.GetAllRolesAsync(roleFilter);
+
+        // Fetch list of trainers from Auth0
+        Trainers = await Auth0UserService.GetUsersByRole("rol_r6m4hjYSOGhc3HWp");
+        RoleIdToRoleName = (selectedRoleIds) =>
+        {
+            var selectedRoles = Roles.Where(t => selectedRoleIds.Contains(t.Id)).Select(t => t.Name);
+            return string.Join(", ", selectedRoles);
+        };
+
+        TrainerAuth0IdToFullName = (selectedTrainerIds) =>
+        {
+            var selectedTrainers = Trainers.Where(t => selectedTrainerIds.Contains(t.UserId)).Select(t => t.FullName);
+            return string.Join(", ", selectedTrainers);
+        };
+
+        userId = await GetUserIdByAuth0IdUseCase.ExecuteAsync(UserId);
+        var selectedTrainerUserIds = await GetTrainerIdsByUserIdUseCase.ExecuteAsync(userId);
+
+        // Initialize selectedTrainerAuth0Id with the internal user's trainer id's
+        if (selectedTrainerUserIds != null)
+        {
+            selectedTrainerAuth0Ids = await GetAuth0UserIdsByUserIds.ExecuteAsync(selectedTrainerUserIds);
+
+        }
     }
 
     private async Task SaveUser()
     {
-        // Update the user's role and navigate back to the user management page
-        await auth0UserService.UpdateUserRoleAsync(UserId, selectedRoleId);
+        await Auth0UserService.UpdateUserRoleAsync(UserId, selectedRoleIds);
+        var selectedTrainerUserIds = await GetUserIdsByAuth0IdsUseCase.ExecuteAsync(selectedTrainerAuth0Ids);
+        await UpdateClientTrainersUseCase.ExecuteAsync(userId, selectedTrainerUserIds);
         Navigation.NavigateTo("/user-management");
     }
 

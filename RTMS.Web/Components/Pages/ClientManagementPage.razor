@@ -1,9 +1,77 @@
 ﻿@page "/client-management"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Trainer, Admin")]
+@inject IGetClientsAssignedToTrainerUseCase GetClientsAssignedToTrainerUseCase
+@inject IRemoveClientFromTrainerUseCase RemoveClientFromTrainerUseCase
+@inject UserService UserService
+@inject NavigationManager NavigationManager
 <PageTitle>Client Management</PageTitle>
 
-<h3>Client Management</h3>
+<MudContainer>
+    <MudTable Items="@Clients" Filter="new Func<CoreBusiness.User, bool>(FilterFunc1)" Virtualize>
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Client Management</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>Name</MudTh>
+            <MudTh>Email</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Name">@context.FullName</MudTd>
+            <MudTd DataLabel="Email">@context.Email</MudTd>
+            <MudTd DataLabel="Actions">
+                <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open user options">
+                    <MudMenuItem Icon="@Icons.Material.Filled.ModeEdit" IconColor="Color.Info" OnClick="() => NavigateToManageClientPage(context.Id, context.FirstName)">Manage Workouts</MudMenuItem>
+                    <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error" OnClick="() => RemoveClient(context.Id)">Remove Client</MudMenuItem>
+                </MudMenu>
+            </MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+    <br />
+    <MudButton Color="Color.Info" Variant="Variant.Filled" Href="/add-user">
+        Add User
+    </MudButton>
+</MudContainer>
 
 @code {
+    private IEnumerable<CoreBusiness.User> Clients = new List<CoreBusiness.User>();
+    private string searchString1 = "";
 
+    protected override async Task OnInitializedAsync()
+    {
+        Clients = await GetClientsAssignedToTrainerUseCase.ExecuteAsync(UserService.UserId);
+    }
+
+    private bool FilterFunc1(CoreBusiness.User user) => FilterFunc(user, searchString1);
+
+    private bool FilterFunc(CoreBusiness.User user, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (user.FullName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (user.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private void NavigateToManageClientPage(Guid userId, string firstName)
+    {
+        NavigationManager.NavigateTo($"/manage-client/{userId}/{firstName}");
+    }
+
+    private async Task RemoveClient(Guid clientId)
+    {
+        var trainerId = UserService.UserId;
+        await RemoveClientFromTrainerUseCase.ExecuteAsync(clientId, trainerId);
+
+        Clients = await GetClientsAssignedToTrainerUseCase.ExecuteAsync(trainerId);
+    }
 }

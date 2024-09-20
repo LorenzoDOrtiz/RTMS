@@ -1,0 +1,185 @@
+﻿@page "/manage-client/{Id}/{FirstName}"
+@attribute [Authorize(Roles = "Trainer, Admin")]
+@inject IViewWorkoutTemplatesByUserIdUseCase ViewWorkoutTemplatesByUserIdUseCase
+@inject IViewWorkoutTemplateByIdUseCase ViewWorkoutTemplateByIdUseCase
+@inject IAddClientWorkoutTemplateUseCase AddClientWorkoutTemplateUseCase
+@inject IViewClientWorkoutTemplatesUseCase ViewClientWorkoutTemplatesUseCase
+@inject IRemoveTrainerTemplateFromClientUseCase RemoveTrainerTemplateFromClientUseCase
+@inject IViewWorkoutHistoryByUserIdUseCase ViewWorkoutHistoryByUserIdUseCase
+@inject UserService UserService
+@inject NavigationManager NavigationManager
+<PageTitle>Manage Client</PageTitle>
+
+<MudContainer>
+    <MudTable Items="@Workouts" Filter="new Func<WorkoutTemplate, bool>(FilterFunc1)" Virtualize >
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Your Workouts</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>Workout</MudTh>
+            <MudTh Style="width: 800px;">Created By</MudTh>
+          @*<MudTh>Creation Date</MudTh>*@
+            <MudTh Style="width: 200px;"></MudTh> <!-- Actions column width -->
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Workout">@context.Name</MudTd>
+            <MudTd DataLabel="Created By">@context.User.FullName</MudTd>
+@*             <MudTd DataLabel="Creation Date">@context.CreatedAt.ToLocalTime().ToString("M/d/yyyy h:mm tt")</MudTd> I need to figure out how to align the columns to add this because at the moment it's offset
+ *@            <MudTd DataLabel="Actions" Style="text-align: right; padding-right:30px;">
+                <MudSpacer />
+                @if (!ClientWorkouts.Any(cw => cw.Id == @context.Id)) // Check if the workout template is not in ClientWorkouts
+                {
+                    <MudTooltip Text="Add Workout To Client">
+                        <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Success" OnClick="() => AddTrainerTemplateToClient(context.Id)"></MudIconButton>
+                    </MudTooltip>
+                }
+            </MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="[3, 6, 9, 12]" />
+        </PagerContent>
+    </MudTable>
+    <br />
+
+    <MudTable Items="@ClientWorkouts" Filter="new Func<WorkoutTemplate, bool>(FilterFunc3)" Virtualize>
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">@FirstName's Workouts</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchString2" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>Workout</MudTh>
+            <MudTh Style="width: 800px;">Created By</MudTh>
+            <MudTh Style="width: 200px;"></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Workout">@context.Name</MudTd>
+            <MudTd DataLabel="Created By">@context.User.FullName</MudTd>
+            <MudTd DataLabel="Actions" Style="text-align: right; padding-right:30px;">
+                <MudSpacer />
+                <MudTooltip Text="Remove Workout From Client">
+                    <MudIconButton Icon="@Icons.Material.Filled.DeleteForever" Color="Color.Error" OnClick="() => RemoveTrainerTemplateFromClient(context.Id)"></MudIconButton>
+                </MudTooltip>
+            </MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="[3, 6, 9, 12]" />
+        </PagerContent>
+    </MudTable>
+    <br />
+
+    <MudTable Items="@ClientWorkoutHistory" Filter="new Func<Workout, bool>(FilterFunc5)" Virtualize>
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">@FirstName's Workout History</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchString3" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>Workout</MudTh>
+            <MudTh Style="width: 200px;"></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Workout">@context.Name</MudTd>
+            <MudTd DataLabel="Actions" Style="text-align: right; padding-right:30px;">
+                <MudSpacer />
+                <MudTooltip Text="Go To Detailed Workout View">
+                    <MudIconButton Icon="@Icons.Material.Filled.Details" Color="Color.Info" OnClick="() => RemoveTrainerTemplateFromClient(context.Id)"></MudIconButton>
+                </MudTooltip>
+            </MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="[3, 6, 9, 12]" />
+        </PagerContent>
+    </MudTable>
+    <br />
+</MudContainer>
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    [Parameter]
+    public string FirstName { get; set; }
+
+    private IEnumerable<WorkoutTemplate> Workouts = new List<WorkoutTemplate>();
+    private IEnumerable<WorkoutTemplate> ClientWorkouts = new List<WorkoutTemplate>();
+    private IEnumerable<Workout> ClientWorkoutHistory = new List<Workout>();
+
+    private string searchString1 = "";
+    private string searchString2 = "";
+    private string searchString3 = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        Workouts = await ViewWorkoutTemplatesByUserIdUseCase.ExecuteAsync(UserService.UserId);
+        ClientWorkouts = await ViewClientWorkoutTemplatesUseCase.ExecuteAsync(Guid.Parse(Id));
+        ClientWorkoutHistory = await ViewWorkoutHistoryByUserIdUseCase.ExecuteAsync(Guid.Parse(Id));
+    }
+
+    private bool FilterFunc1(WorkoutTemplate workout) => FilterFunc(workout, searchString1);
+
+    private bool FilterFunc(WorkoutTemplate workout, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (workout.User.FullName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (workout.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private bool FilterFunc3(WorkoutTemplate workout) => FilterFunc2(workout, searchString2);
+
+    private bool FilterFunc2(WorkoutTemplate workout, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (workout.User.FullName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (workout.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private bool FilterFunc5(Workout workout) => FilterFunc4(workout, searchString3);
+
+    private bool FilterFunc4(Workout workout, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (workout.User.FullName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (workout.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    // Method to add a trainer's workout template to a client
+    private async Task AddTrainerTemplateToClient(int workoutTemplateId)
+    {
+        // Get the workout template by its ID
+        var workoutTemplate = await ViewWorkoutTemplateByIdUseCase.ExecuteAsync(workoutTemplateId);
+
+        // Create the association between the client (UserId) and the workout template
+        var clientWorkoutTemplate = new ClientWorkoutTemplate
+            {
+                ClientId = Guid.Parse(Id),
+                WorkoutTemplateId = workoutTemplate.Id, 
+                AssignedBy = UserService.FullName,
+                AssignedDate = DateTime.UtcNow 
+            };
+
+        // Add the client-workout template association
+        await AddClientWorkoutTemplateUseCase.ExecuteAsync(clientWorkoutTemplate);
+        ClientWorkouts = await ViewClientWorkoutTemplatesUseCase.ExecuteAsync(Guid.Parse(Id));
+    }
+
+    private async Task RemoveTrainerTemplateFromClient(int workoutTemplateId)
+    {
+        await RemoveTrainerTemplateFromClientUseCase.ExecuteAsync(workoutTemplateId, Guid.Parse(Id));
+        ClientWorkouts = await ViewClientWorkoutTemplatesUseCase.ExecuteAsync(Guid.Parse(Id));
+    }
+}

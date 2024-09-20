@@ -16,7 +16,7 @@
 
         public List<string> Roles { get; set; }
 
-        public string SelectedRoleId { get; set; } // The role selected by the user
+        public IEnumerable<string> SelectedRoleIds { get; set; } // The role selected by the user
 
 
     }
