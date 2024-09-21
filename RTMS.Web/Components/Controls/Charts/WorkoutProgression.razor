@@ -6,7 +6,7 @@
 <MudSpacer />
 <MudDynamicTabs @ref="@DynamicTabs" AddTab="@OpenPopover" @bind-ActivePanelIndex="@UserIndex" CloseTab="@CloseTabCallback"
                 AddIconToolTip="Click to add a new workout tab" CloseIconToolTip="Close workout tab"
-                PanelClass="px-4 py-6" Elevation="4" Rounded ApplyEffectsToContainer>
+                PanelClass="px-4 py-6" Elevation="4" Rounded ApplyEffectsToContainer Class="mt-2">
     @foreach (var tab in UserTabs)
     {
         <MudTabPanel ID="@tab.Id" Text="@tab.Label" ShowCloseIcon="@tab.ShowCloseIcon">
