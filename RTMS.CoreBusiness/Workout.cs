@@ -2,13 +2,11 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RTMS.CoreBusiness;
-public class Workout
+public class Workout : BaseEntity
 {
-    [Key]
-    public int Id { get; set; }
-
     [Required]
     public Guid UserId { get; set; }
+
     public User User { get; set; }
 
     [Required]
@@ -22,11 +20,13 @@ public class Workout
     [ForeignKey("WorkoutTemplateId")]
     public int? WorkoutTemplateId { get; set; }
 
-    public virtual WorkoutTemplate WorkoutTemplate { get; set; }
+    public WorkoutTemplate WorkoutTemplate { get; set; }
 
-    public virtual ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();
+    public ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();
 
     public double TotalWorkoutVolume => GetTotalWorkoutVolume();
+
+    public bool IsCompleted { get; set; }
 
     public double GetTotalWorkoutVolume()
     {
@@ -54,5 +54,4 @@ public class Workout
             return null;
         }
     }
-    public bool IsCompleted { get; set; }
 }

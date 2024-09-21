@@ -1,4 +1,6 @@
-﻿<MudSimpleTable Dense Elevation="3">
+﻿@inject UserService UserService
+
+<MudSimpleTable Dense Elevation="3">
     <thead>
         <tr>
             <th>
@@ -19,13 +21,15 @@
                 <ExerciseMenu ExerciseCount="ExerciseCount"
                               OnSetAdded="HandleSetAdded"
                               OnRestTimerOpened="HandleRestTimerOpened"
-                              OnExerciseDeleted="HandleExerciseDeleted" />
+                              OnExerciseDeleted="HandleExerciseDeleted"
+                              OnNoteOpened="HandleNoteOpened" />
 
                 <RestTimerMenu IsRestTimerOpen="@Exercise.IsRestTimerOpen"
                                RestTimerValue="@Exercise.RestTimerValue"
                                RestTimerUnit="@Exercise.RestTimerUnit"
                                OnRestTimerCancel="HandleRestTimerCancel"
                                OnRestTimerSet="@((args) => HandleRestTimerSet(args.Item1, args.Item2))" />
+                <NotePopover IsNotePopoverOpen="@Exercise.IsNotePopOverOpen" Note="@Exercise.Note" OnNoteSave="HandleNoteSave" OnFocusLost="HandleFocusLost" />
             </th>
         </tr>
     </thead>
@@ -93,5 +97,20 @@
 
         }
 
+    }
+
+    private void HandleNoteOpened()
+    {
+        Exercise.IsNotePopOverOpen = true;
+    }
+
+    private void HandleNoteSave(string newNote)
+    {
+        Exercise.Note = newNote;
+    }
+
+    private void HandleFocusLost()
+    {
+        Exercise.IsNotePopOverOpen = false;
     }
 }

@@ -6,33 +6,32 @@
 @inject IGetActiveWorkoutByUserIdUseCase GetActiveWorkoutByUserIdUseCase
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<MudThemeProvider @bind-IsDarkMode="_isDarkMode" />
+<MudThemeProvider IsDarkMode=true />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudText Typo="Typo.h5" Class="ml-2">RTMS</MudText>
-
+        <img src="/icons/logo.png" width="50" height="50" style="vertical-align: middle;" />
         @if (UserService.IsUserAuthenticated)
         {
             @if (ActiveWorkoutService.ActiveWorkout != null && !IsWorkoutInProgressPage())
             {
-                        <div style="margin-left: auto; display: flex; align-items: center; justify-content: space-around;">
-                            <MudButton StartIcon="@Icons.Material.Filled.MonitorHeart"
-                                       Color="Color.Success"
-                                       Variant="Variant.Filled"
-                                       Href="@($"/workout-in-progress/{ActiveWorkoutService.ActiveWorkout.Id}")">
+                <MudContainer Class="d-flex justify-end align-center mr-0 pr-0">
+                    <MudButton StartIcon="material-symbols-sharp/exercise"
+                               Color="Color.Success"
+                               Variant="Variant.Filled"
+                               Href="@($"/workout-in-progress/{ActiveWorkoutService.ActiveWorkout.Id}")">
                         @ActiveWorkoutService.ActiveWorkout.Name
-                            </MudButton>
-                            <MainLayoutWorkoutTimer />
-                            <MainLayoutRestTimer />
-                        </div>
+                    </MudButton>
+                    <MainLayoutWorkoutTimer />
+                    <MainLayoutRestTimer />
+                </MudContainer>
+
             }
         }
     </MudAppBar>
-    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+    <MudDrawer @bind-Open="@_open" ClipMode="DrawerClipMode.Docked" Elevation="2" Variant="DrawerVariant.Mini" OpenMiniOnHover >
         <MyNavMenu />
     </MudDrawer>
     <MudMainContent>
@@ -40,6 +39,10 @@
             @Body
         </MudContainer>
     </MudMainContent>
+
+    <MudScrollToTop>
+        <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowCircleUp" />
+    </MudScrollToTop>
 </MudLayout>
 
 <div id="blazor-error-ui">
@@ -49,8 +52,12 @@
 </div>
 
 @code {
-    private bool _isDarkMode = true;
-    private bool _drawerOpen = true;
+    private bool _open = false;
+
+    private void ToggleDrawer()
+    {
+        _open = !_open;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,11 +92,6 @@
         {
             await LoadActiveWorkout(); // Reload active workout on location change
         }
-    }
-
-    void DrawerToggle()
-    {
-        _drawerOpen = !_drawerOpen;
     }
 
     private bool IsWorkoutInProgressPage()

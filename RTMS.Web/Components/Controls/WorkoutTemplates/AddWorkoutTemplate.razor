@@ -1,7 +1,7 @@
 ﻿@inject IAddWorkoutTemplateUseCase AddWorkoutUseCase
 @inject IMapper Mapper
 @inject NavigationManager NavigationManager
-@inject UserService UserContextService
+@inject UserService UserService
 
 @if (_workoutTemplateViewModel != null)
 {
@@ -27,7 +27,7 @@
 
     protected override void OnInitialized()
     {
-        _workoutTemplateViewModel.UserId = UserContextService.UserId;
+        _workoutTemplateViewModel.UserId = UserService.UserId;
         HandleExerciseAdded();
     }
 
@@ -82,6 +82,10 @@
     private async Task HandleSave()
     {
         var workoutTemplate = Mapper.Map<WorkoutTemplate>(_workoutTemplateViewModel);
+        if (UserService.IsTrainer)
+        {
+            workoutTemplate.IsTrainerCreated = true;
+        }
         await AddWorkoutUseCase.ExecuteAsync(workoutTemplate);
         NavigationManager.NavigateTo("/workouts");
     }

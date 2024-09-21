@@ -12,7 +12,7 @@
 @inject IDialogService DialogService
 @inject IMapper Mapper
 @inject ILocalStorageService LocalStorage
-@inject UserService UserContextService
+@inject UserService UserService
 @inject RestTimerService RestTimerService
 @inject NavigationManager NavigationManager
 @inject ActiveWorkoutService ActiveWorkoutService
@@ -79,7 +79,7 @@ else
             // If local storage is empty, then hit the database
             if (_workoutViewModel == null)
             {
-                var userId = UserContextService.UserId;
+                var userId = UserService.UserId;
                 var workout = await ViewActiveWorkoutByWorkoutAndUserIdUseCase.ExecuteAsync(Id, userId);
                 _workoutViewModel = Mapper.Map<WorkoutViewModel>(workout);
             }
@@ -100,7 +100,7 @@ else
         if (_workoutViewModel != null)
         {
             var serialized = JsonSerializer.Serialize(_workoutViewModel);
-            await LocalStorage.SetItemAsync("activeWorkout", serialized);
+            await LocalStorage.SetItemAsync("rtms_active_workout", serialized);
         }
     }
 
@@ -186,33 +186,35 @@ else
 
     private bool WorkoutTemplateDiffersFromWorkout(WorkoutTemplate workoutTemplate, Workout workout)
     {
-        if (workoutTemplate.Name != workout.Name)
+        if (workoutTemplate != null && workout != null)
         {
-            return true; // Names differ
-        }
-
-        if (workoutTemplate.Exercises.Count != workout.Exercises.Count)
-        {
-            return true; // Different number of exercises
-        }
-
-        // Create dictionaries to compare exercises by exercise template Id
-        var workoutExercisesById = workout.Exercises.ToDictionary(e => e.ExerciseTemplateId);
-        var templateExercisesById = workoutTemplate.Exercises.ToDictionary(e => e.Id);
-
-        foreach (var exerciseTemplate in workoutTemplate.Exercises)
-        {
-            if (!workoutExercisesById.TryGetValue(exerciseTemplate.Id, out var matchingExercise))
+            if (workoutTemplate.Name != workout.Name)
             {
-                return true; // Exercise not found in the workout
+                return true; // Names differ
             }
 
-            if (exerciseTemplate.Name != matchingExercise.Name || exerciseTemplate.Sets.Count != matchingExercise.Sets.Count)
+            if (workoutTemplate.Exercises.Count != workout.Exercises.Count)
             {
-                return true; // Exercise properties differ
+                return true; // Different number of exercises
+            }
+
+            // Create dictionaries to compare exercises by exercise template Id
+            var workoutExercisesById = workout.Exercises.ToDictionary(e => e.ExerciseTemplateId);
+            var templateExercisesById = workoutTemplate.Exercises.ToDictionary(e => e.Id);
+
+            foreach (var exerciseTemplate in workoutTemplate.Exercises)
+            {
+                if (!workoutExercisesById.TryGetValue(exerciseTemplate.Id, out var matchingExercise))
+                {
+                    return true; // Exercise not found in the workout
+                }
+
+                if (exerciseTemplate.Name != matchingExercise.Name || exerciseTemplate.Sets.Count != matchingExercise.Sets.Count)
+                {
+                    return true; // Exercise properties differ
+                }
             }
         }
-
         // All properties match, no changes
         return false;
     }
@@ -221,9 +223,46 @@ else
     {
         var _workoutTemplate = await ViewWorkoutTemplateByIdUseCase.ExecuteAsync(_workoutViewModel.WorkoutTemplateId);
 
+        // Map the current workout view model to the workout entity
         _workout = Mapper.Map<Workout>(_workoutViewModel);
 
-        // Check if changes are present
+        // Check if the user is a non-trainer and the workout template was assigned by a trainer
+        if (!UserService.IsTrainer && _workoutTemplate.UserId != UserService.UserId)
+        {
+            // Set SetTemplateId to null for newly added sets only
+            foreach (var exercise in _workout.Exercises)
+            {
+                if (exercise.Id == 0) // Check if the set is new
+                {
+                    exercise.ExerciseTemplateId = null; // Ensure this is null for new sets
+                }
+                // Check if the exercise has a new set (Id is 0)
+                foreach (var set in exercise.Sets)
+                {
+                    if (set.Id == 0) // Check if the set is new
+                    {
+                        set.SetTemplateId = null; // Ensure this is null for new sets
+                    }
+                }
+            }
+
+            // Non-trainers: end the workout without any update prompt
+            await EndWorkoutUseCase.ExecuteAsync(_workout);
+
+            // Clear local storage before resetting
+            await LocalStorage.RemoveItemAsync("rtms_active_workout");
+
+            ActiveWorkoutService.ActiveWorkout = null;
+
+            // Reset view model
+            _workoutViewModel = null;
+
+            // Navigate to workouts page
+            NavigationManager.NavigateTo("/workouts");
+            return; // Exit to prevent further processing
+        }
+
+        // If the user is a trainer or the workout template belongs to them, check for changes
         var changesPresent = WorkoutTemplateDiffersFromWorkout(_workoutTemplate, _workout);
 
         if (changesPresent)
@@ -232,7 +271,7 @@ else
 
             if (!dialogResult.Canceled)
             {
-                // create the updated workout template to update the workout template in the database
+                // Create the updated workout template to update the workout template in the database
                 var _updatedWorkoutTemplate = new WorkoutTemplate
                     {
                         Id = _workout.WorkoutTemplateId.Value,
@@ -254,11 +293,10 @@ else
                         }).ToList()
                     };
 
+                // Execute the update for the workout template
                 await EditWorkoutTemplateUseCase.ExecuteAsync(_updatedWorkoutTemplate);
             }
-        } 
-
-        // udpate the active workout and set end time and IsCompleted to true
+        }
         await EndWorkoutUseCase.ExecuteAsync(_workout);
 
         // Clear local storage before resetting

@@ -1,10 +1,11 @@
 ﻿@inject IEditWorkoutTemplateUseCase EditWorkoutUseCase
 @inject IMapper Mapper
 @inject NavigationManager NavigationManager
+@inject UserService UserService 
 
 @if (_workoutTemplateViewModel != null)
 {
-    <MudForm @ref="form" @bind-IsValid="@validForm" Validation="() => ValidateForm">
+    <MudForm @ref="form" @bind-IsValid="@validForm" Validation="() => ValidateForm" Disabled="IsFormDisabled">
         <MudStack Spacing="4">
             <WorkoutTemplateHeader WorkoutName="@_workoutTemplateViewModel.Name" OnWorkoutNameChanged="HandleWorkoutNameChange" />
             @if (_workoutTemplateViewModel.Exercises != null)
@@ -23,9 +24,11 @@
     private WorkoutTemplateViewModel _workoutTemplateViewModel = new();
     bool validForm;
     MudForm? form;
+   
 
     [Parameter]
     public WorkoutTemplate? WorkoutTemplate { get; set; }
+    private bool IsFormDisabled { get; set; }
 
     protected override void OnParametersSet()
     {
@@ -33,7 +36,9 @@
         if (WorkoutTemplate != null)
         {
             _workoutTemplateViewModel = Mapper.Map<WorkoutTemplateViewModel>(WorkoutTemplate);
-        }
+            // Disable editing of the form if the current user isn't a trainer (in cases where the template was assigned)
+            IsFormDisabled = !UserService.IsTrainer && (WorkoutTemplate.IsTrainerCreated && WorkoutTemplate.UserId != UserService.UserId);
+        } 
     }
 
     // Make sure that all data loaded into the edit form is valid

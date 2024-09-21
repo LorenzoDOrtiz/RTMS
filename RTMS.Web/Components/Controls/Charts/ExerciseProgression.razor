@@ -5,7 +5,7 @@
 <MudText Typo="Typo.h6">Exercise Volume Progression</MudText>
 <MudSpacer />
 <MudDynamicTabs @ref="@DynamicTabs" AddTab="@OpenPopover" @bind-ActivePanelIndex="@UserIndex" CloseTab="@CloseTabCallback"
-                AddIconToolTip="Click to add a new workout tab" CloseIconToolTip="Close workout tab"
+                AddIconToolTip="Click to add a new exercise tab" CloseIconToolTip="Close exercise tab"
                 PanelClass="px-4 py-6" Elevation="4" Rounded ApplyEffectsToContainer>
     @foreach (var tab in UserTabs)
     {
@@ -54,6 +54,13 @@
 
         // Filter WorkoutTemplates to exclude those that are already used in tabs
         ExerciseTemplates = allTemplates.Where(template => !usedTemplateIds.Contains(template.Id)).ToList();
+        
+        foreach (var template in allTemplates)
+        {
+            await SelectExerciseTemplate(template);
+        }
+
+        UserIndex = 0;
     }
 
     private void OpenPopover()

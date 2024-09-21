@@ -54,6 +54,14 @@
 
         // Filter WorkoutTemplates to exclude those that are already used in tabs
         WorkoutTemplates = allTemplates.Where(template => !usedTemplateIds.Contains(template.Id)).ToList();
+
+        // doing this for now so the data loads but in the future I will add a way to save the tabs the user opened in the past
+        foreach (var template in allTemplates)
+        {
+            await SelectWorkoutTemplate(template);
+        }
+
+        UserIndex = 0;
     }
 
     private void OpenPopover()

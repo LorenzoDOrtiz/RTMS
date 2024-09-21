@@ -2,10 +2,8 @@
 
 namespace RTMS.CoreBusiness;
 
-public class ExerciseSetTemplate
+public class ExerciseSetTemplate : BaseEntity
 {
-    [Key]
-    public int Id { get; set; }
 
     [Required]
     public int ExerciseTemplateId { get; set; }

@@ -1,0 +1,87 @@
+﻿@inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<MudThemeProvider IsDarkMode="true" />
+
+@if (isLoading)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (!isAuthenticated)
+{
+        <MudAppBar Elevation="1" Color="Color.Primary">
+            <img src="/icons/logo.png" width="50" height="50" style="vertical-align: middle;" />
+            <div style="margin-left: auto; display: flex; align-items: center; justify-content: space-around;">
+                <MudLink Color="Color.Default" Href="/Account/Login" Class="text-darken-2">Login</MudLink>
+            </div>
+        </MudAppBar>
+    <MudContainer>
+        <MudCard Style="margin-top: 8%;">
+            <MudCardHeader>
+                <MudText Typo="Typo.h6" Align="Align.Center">Welcome to RTMS</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudText>
+                    Your one-stop solution for managing your resistance training workouts, tracking your progress, and staying motivated!
+                </MudText>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Color="Color.Primary" Href="/Workouts">Get Started</MudButton>
+            </MudCardActions>
+        </MudCard>
+
+        <MudGrid Class="mt-4" Justify="Justify.Center">
+            <MudItem xs="12" sm="6" md="4">
+                <MudPaper Class="p-3" Elevation="4" Height="150px">
+                    <MudText Typo="Typo.h6" Align="Align.Center">Workout Templates</MudText>
+                    <MudText Class="ma-3 pb-3">
+                        Easily create custom workout templates that work for you!
+                    </MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="4">
+                <MudPaper Class="p-3" Elevation="4" Height="150px">
+                    <MudText Typo="Typo.h6" Align="Align.Center">Real Time Tracking</MudText>
+                    <MudText Class="ma-3 pb-3">
+                        Keep track of sets, reps, rest time, and more with real time workout tracking!
+                    </MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="4">
+                <MudPaper Class="p-3" Elevation="4" Height="150px">
+                    <MudText Typo="Typo.h6" Align="Align.Center">Trainer Integration</MudText>
+                    <MudText Class="ma-3 pb-3">
+                        Easily work with your personal trainer as they can assign you custom workouts and track all your progress.
+                    </MudText>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+
+    <MudAppBar Bottom Dense>
+        <MudText Align="Align.Center" Class="py-2">© 2024 RTMS. All rights reserved.</MudText>
+    </MudAppBar>
+}
+
+@code {
+    private bool isAuthenticated = false;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        // Check if the user is authenticated
+        isAuthenticated = authState?.User?.Identity?.IsAuthenticated ?? false;
+
+        if (isAuthenticated)
+        {
+            // Automatically redirect authenticated users to the dashboard
+            NavigationManager.NavigateTo("/dashboard");
+        }
+
+        // Set loading to false to render the UI for unauthenticated users
+        isLoading = false;
+    }
+}

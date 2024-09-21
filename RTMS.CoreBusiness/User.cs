@@ -12,6 +12,7 @@ namespace RTMS.CoreBusiness
 
         [Required]
         public string FirstName { get; set; }
+
         [Required]
         public string LastName { get; set; }
 
@@ -21,7 +22,9 @@ namespace RTMS.CoreBusiness
         public string Email { get; set; }
 
         public ICollection<WorkoutTemplate> WorkoutTemplates { get; set; }
+
         public ICollection<Workout> Workouts { get; set; }
+
         public ICollection<ClientWorkoutTemplate> ClientWorkoutTemplates { get; set; } = new List<ClientWorkoutTemplate>();
 
     }

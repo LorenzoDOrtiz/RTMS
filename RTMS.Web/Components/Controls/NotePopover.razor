@@ -1,0 +1,33 @@
+﻿<MudPopover Open="IsNotePopoverOpen" Class="px-4 pt-2 pb-2">
+    <MudPaper>
+
+   
+    <MudTextField 
+        @ref="multilineReference" 
+        T="string" Label="Multiline Select" 
+        Lines="3" Variant="Variant.Outlined" 
+        Text="@Note" Adornment="Adornment.End" 
+        AdornmentIcon="@Icons.Material.Filled.Api" 
+        OnAdornmentClick="@(() => multilineReference.SelectAsync())"
+        AutoGrow
+        AutoFocus
+        ValueChanged="@(newNote => OnNoteSave.InvokeAsync(newNote))"
+        OnBlur="@( () => OnFocusLost.InvokeAsync())"/>
+    </MudPaper>
+</MudPopover>
+
+@code {
+    [Parameter]
+    public bool IsNotePopoverOpen {get; set;}
+
+    [Parameter]
+    public string Note { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnNoteSave { get; set; } 
+
+    [Parameter]
+    public EventCallback OnFocusLost { get; set; }
+
+    private MudTextField<string> multilineReference;
+}

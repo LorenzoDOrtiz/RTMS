@@ -9,42 +9,65 @@
 <PageTitle>Add User</PageTitle>
 
 <MudContainer>
-    <MudText Typo="Typo.h6">Add User</MudText>
+    <MudForm @bind-IsValid="@validForm">
+        <MudStack Spacing="3" Style="width: 300px;">
+            <MudTextField @bind-Value="firstName" Label="First Name" Placeholder="Enter user first name" AutoFocus Required OnlyValidateIfDirty Validation="ValidateFirstName" />
+            <MudTextField @bind-Value="lastName" Label="Last Name" Placeholder="Enter user last name" Required OnlyValidateIfDirty Validation="ValidateLastName" />
 
-    <MudTextField @bind-Value="firstName" Label="First Name" Placeholder="Enter user first name" AutoFocus />
-    <MudTextField @bind-Value="lastName" Label="Last Name" Placeholder="Enter user last name" />
-    <MudNumericField @bind-Value="phoneNumber" Label="Phone Number" Placeholder="Enter user phone number" />
-    <MudTextField @bind-Value="email" Label="User Email" Placeholder="Enter user email" />
+            <MudTextField Mask="@mask1" Label="Phone Number" HelperText="@mask1.Mask"
+                          @bind-Value="phoneNumber" Variant="@Variant.Text" Clearable Required InputType="InputType.Telephone" />
+
+            <MudTextField Label="Email Address" HelperText="Ex. user@domain.com"
+                          @bind-Value="email" Variant="@Variant.Text" Clearable Required OnlyValidateIfDirty InputType="InputType.Email" Validation="ValidateEmail" />
+
+            <MudSelect @bind-Value="selectedRoleId" Label="Role" T="string">
+                @foreach (var role in Roles)
+                {
+                    <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
+                }
+            </MudSelect>
+            <MudSelect @bind-SelectedValues="selectedTrainerAuth0Ids" Label="Trainer" MultiSelection MultiSelectionTextFunc="@ToStringFuncMulti">
+                @foreach (var trainer in Trainers)
+                {
+                    <MudSelectItem Value="@trainer.UserId">@trainer.FullName</MudSelectItem>
+                }
+            </MudSelect>
+        </MudStack>
+    </MudForm>
     <br />
-    <MudSelect @bind-Value="selectedRoleId" Label="Role" T="string">
-        @foreach (var role in Roles)
-        {
-            <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
-        }
-    </MudSelect>
-    <br />
-    <MudSelect @bind-SelectedValues="selectedTrainerAuth0Ids" Label="Trainer" MultiSelection MultiSelectionTextFunc="@ToStringFuncMulti">
-        @foreach (var trainer in Trainers)
-        {
-            <MudSelectItem Value="@trainer.UserId">@trainer.FullName</MudSelectItem>
-        }
-    </MudSelect>
-    <br />
-    <MudButton OnClick="SendInvitation" Variant="Variant.Filled" Color="Color.Primary">Send Invitation</MudButton>
+    <MudButton OnClick="SendInvitation" Variant="Variant.Filled" Color="Color.Primary" Disabled="!validForm">Send Invitation</MudButton>
     <MudButton OnClick="Cancel" Variant="Variant.Text" Color="Color.Secondary">Cancel</MudButton>
 </MudContainer>
 
 @code {
+    bool validForm;
+
     private string firstName;
     private string lastName;
     private string fullName => $"{firstName} {lastName}";
     private string phoneNumber;
     private string email;
+    
     private string selectedRoleId;
     private IList<Role> Roles = new List<Role>();
     private IEnumerable<string> selectedTrainerAuth0Ids = new List<string>();
     private IList<Auth0UserDto> Trainers = new List<Auth0UserDto>();
     private Func<IEnumerable<string>, string> ToStringFuncMulti;
+
+    private Func<string, bool> ValidateFirstName = value => !string.IsNullOrWhiteSpace(value) && value.Length >= 2;
+    private Func<string, bool> ValidateLastName = value => !string.IsNullOrWhiteSpace(value) && value.Length >= 2;
+    private Func<string, bool> ValidateEmail = email =>
+    {
+    // Basic regex for email validation
+    var emailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+    return !string.IsNullOrWhiteSpace(email) && emailRegex.IsMatch(email);
+    };
+    public PatternMask mask1 = new PatternMask("XXX-XXX-XXXX")
+        {
+            MaskChars = new[] { new MaskChar('X', @"[0-9]") },
+            Placeholder = '_',
+            CleanDelimiters = true,
+        };
 
     protected override async Task OnInitializedAsync()
     {

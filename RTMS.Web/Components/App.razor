@@ -9,11 +9,12 @@
     <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="RTMS.Web.styles.css" />
-    <HeadOutlet @rendermode="InteractiveServer" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <HeadOutlet @rendermode="RenderModeForPage" />
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveServer" />
+    <Routes @rendermode="RenderModeForPage" />
     <script src="/js/downloadCSV.js"></script>
     <script src="/js/timerSounds.js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
@@ -23,6 +24,9 @@
 </html>
 
 @code {
+    // Only to be used in App.razor since it's statically rendered. Doing this so that / can be SSR for performance and interactive server everywhere else
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
 
-
+    private IComponentRenderMode? RenderModeForPage => HttpContext.Request.Path.Equals("/") ? null : InteractiveServer;
 }

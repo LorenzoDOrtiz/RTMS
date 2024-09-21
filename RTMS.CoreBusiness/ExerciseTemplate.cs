@@ -2,16 +2,11 @@
 
 namespace RTMS.CoreBusiness;
 
-public class ExerciseTemplate
+public class ExerciseTemplate : BaseEntity
 {
-    [Key]
-    public int Id { get; set; }
 
     [Required]
     public int WorkoutTemplateId { get; set; }
-
-    [Required]
-    public int Order { get; set; }
 
     [Required]
     public string Name { get; set; } = string.Empty;
@@ -20,7 +15,7 @@ public class ExerciseTemplate
 
     public string RestTimerUnit { get; set; } = "minutes";
 
-    public virtual ICollection<ExerciseSetTemplate> Sets { get; set; } = new List<ExerciseSetTemplate>();
+    public ICollection<ExerciseSetTemplate> Sets { get; set; } = new List<ExerciseSetTemplate>();
 
     public string? Note { get; set; }
 }

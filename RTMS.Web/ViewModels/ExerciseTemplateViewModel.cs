@@ -19,5 +19,7 @@
         public string Note { get; set; } = string.Empty;
 
         public bool IsRestTimerOpen { get; set; } = false;
+
+        public bool IsNotePopOverOpen { get; set; } = false;
     }
 }

@@ -1,25 +1,48 @@
-﻿@using RTMS.CoreBusiness
-@inject IViewWorkoutTemplatesByUserIdUseCase ViewWorkoutsByUserIdUseCase
+﻿@inject IViewWorkoutTemplatesByUserIdUseCase ViewWorkoutsByUserIdUseCase
+@inject IAddWorkoutUseCase AddWorkoutUseCase
+@inject IDeleteWorkoutTemplateUseCase DeleteWorkoutUseCase
+@inject IViewWorkoutTemplateByIdUseCase ViewWorkoutTemplateByIdUseCase
+@inject IMapper Mapper
+@inject IGetActiveWorkoutByUserIdUseCase GetActiveWorkoutByUserIdUseCase
+@inject IDialogService DialogService
+@inject IEndWorkoutUseCase EndWorkoutUseCase
+@inject ILocalStorageService LocalStorage
+@inject UserService UserService
+@inject ActiveWorkoutService ActiveWorkoutService
+@inject NavigationManager NavigationManager
 
-<MudText Typo="Typo.h5" GutterBottom="true">Workouts</MudText>
-
-<MudSimpleTable Elevation="3">
-    <tbody>
-        @if (userWorkoutTemplates != null && userWorkoutTemplates.Count > 0)
-        {
-            @foreach (var workout in userWorkoutTemplates)
-            {
-                <WorkoutTemplatesItem WorkoutTemplate="workout" />
-            }
-        }
-        else
-        {
-            <tr>
-                <td colspan="2">No workouts available.</td>
-            </tr>
-        }
-    </tbody>
-</MudSimpleTable>
+<MudTable Items="@userWorkoutTemplates" Filter="new Func<WorkoutTemplate, bool>(FilterFunc1)" Virtualize>
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Workouts</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Workout Name</MudTh>
+        <MudTh>Created By</MudTh>
+        <MudTh>Creation</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Workouts">@context.Name</MudTd>
+        <MudTd DataLabel="Workouts">@context.User.FullName</MudTd>
+        <MudTd DataLabel="Start">@context.CreatedAt.ToLocalTime().ToString("M/d/yyyy h:mm tt")</MudTd>
+        <MudTd DataLabel="Actions">
+            <MudContainer Class="d-flex justify-end align-center">
+                <MudButton OnClick="() => StartWorkout(context)" Color="Color.Success" Variant="Variant.Filled">
+                    Start
+                </MudButton>
+                <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open workout options">
+                    <MudMenuItem Icon="@Icons.Material.Filled.Edit" IconColor="Color.Info" Href="@($"/workouts/edit-workout-template/{context.Id}")">Edit</MudMenuItem>
+                    <MudMenuItem Icon="@Icons.Material.Filled.DeleteForever" IconColor="Color.Error" OnClick="() => DeleteWorkoutTemplate(context.Id)">Delete</MudMenuItem>
+                </MudMenu>
+            </MudContainer>
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="[3, 6, 9, 12]" />
+    </PagerContent>
+</MudTable>
 
 <br />
 
@@ -36,6 +59,76 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        userWorkoutTemplates = (await ViewWorkoutsByUserIdUseCase.ExecuteAsync(UserID)).ToList();
+    }
+
+    private string searchString = "";
+
+    private bool FilterFunc1(WorkoutTemplate workoutTemplate) => FilterFunc(workoutTemplate, searchString);
+
+    private bool FilterFunc(WorkoutTemplate workoutTemplate, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+
+        string createdAtString = workoutTemplate.CreatedAt.ToLocalTime().ToString("M/d/yyyy h:mm tt");
+
+        if (workoutTemplate.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (workoutTemplate.User.FullName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (createdAtString.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    }
+
+    private async Task StartWorkout(WorkoutTemplate workoutTemplate)
+    {
+        if (workoutTemplate != null)
+        {
+            // let's check if the user has a active workout before they start a new one
+            // and show a dialogue to end the active workout before starting a new one or to
+            // not create a new one and go to the active workout instead
+            var userId = UserService.UserId;
+            var workoutInProgress = await GetActiveWorkoutByUserIdUseCase.ExecuteAsync(userId); // this just has the workout table of the active workout if it exists, otherwise null
+            if (workoutInProgress != null)
+            {
+                var dialog = DialogService.Show<EndActiveWorkoutDialogue>("End Active Workout?");
+                var result = await dialog.Result;
+
+                if (result.Canceled)
+                {
+                    return;
+                }
+                else
+                {
+                    // set the workout status to complete and the end time
+                    await EndWorkoutUseCase.ExecuteAsync(workoutInProgress);
+
+                    // Clear local storage of the active workout
+                    await LocalStorage.RemoveItemAsync("rtms_active_workout");
+
+                    // set the activeworkout to null in the service
+                    ActiveWorkoutService.ActiveWorkout = null;
+                }
+            }
+            var detailedWorkoutTemplate = await ViewWorkoutTemplateByIdUseCase.ExecuteAsync(workoutTemplate.Id);
+            var workout = Mapper.Map<Workout>(detailedWorkoutTemplate);
+            workout.StartTime = DateTime.UtcNow;
+            workout.WorkoutTemplateId = workoutTemplate.Id;
+            workout.Id = 0;
+            workout.UserId = userId;
+
+            var Id = await AddWorkoutUseCase.ExecuteAsync(workout);
+            NavigationManager.NavigateTo($"/workout-in-progress/{Id}");
+        }
+
+    }
+
+    private async Task DeleteWorkoutTemplate(int workoutTemplateId)
+    {
+        await DeleteWorkoutUseCase.ExecuteAsync(workoutTemplateId);
         userWorkoutTemplates = (await ViewWorkoutsByUserIdUseCase.ExecuteAsync(UserID)).ToList();
     }
 }

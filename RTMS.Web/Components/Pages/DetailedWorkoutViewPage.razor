@@ -23,7 +23,7 @@
             <MudPaper Elevation="2" Class="pa-4">
                 <MudText Typo="Typo.h5">Total Volume</MudText>
                 <MudDivider />
-                <MudText Typo="Typo.body1">@workout.GetTotalWorkoutVolume() kg</MudText>
+                <MudText Typo="Typo.body1">@workout.GetTotalWorkoutVolume() lbs</MudText>
             </MudPaper>
         </MudItem>
 
@@ -41,7 +41,7 @@
                             <strong>@exercise.Name</strong> -
                             Total Sets: @exercise.Sets.Count,
                             Total Reps: @exercise.Sets.Sum(set => set.Reps),
-                            Volume: @totalVolume kg
+                            Volume: @totalVolume lbs
                         </MudText>
                     }
                 }

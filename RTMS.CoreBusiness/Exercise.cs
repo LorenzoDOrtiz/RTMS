@@ -2,23 +2,20 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RTMS.CoreBusiness;
-public class Exercise
+public class Exercise : BaseEntity
 {
-    [Key]
-    public int Id { get; set; }
-
     [Required]
     public string Name { get; set; }
 
     [ForeignKey("WorkoutId")]
     public int WorkoutId { get; set; }
 
-    public virtual Workout Workout { get; set; }
+    public Workout Workout { get; set; }
 
     [ForeignKey("ExerciseTemplateId")]
     public int? ExerciseTemplateId { get; set; }
 
-    public virtual ExerciseTemplate ExerciseTemplate { get; set; }
+    public ExerciseTemplate ExerciseTemplate { get; set; }
 
     public int RestTimerValue { get; set; } = 0;
 
@@ -51,7 +48,7 @@ public class Exercise
         return totalVolume;
     }
 
-    public virtual ICollection<ExerciseSet> Sets { get; set; } = new List<ExerciseSet>();
+    public ICollection<ExerciseSet> Sets { get; set; } = new List<ExerciseSet>();
 
     public string? Note { get; set; }
 }

@@ -72,7 +72,7 @@
     <WorkoutHistory Id="@Id" FirstName="@FirstName"/>
     <br />
 
-    <WorkoutAnalytics Id="@Id" FirstName="@FirstName" />
+    <Charts Id="@Id"/>
     <br />
 </MudContainer>
 
@@ -132,8 +132,6 @@
             {
                 ClientId = Id,
                 WorkoutTemplateId = workoutTemplate.Id, 
-                AssignedBy = UserService.FullName,
-                AssignedDate = DateTime.UtcNow 
             };
 
         // Add the client-workout template association

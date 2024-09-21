@@ -1,33 +1,31 @@
 ﻿<MudNavMenu>
-    <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
-
     <AuthorizeView>
         <Authorized>
-            <MudNavLink Href="/workouts" Match="NavLinkMatch.Prefix">Workouts</MudNavLink>
-            <MudNavLink Href="/workout-history" Match="NavLinkMatch.Prefix">Workout History</MudNavLink>
-            <MudNavLink Href="/charts" Match="NavLinkMatch.Prefix">Charts</MudNavLink>
+            <MudNavLink Href="/dashboard" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Sharp.Dashboard">Dashboard</MudNavLink>
+            <MudNavLink Href="/workouts" Match="NavLinkMatch.Prefix" Icon="material-symbols-sharp/exercise">
+                Workouts
+            </MudNavLink>
+            <MudNavLink Href="/workout-history" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Sharp.History">Workout History</MudNavLink>
+            <MudNavLink Href="/charts" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Outlined.ShowChart">Charts</MudNavLink>
         </Authorized>
     </AuthorizeView>
 
     <AuthorizeView Roles="Admin, Trainer">
         <Authorized>
-            <MudNavLink Href="/user-management" Match="NavLinkMatch.Prefix">User Management</MudNavLink>
-            <MudNavLink Href="/client-management" Match="NavLinkMatch.Prefix">Client Management</MudNavLink>
+            <MudNavLink Href="/user-management" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Sharp.AdminPanelSettings">User Management</MudNavLink>
+            <MudNavLink Href="/client-management" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Sharp.SupervisedUserCircle">Client Management</MudNavLink>
         </Authorized>
     </AuthorizeView>
 
     <AuthorizeView>
         <Authorized>
-            <MudNavLink Href="/settings" Match="NavLinkMatch.Prefix">Settings</MudNavLink>
+            <MudNavLink Href="/settings" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Sharp.Settings">Settings</MudNavLink>
         </Authorized>
     </AuthorizeView>
 
     <AuthorizeView>
         <Authorized>
-            <MudNavLink Href="Account/Logout" Match="NavLinkMatch.Prefix">Logout</MudNavLink>
+            <MudNavLink Href="Account/Logout" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Sharp.Logout">Logout</MudNavLink>
         </Authorized>
-        <NotAuthorized>
-            <MudNavLink Href="Account/Login" Match="NavLinkMatch.Prefix">Login</MudNavLink>
-        </NotAuthorized>
     </AuthorizeView>
 </MudNavMenu>

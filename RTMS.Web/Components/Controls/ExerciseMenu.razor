@@ -12,7 +12,8 @@
                  IconColor="Color.Secondary">
         Rest Timer
     </MudMenuItem>
-    <MudMenuItem Icon="@Icons.Material.Filled.Note"
+    <MudMenuItem OnClick="OpenNote"
+                 Icon="@Icons.Material.Filled.Note"
                  IconColor="Color.Tertiary">
         Note
     </MudMenuItem>
@@ -39,6 +40,9 @@
     [Parameter]
     public EventCallback OnExerciseDeleted { get; set; }
 
+    [Parameter]
+    public EventCallback OnNoteOpened { get; set; }
+
     private async Task AddSet()
     {
         await OnSetAdded.InvokeAsync();
@@ -52,5 +56,10 @@
     private async Task DeleteExercise()
     {
         await OnExerciseDeleted.InvokeAsync();
+    }
+
+    private async Task OpenNote()
+    {
+        await OnNoteOpened.InvokeAsync();
     }
 }

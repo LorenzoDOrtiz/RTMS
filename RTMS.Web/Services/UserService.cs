@@ -16,6 +16,7 @@ public class UserService(AuthenticationStateProvider authenticationStateProvider
     public string UserEmail { get; private set; }
     public bool IsUserAuthenticated { get; private set; }
     public bool IsAdmin { get; private set; }
+    public bool IsTrainer { get; private set; }
 
     public async Task LoadUserAsync()
     {
@@ -37,6 +38,7 @@ public class UserService(AuthenticationStateProvider authenticationStateProvider
             UserEmail = internalUser.Email;
             IsUserAuthenticated = user.Identity.IsAuthenticated;
             IsAdmin = user.IsInRole("Admin");
+            IsTrainer = user.IsInRole("Trainer");
         }
         else
         {

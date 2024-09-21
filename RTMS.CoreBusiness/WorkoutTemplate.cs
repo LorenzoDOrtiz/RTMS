@@ -2,11 +2,8 @@
 
 namespace RTMS.CoreBusiness;
 
-public class WorkoutTemplate
+public class WorkoutTemplate : BaseEntity
 {
-    [Key]
-    public int Id { get; set; }
-
     [Required]
     public Guid UserId { get; set; }
 
@@ -17,7 +14,9 @@ public class WorkoutTemplate
 
     public DateTime CreatedAt { get; set; }
 
-    public virtual ICollection<ExerciseTemplate> Exercises { get; set; } = new List<ExerciseTemplate>();
+    public ICollection<ExerciseTemplate> Exercises { get; set; } = new List<ExerciseTemplate>();
+
     public ICollection<ClientWorkoutTemplate> ClientWorkoutTemplates { get; set; } = new List<ClientWorkoutTemplate>();
 
+    public bool IsTrainerCreated { get; set; }
 }
