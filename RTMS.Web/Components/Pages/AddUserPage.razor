@@ -65,15 +65,24 @@
 
         // Get the user's internal ID based on the Auth0 ID
         var clientUserId = await GetUserIdByAuth0IdUseCase.ExecuteAsync(clientAuth0Id);
-        var trainerUserId = await GetUserIdsByAuth0IdsUseCase.ExecuteAsync(selectedTrainerAuth0Ids);
 
-        // Add the trainer-client relationship if both IDs are valid
-        if (trainerUserId.Any())
+        IEnumerable<Guid> trainerUserIds = Enumerable.Empty<Guid>(); // Default to an empty list
+
+        if (selectedTrainerAuth0Ids != null && selectedTrainerAuth0Ids.Any())
         {
-            await AddTrainerClientRelationshipUseCase.ExecuteAsync(clientUserId, trainerUserId);
+            trainerUserIds = await GetUserIdsByAuth0IdsUseCase.ExecuteAsync(selectedTrainerAuth0Ids);
         }
 
-        // Redirect to user management page
+        // Add the trainer-client relationship if both IDs are valid
+        if (trainerUserIds.Any())
+        {
+            // Ensure you have a valid trainerUserId, which is likely from the first trainer in the list
+            var trainerUserId = trainerUserIds.First(); // Use the first trainer ID for the relationship
+            await AddTrainerClientRelationshipUseCase.ExecuteAsync(clientUserId, trainerUserIds);
+        }
+        // Delay for a short duration so the changes can be reflected in auth0. Might be able to avoid this later by using the ServerData feature of the mud table
+        await Task.Delay(1000);
+
         NavigationManager.NavigateTo("/user-management");
     }
 

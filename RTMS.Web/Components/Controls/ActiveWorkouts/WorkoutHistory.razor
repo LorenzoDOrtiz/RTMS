@@ -1,46 +1,100 @@
-﻿@using RTMS.CoreBusiness
-@inject IViewWorkoutHistoryByUserIdUseCase ViewWorkoutHistoryByUserIdUseCase
+﻿@inject IViewWorkoutHistoryByUserIdUseCase ViewWorkoutHistoryByUserIdUseCase
+@inject NavigationManager NavigationManager
 
-<MudText Typo="Typo.h5" GutterBottom>Workout History</MudText>
-
-<MudSimpleTable Elevation="3" Striped>
-    <thead>
-        <tr>
-            <th>Workout Name</th>
-            <th>Date</th>
-            <th>Duration</th>
-            <th>Volume</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (userWorkoutHistory != null && userWorkoutHistory.Count > 0)
-        {
-            @foreach (var workout in userWorkoutHistory)
+<MudTable Items="@ClientWorkoutHistory" Filter="new Func<Workout, bool>(FilterFunc5)" Virtualize>
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">
+            @if(FirstName != null)
             {
-                if (workout.IsCompleted)
-                {
-                    <WorkoutHistoryItem Workout="workout" />
-
-                }
+                <span>@FirstName's Workout History</span>
             }
-        }
-        else
-        {
-            <tr>
-                <td colspan="2">No workout history.</td>
-            </tr>
-        }
-    </tbody>
-</MudSimpleTable>
+            else
+            {
+                <span>Workout History</span>
+            }
+        </MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString3" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Workout</MudTh>
+        <MudTh>Start</MudTh>
+        <MudTh>End</MudTh>
+        <MudTh>Duration</MudTh> 
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Workout">
+            <MudLink Href=@($"/detailed-workout-view/{context.Id}") Color="Color.Primary">
+                @context.Name
+            </MudLink>
+        </MudTd>
+        <MudTd DataLabel="Start">@context.StartTime.ToLocalTime().ToString("M/d/yyyy h:mm tt")</MudTd>
+        <MudTd DataLabel="End">
+            @if (@context.EndTime.HasValue)
+            {
+                @context.EndTime.Value.ToLocalTime().ToString("M/d/yyyy h:mm tt")
+            }
+            else
+            {
+                <span></span>
+            }
+        </MudTd>
+        <MudTd DataLabel="Duration">
+            @if (@context.Duration.HasValue)
+            {
+                var duration = @context.Duration;
+                @(duration.Value.TotalMinutes < 1 ? "< 1 min" : $"{duration.Value.TotalHours:F0} hr {duration.Value.Minutes} min")
+            }
+            else
+            {
+                <span></span>
+            }
+
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="[3, 6, 9, 12]" />
+    </PagerContent>
+</MudTable>
 
 @code {
     [Parameter]
-    public Guid UserID { get; set; }
+    public Guid Id { get; set; }
 
-    private List<Workout>? userWorkoutHistory;
+    [Parameter]
+    public string FirstName { get; set; }
 
-    protected override async Task OnParametersSetAsync()
+    private IEnumerable<Workout> ClientWorkoutHistory = new List<Workout>();
+
+    protected override async Task OnInitializedAsync()
     {
-        userWorkoutHistory = (await ViewWorkoutHistoryByUserIdUseCase.ExecuteAsync(UserID)).ToList();
+        ClientWorkoutHistory = await ViewWorkoutHistoryByUserIdUseCase.ExecuteAsync(Id);
+    }
+
+    private string searchString3 = "";
+
+    private bool FilterFunc5(Workout workout) => FilterFunc4(workout, searchString3);
+
+    private bool FilterFunc4(Workout workout, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+
+        string startTimeString = workout.StartTime.ToLocalTime().ToString("M/d/yyyy h:mm tt");
+        string endTimeString = workout.EndTime.HasValue ? workout.EndTime.Value.ToLocalTime().ToString("M/d/yyyy h:mm tt") : string.Empty;
+
+        if (startTimeString.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (endTimeString.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (workout.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    }
+
+    private async Task GoToDetailedWorkoutView(int workoutId)
+    {
+        NavigationManager.NavigateTo($"/detailed-workout-view/{workoutId}");
     }
 }

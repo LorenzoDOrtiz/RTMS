@@ -5,21 +5,17 @@ namespace RTMS.CoreBusiness;
 public class ExerciseSet
 {
     [Key]
-    public int Id { get; set; }  // Primary key
-
+    public int Id { get; set; }
     [ForeignKey("ExerciseId")]
-    public int ExerciseId { get; set; }  // Foreign key to Exercise
-
-    public virtual Exercise Exercise { get; set; }  // Navigation property
-
+    public int ExerciseId { get; set; }
+    public virtual Exercise Exercise { get; set; }
     [ForeignKey("SetTemplateId")]
-    public int? SetTemplateId { get; set; }  // Foreign key to ExerciseTemplate
+    public int? SetTemplateId { get; set; }
 
-    public virtual ExerciseSetTemplate ExerciseSetTemplate { get; set; }  // Navigation property to the template
+    public virtual ExerciseSetTemplate ExerciseSetTemplate { get; set; }
+    [Required]
+    public int Reps { get; set; }
 
     [Required]
-    public int Reps { get; set; }  // Number of repetitions
-
-    [Required]
-    public double Weight { get; set; }  // Weight lifted
+    public double Weight { get; set; }
 }

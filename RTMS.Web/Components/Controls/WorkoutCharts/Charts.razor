@@ -1,0 +1,15 @@
+﻿<MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="px-0">
+    <MudGrid Class="d-flex align-start justify-center mud-width-full py-8">
+        <MudItem xs=12 lg=6>
+            <WorkoutProgression Id="@Id"/>
+        </MudItem>
+        <MudItem xs=12 lg=6>
+            <ExerciseProgression Id="@Id" />
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code{
+    [Parameter]
+    public Guid Id { get; set; }
+}

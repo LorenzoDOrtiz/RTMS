@@ -1,0 +1,107 @@
+﻿@inject UserService UserService
+@inject IGetWorkoutTemplatesWithAtLeastTwoWorkoutsUseCase GetWorkoutTemplatesWithAtLeastTwoWorkoutsUseCase
+@inject IGetDetailedWorkoutHistoryByTemplateIdUseCase GetDetailedWorkoutHistoryByTemplateIdUseCase
+
+<MudText Typo="Typo.h6">Workout Volume Progression</MudText>
+<MudSpacer />
+<MudDynamicTabs @ref="@DynamicTabs" AddTab="@OpenPopover" @bind-ActivePanelIndex="@UserIndex" CloseTab="@CloseTabCallback"
+                AddIconToolTip="Click to add a new workout tab" CloseIconToolTip="Close workout tab"
+                PanelClass="px-4 py-6" Elevation="4" Rounded ApplyEffectsToContainer>
+    @foreach (var tab in UserTabs)
+    {
+        <MudTabPanel ID="@tab.Id" Text="@tab.Label" ShowCloseIcon="@tab.ShowCloseIcon">
+            <WorkoutProgressionApexLineGraph Workouts="@tab.Workouts" />
+        </MudTabPanel>
+    }
+</MudDynamicTabs>
+
+<MudPopover Open="@_isPopoverOpen" AnchorOrigin="Origin.TopRight" TransformOrigin="Origin.TopRight" Duration="1000">
+    <MudList T="WorkoutTemplate">
+        @foreach (var template in WorkoutTemplates)
+        {
+            <MudListItem OnClick="() => SelectWorkoutTemplate(template)">
+                @template.Name
+            </MudListItem>
+        }
+    </MudList>
+</MudPopover>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; } = Guid.Empty;
+
+    public MudDynamicTabs DynamicTabs;
+    private bool _isPopoverOpen;
+    private IEnumerable<WorkoutTemplate> WorkoutTemplates = new List<WorkoutTemplate>();
+
+    public class TabView
+    {
+        public string Label { get; set; }
+        public Guid Id { get; set; }
+        public bool ShowCloseIcon { get; set; } = true;
+        public List<Workout> Workouts { get; set; }
+    }
+
+    public List<TabView> UserTabs = new();
+    public int UserIndex;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var allTemplates = await GetWorkoutTemplatesWithAtLeastTwoWorkoutsUseCase.ExecuteAsync(Id != Guid.Empty ? Id : UserService.UserId);
+
+        // Get IDs of templates that are already in the UserTabs
+        var usedTemplateIds = UserTabs.Select(tab => tab.Workouts.FirstOrDefault()?.WorkoutTemplateId).Where(id => id.HasValue).Select(id => id.Value).ToHashSet();
+
+        // Filter WorkoutTemplates to exclude those that are already used in tabs
+        WorkoutTemplates = allTemplates.Where(template => !usedTemplateIds.Contains(template.Id)).ToList();
+    }
+
+    private void OpenPopover()
+    {
+        _isPopoverOpen = true;
+    }
+
+    private async Task SelectWorkoutTemplate(WorkoutTemplate template)
+    {
+        _isPopoverOpen = false;
+
+        var workouts = await GetDetailedWorkoutHistoryByTemplateIdUseCase.ExecuteAsync(template.Id);
+
+        UserTabs.Add(new TabView
+            {
+                Id = Guid.NewGuid(),
+                Label = template.Name,
+                Workouts = workouts.ToList()
+            });
+
+        UserIndex = UserTabs.Count - 1;
+
+        // Refresh the template list after adding a new tab
+        await UpdateWorkoutTemplates();
+
+        StateHasChanged();
+    }
+
+    private async Task UpdateWorkoutTemplates()
+    {
+        var allTemplates = await GetWorkoutTemplatesWithAtLeastTwoWorkoutsUseCase.ExecuteAsync(UserService.UserId);
+
+        // Get IDs of templates that are already in the UserTabs
+        var usedTemplateIds = UserTabs.Select(tab => tab.Workouts.FirstOrDefault()?.WorkoutTemplateId).Where(id => id.HasValue).Select(id => id.Value).ToHashSet();
+
+        // Filter WorkoutTemplates to exclude those that are already used in tabs
+        WorkoutTemplates = allTemplates.Where(template => !usedTemplateIds.Contains(template.Id)).ToList();
+    }
+
+    private void CloseTabCallback(MudTabPanel panel) => RemoveTab((Guid)panel.ID);
+
+    private void RemoveTab(Guid id)
+    {
+        var tabView = UserTabs.SingleOrDefault((t) => Equals(t.Id, id));
+        if (tabView is not null)
+        {
+            UserTabs.Remove(tabView);
+            StateHasChanged();
+        }
+    }
+}

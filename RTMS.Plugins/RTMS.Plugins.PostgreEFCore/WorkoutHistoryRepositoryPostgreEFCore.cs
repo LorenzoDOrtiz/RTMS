@@ -112,4 +112,52 @@ public class WorkoutHistoryRepositoryPostgreEFCore(IDbContextFactory<RTMSDBConte
 
         return await context.Workouts.Where(w => w.UserId == userId && w.IsCompleted == true).ToListAsync();
     }
+
+    public async Task<Workout> GetDetailedWorkoutHistoryByWorkoutIdAsync(int workoutId)
+    {
+        using var context = contextFactory.CreateDbContext();
+        var workout = await context.Workouts
+            .Include(w => w.Exercises)
+            .ThenInclude(e => e.Sets)
+            .FirstOrDefaultAsync(w => w.Id == workoutId);
+
+        return workout;
+    }
+
+    public async Task<IEnumerable<Workout>> GetDetailedWorkoutHistoryByTemplateIdAsync(int templateId)
+    {
+        using var context = contextFactory.CreateDbContext();
+
+        var workouts = await context.Workouts
+            .Include(w => w.Exercises)
+            .ThenInclude(e => e.Sets)
+            .Where(w => w.WorkoutTemplateId == templateId)
+            .ToListAsync();
+
+        return workouts;
+    }
+
+    public async Task<IEnumerable<Exercise>> GetDetailedExerciseHistoryByTemplateId(int templateId)
+    {
+        using var context = contextFactory.CreateDbContext();
+
+        var exercises = await context.Exercises
+            .Include(e => e.Sets)
+            .Include(e => e.Workout) // including the workout to get the time for the exercise volume chart
+            .Where(e => e.ExerciseTemplateId == templateId)
+            .ToListAsync();
+
+        return exercises;
+    }
+
+    public async Task<List<Workout>> GetAllDetailedWorkoutDataByUserIdAsync(Guid userId)
+    {
+        using var context = contextFactory.CreateDbContext();
+
+        return await context.Workouts
+            .Include(w => w.Exercises)
+                .ThenInclude(e => e.Sets)
+            .Where(w => w.UserId == userId)
+            .ToListAsync();
+    }
 }

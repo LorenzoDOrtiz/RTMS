@@ -1,0 +1,64 @@
+﻿@using ApexCharts
+
+@if (Workouts != null && Workouts.Any())
+{
+
+
+    <ApexChart TItem="Workout"
+               Title="@($"{WorkoutName} - Workout Volume Progression")"
+               Options="@options">
+        <ApexPointSeries TItem="Workout"
+                         Items="Workouts"
+                         Name="Volume"
+                         SeriesType="SeriesType.Line"
+                         XValue="@(e => e.StartTime.ToLocalTime().ToString("MM/dd/yyyy"))"
+                         YAggregate="@(e => e.Sum(e => (decimal)e.TotalWorkoutVolume))"
+                         OrderBy="e=> e.Y"
+                         ShowDataLabels="true" />
+    </ApexChart>
+}
+else
+{
+    <MudProgressCircular Indeterminate />
+
+}
+@code {
+    [Parameter]
+    public List<Workout> Workouts { get; set; }
+
+    private string WorkoutName => Workouts?.FirstOrDefault()?.Name ?? "No Workout";
+
+    private ApexChartOptions<Workout> options;
+
+    protected override void OnInitialized()
+    {
+        var fileName = $"{WorkoutName.Replace(" ", "_")}_Report";
+
+        options = new ApexChartOptions<Workout>
+            {
+                Theme = new Theme
+                {
+                  Mode = Mode.Dark, 
+                  Palette = PaletteType.Palette1
+                },
+                Chart = new Chart
+                {
+                    Type = ApexCharts.ChartType.Line,
+                    Toolbar = new Toolbar
+                    {
+                        Export = new ExportOptions
+                        {
+                            Csv = new ExportCSV
+                            {
+                                Filename = fileName,
+                            }
+                        }
+                    }
+                },
+                Xaxis = new XAxis { Title = new AxisTitle { Text = "Session" } },
+                Yaxis = new List<YAxis> { new YAxis { Title = new AxisTitle { Text = "Volume" } } },
+                Tooltip = new Tooltip { Enabled = true },
+                Markers = new Markers { Size = 6 }
+            };
+    }
+}

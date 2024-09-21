@@ -7,8 +7,8 @@ namespace RTMS.CoreBusiness
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; }  // Internal User ID
-        public string Auth0Id { get; set; } // Store the Auth0 UserId
+        public Guid Id { get; set; }
+        public string Auth0Id { get; set; }
 
         [Required]
         public string FirstName { get; set; }

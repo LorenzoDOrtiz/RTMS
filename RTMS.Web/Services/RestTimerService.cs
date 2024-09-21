@@ -41,7 +41,6 @@ namespace RTMS.Web.Services
             // Stop and dispose the timer when no longer needed
             _timer?.Stop();
             _timer?.Dispose();
-            _timer = null;
 
             // Trigger UI update on timer stop
             OnTimerChanged?.Invoke();

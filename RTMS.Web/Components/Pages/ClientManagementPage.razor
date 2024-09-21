@@ -25,7 +25,7 @@
             <MudTd DataLabel="Email">@context.Email</MudTd>
             <MudTd DataLabel="Actions">
                 <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open user options">
-                    <MudMenuItem Icon="@Icons.Material.Filled.ModeEdit" IconColor="Color.Info" OnClick="() => NavigateToManageClientPage(context.Id, context.FirstName)">Manage Workouts</MudMenuItem>
+                    <MudMenuItem Icon="@Icons.Material.Filled.ModeEdit" IconColor="Color.Info" OnClick="() => NavigateToManageClientPage(context.Id, context.FirstName)">Manage @context.FirstName</MudMenuItem>
                     <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error" OnClick="() => RemoveClient(context.Id)">Remove Client</MudMenuItem>
                 </MudMenu>
             </MudTd>
@@ -66,6 +66,7 @@
     {
         NavigationManager.NavigateTo($"/manage-client/{userId}/{firstName}");
     }
+
 
     private async Task RemoveClient(Guid clientId)
     {

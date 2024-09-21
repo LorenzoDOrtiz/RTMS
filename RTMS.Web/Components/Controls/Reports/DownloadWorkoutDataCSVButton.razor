@@ -1,0 +1,56 @@
+﻿@inject IJSRuntime JSRuntime
+@inject IGetAllDetailedWorkoutDataByUserId GetAllDetailedWorkoutDataByUserId
+@inject UserService UserService
+
+<MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="DownloadWorkoutData">
+    Download Workout Data
+</MudButton>
+
+@code {
+    private async Task DownloadWorkoutData()
+    {
+        var workouts = await FetchWorkoutDataAsync();
+        var csvContent = GenerateCsv(workouts);
+        var fileName = $"Workout_Data_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+
+        // Call the JavaScript function to download the file
+        await JSRuntime.InvokeVoidAsync("downloadCSV", fileName, csvContent);
+    }
+
+    private async Task<List<Workout>> FetchWorkoutDataAsync()
+    {
+        return await GetAllDetailedWorkoutDataByUserId.ExecuteAsync(UserService.UserId);
+    }
+
+    private string GenerateCsv(List<Workout> workouts)
+    {
+        var csv = new StringBuilder();
+        csv.AppendLine("Workout ID,Workout Name,Start Time,End Time,Total Volume,Exercise Name,Reps,Weight,Exercise Volume");
+
+        foreach (var workout in workouts)
+        {
+            if (workout.Exercises != null && workout.Exercises.Any())
+            {
+                foreach (var exercise in workout.Exercises)
+                {
+                    var exerciseVolume = exercise.TotalExerciseVolume; 
+                    foreach (var set in exercise.Sets)
+                    {
+                        var line = $"{workout.Id},{workout.Name},{workout.StartTime},{workout.EndTime}," +
+                                   $"{workout.TotalWorkoutVolume}," +
+                                   $"{exercise.Name},{set.Reps},{set.Weight},{exerciseVolume}";
+                        csv.AppendLine(line);
+                    }
+                }
+            }
+            else
+            {
+                var line = $"{workout.Id},{workout.Name},{workout.StartTime},{workout.EndTime},{workout.TotalWorkoutVolume},,,,"; // Additional commas for exercise data
+                csv.AppendLine(line);
+            }
+        }
+
+        return csv.ToString();
+    }
+
+}

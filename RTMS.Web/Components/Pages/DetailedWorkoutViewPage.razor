@@ -1,0 +1,91 @@
+﻿@page "/detailed-workout-view/{Id:int}"
+@attribute [Authorize]
+@inject IGetDetailedWorkoutHistoryByWorkoutIdUseCase GetDetailedWorkoutHistoryByWorkoutIdUseCase
+
+<PageTitle>Detailed Workout View</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudGrid Spacing="4">
+        <!-- Overview Section -->
+        <MudItem xs="12">
+            <MudPaper Elevation="2" Class="pa-4">
+                <MudText Typo="Typo.h5">Workout Overview</MudText>
+                <MudDivider />
+                <MudText Typo="Typo.body1"><strong>Name:</strong> @workout.Name</MudText>
+                <MudText Typo="Typo.body1"><strong>Start Time:</strong> @workout.StartTime.ToString("f")</MudText>
+                <MudText Typo="Typo.body1"><strong>End Time:</strong> @(workout.EndTime.HasValue ? workout.EndTime.Value.ToString("f"): "In Progress")</MudText>
+                <MudText Typo="Typo.body1"><strong>Duration:</strong> @(workout.Duration.HasValue ? workout.Duration.Value.ToString(@"hh\:mm\:ss") : "Not Completed")</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <!-- Total Volume -->
+        <MudItem xs="12">
+            <MudPaper Elevation="2" Class="pa-4">
+                <MudText Typo="Typo.h5">Total Volume</MudText>
+                <MudDivider />
+                <MudText Typo="Typo.body1">@workout.GetTotalWorkoutVolume() kg</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <!-- Exercises List -->
+        <MudItem xs="12">
+            <MudPaper Elevation="2" Class="pa-4">
+                <MudText Typo="Typo.h5">Exercises</MudText>
+                <MudDivider />
+                @if (workout.Exercises.Any())
+                {
+                    foreach (var exercise in workout.Exercises)
+                    {
+                        double totalVolume = exercise.Sets.Sum(set => set.Reps * set.Weight);
+                        <MudText Typo="Typo.body1">
+                            <strong>@exercise.Name</strong> -
+                            Total Sets: @exercise.Sets.Count,
+                            Total Reps: @exercise.Sets.Sum(set => set.Reps),
+                            Volume: @totalVolume kg
+                        </MudText>
+                    }
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Warning">No exercises recorded for this workout.</MudText>
+                }
+            </MudPaper>
+        </MudItem>
+
+        <!-- Notes Section -->
+        <MudItem xs="12">
+            <MudPaper Elevation="2" Class="pa-4">
+                <MudText Typo="Typo.h5">Notes</MudText>
+                <MudDivider />
+                @if (workout.Exercises.Any())
+                {
+                    foreach (var exercise in workout.Exercises)
+                    {
+                        <MudText Typo="Typo.body1">
+                            <strong>@exercise.Name:</strong>
+                            @(string.IsNullOrEmpty(exercise.Note) ? "No notes available." : exercise.Note)
+                        </MudText>
+                    }
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Warning">No exercises recorded for this workout.</MudText>
+                }
+            </MudPaper>
+        </MudItem>
+
+    </MudGrid>
+</MudContainer>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Workout workout = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch the workout by Id and populate data
+        workout = await GetDetailedWorkoutHistoryByWorkoutIdUseCase.ExecuteAsync(Id);
+    }
+}

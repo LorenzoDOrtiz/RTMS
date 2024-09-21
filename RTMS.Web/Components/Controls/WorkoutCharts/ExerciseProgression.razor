@@ -1,0 +1,107 @@
+﻿@inject UserService UserService
+@inject IGetExerciseTemplatesWithAtLeastTwoExercisesUseCase GetExerciseTemplatesWithAtLeastTwoExercisesUseCase
+@inject IGetDetailedExerciseHistoryByTemplateIdUseCase GetDetailedExerciseHistoryByTemplateIdUseCase
+
+<MudText Typo="Typo.h6">Exercise Volume Progression</MudText>
+<MudSpacer />
+<MudDynamicTabs @ref="@DynamicTabs" AddTab="@OpenPopover" @bind-ActivePanelIndex="@UserIndex" CloseTab="@CloseTabCallback"
+                AddIconToolTip="Click to add a new workout tab" CloseIconToolTip="Close workout tab"
+                PanelClass="px-4 py-6" Elevation="4" Rounded ApplyEffectsToContainer>
+    @foreach (var tab in UserTabs)
+    {
+        <MudTabPanel ID="@tab.Id" Text="@tab.Label" ShowCloseIcon="@tab.ShowCloseIcon">
+            <ExerciseProgressionApexLineGraph Exercises="@tab.Exercises" />
+        </MudTabPanel>
+    }
+</MudDynamicTabs>
+
+<MudPopover Open="@_isPopoverOpen" AnchorOrigin="Origin.TopRight" TransformOrigin="Origin.TopRight" Duration="1000">
+    <MudList T="WorkoutTemplate">
+        @foreach (var template in ExerciseTemplates)
+        {
+            <MudListItem OnClick="() => SelectExerciseTemplate(template)">
+                @template.Name
+            </MudListItem>
+        }
+    </MudList>
+</MudPopover>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; } = Guid.Empty;
+
+    public MudDynamicTabs DynamicTabs;
+    private bool _isPopoverOpen;
+    private IEnumerable<ExerciseTemplate> ExerciseTemplates = new List<ExerciseTemplate>();
+
+    public class TabView
+    {
+        public string Label { get; set; }
+        public Guid Id { get; set; }
+        public bool ShowCloseIcon { get; set; } = true;
+        public List<Exercise> Exercises { get; set; }
+    }
+
+    public List<TabView> UserTabs = new();
+    public int UserIndex;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var allTemplates = await GetExerciseTemplatesWithAtLeastTwoExercisesUseCase.ExecuteAsync(Id != Guid.Empty ? Id : UserService.UserId);
+
+        // Get IDs of templates that are already in the UserTabs
+        var usedTemplateIds = UserTabs.Select(tab => tab.Exercises.FirstOrDefault()?.ExerciseTemplateId).Where(id => id.HasValue).Select(id => id.Value).ToHashSet();
+
+        // Filter WorkoutTemplates to exclude those that are already used in tabs
+        ExerciseTemplates = allTemplates.Where(template => !usedTemplateIds.Contains(template.Id)).ToList();
+    }
+
+    private void OpenPopover()
+    {
+        _isPopoverOpen = true;
+    }
+
+    private async Task SelectExerciseTemplate(ExerciseTemplate template)
+    {
+        _isPopoverOpen = false;
+
+        var exercises = await GetDetailedExerciseHistoryByTemplateIdUseCase.ExecuteAsync(template.Id);
+
+        UserTabs.Add(new TabView
+            {
+                Id = Guid.NewGuid(),
+                Label = template.Name,
+                Exercises = exercises.ToList()
+            });
+
+        UserIndex = UserTabs.Count - 1;
+
+        // Refresh the template list after adding a new tab
+        await UpdateWorkoutTemplates();
+
+        StateHasChanged();
+    }
+
+    private async Task UpdateWorkoutTemplates()
+    {
+        var allTemplates = await GetExerciseTemplatesWithAtLeastTwoExercisesUseCase.ExecuteAsync(UserService.UserId);
+
+        // Get IDs of templates that are already in the UserTabs
+        var usedTemplateIds = UserTabs.Select(tab => tab.Exercises.FirstOrDefault()?.ExerciseTemplateId).Where(id => id.HasValue).Select(id => id.Value).ToHashSet();
+
+        // Filter WorkoutTemplates to exclude those that are already used in tabs
+        ExerciseTemplates = allTemplates.Where(template => !usedTemplateIds.Contains(template.Id)).ToList();
+    }
+
+    private void CloseTabCallback(MudTabPanel panel) => RemoveTab((Guid)panel.ID);
+
+    private void RemoveTab(Guid id)
+    {
+        var tabView = UserTabs.SingleOrDefault((t) => Equals(t.Id, id));
+        if (tabView is not null)
+        {
+            UserTabs.Remove(tabView);
+            StateHasChanged();
+        }
+    }
+}

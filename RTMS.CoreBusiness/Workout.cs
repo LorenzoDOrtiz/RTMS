@@ -5,26 +5,28 @@ namespace RTMS.CoreBusiness;
 public class Workout
 {
     [Key]
-    public int Id { get; set; }  // Primary key
+    public int Id { get; set; }
 
     [Required]
-    public Guid UserId { get; set; } // Link to ASP.NET Core Identity User
+    public Guid UserId { get; set; }
     public User User { get; set; }
 
     [Required]
-    public string Name { get; set; }  // Name of the workout
+    public string Name { get; set; }
 
     [Required]
-    public DateTime StartTime { get; set; }  // Timestamp when the workout started
+    public DateTime StartTime { get; set; }
 
-    public DateTime? EndTime { get; set; }  // Timestamp when the workout ended
+    public DateTime? EndTime { get; set; }
 
     [ForeignKey("WorkoutTemplateId")]
-    public int? WorkoutTemplateId { get; set; }  // Foreign key to WorkoutTemplate
+    public int? WorkoutTemplateId { get; set; }
 
-    public virtual WorkoutTemplate WorkoutTemplate { get; set; }  // Navigation property
+    public virtual WorkoutTemplate WorkoutTemplate { get; set; }
 
-    public virtual ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();  // Collection of exercises in the workout
+    public virtual ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();
+
+    public double TotalWorkoutVolume => GetTotalWorkoutVolume();
 
     public double GetTotalWorkoutVolume()
     {
@@ -41,5 +43,16 @@ public class Workout
         return totalVolume;
     }
 
-    public bool IsCompleted { get; set; }  // Flag to indicate if the workout is completed
+    public TimeSpan? Duration
+    {
+        get
+        {
+            if (EndTime.HasValue)
+            {
+                return EndTime.Value - StartTime;
+            }
+            return null;
+        }
+    }
+    public bool IsCompleted { get; set; }
 }

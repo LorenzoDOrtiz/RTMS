@@ -24,7 +24,7 @@ public class WorkoutTemplateRepositoryPostgreEFCore(IDbContextFactory<RTMSDBCont
         using var context = contextFactory.CreateDbContext();
 
         var clientWorkoutTemplate = await context.ClientWorkoutTemplates
-            .FirstOrDefaultAsync(cwt => cwt.WorkoutTemplateId == workoutTemplateId && cwt.ClientId == clientId);  // You need to pass the clientId
+            .FirstOrDefaultAsync(cwt => cwt.WorkoutTemplateId == workoutTemplateId && cwt.ClientId == clientId);
 
         if (clientWorkoutTemplate != null)
         {
@@ -78,7 +78,6 @@ public class WorkoutTemplateRepositoryPostgreEFCore(IDbContextFactory<RTMSDBCont
 
         return allTemplates;
     }
-
 
     public async Task<List<WorkoutTemplate>> ViewClientWorkoutTemplatesAsync(Guid clientId)
     {
@@ -173,5 +172,96 @@ public class WorkoutTemplateRepositoryPostgreEFCore(IDbContextFactory<RTMSDBCont
 
             await context.SaveChangesAsync();
         }
+    }
+
+    public async Task<List<WorkoutTemplate>> GetWorkoutTemplatesWithAtLeastTwoWorkoutsAsync(Guid userId)
+    {
+        using var context = contextFactory.CreateDbContext();
+
+        // Get workout templates assigned to the client
+        var assignedTemplates = await context.ClientWorkoutTemplates
+            .Where(cwt => cwt.ClientId == userId)
+            .Include(cwt => cwt.WorkoutTemplate)
+                .ThenInclude(wt => wt.Exercises)
+                    .ThenInclude(e => e.Sets)
+            .Select(cwt => cwt.WorkoutTemplate)
+            .ToListAsync();
+
+        // Get workout templates created by the user
+        var createdTemplates = await context.WorkoutTemplates
+            .Where(wt => wt.UserId == userId)
+            .Include(wt => wt.Exercises)
+                .ThenInclude(e => e.Sets)
+            .ToListAsync();
+
+        // Combine the two lists
+        var allTemplates = assignedTemplates.Concat(createdTemplates).ToList();
+
+        var templateIds = allTemplates.Select(t => t.Id).ToList();
+
+        // Get workout templates with at least two workouts
+        var filteredTemplates = await context.Workouts
+            .Where(w => w.UserId == userId && w.WorkoutTemplateId.HasValue &&
+                        templateIds.Contains(w.WorkoutTemplateId.Value))
+            .GroupBy(w => w.WorkoutTemplateId)
+            .Where(g => g.Count() >= 2)
+            .Select(g => g.FirstOrDefault().WorkoutTemplateId) // Select the WorkoutTemplateId to work with it
+            .Distinct() // Ensure we only get unique template IDs
+            .ToListAsync();
+
+        // Now load the WorkoutTemplates with their related data
+        var resultTemplates = await context.WorkoutTemplates
+            .Where(wt => filteredTemplates.Contains(wt.Id))
+            .Include(wt => wt.Exercises)
+                .ThenInclude(e => e.Sets)
+            .ToListAsync();
+
+        return resultTemplates;
+    }
+
+    public async Task<List<ExerciseTemplate>> GetExerciseTemplatesWithAtLeastTwoExercisesAsync(Guid userId)
+    {
+        using var context = contextFactory.CreateDbContext();
+
+        // Get workout templates assigned to the client
+        var assignedTemplates = await context.ClientWorkoutTemplates
+            .Where(cwt => cwt.ClientId == userId)
+            .Include(cwt => cwt.WorkoutTemplate)
+                .ThenInclude(wt => wt.Exercises)
+                    .ThenInclude(e => e.Sets)
+            .Select(cwt => cwt.WorkoutTemplate)
+            .ToListAsync();
+
+        // Get workout templates created by the user
+        var createdTemplates = await context.WorkoutTemplates
+            .Where(wt => wt.UserId == userId)
+            .Include(wt => wt.Exercises)
+                .ThenInclude(e => e.Sets)
+            .ToListAsync();
+
+        // Combine the two lists of workout templates
+        var allTemplates = assignedTemplates.Concat(createdTemplates).ToList();
+
+        // Get all ExerciseTemplate IDs from the Exercises of each WorkoutTemplate
+        var templateIds = allTemplates
+            .SelectMany(wt => wt.Exercises)
+            .Select(et => et.Id)
+            .Distinct()
+            .ToList();
+
+        // Get the exercise template IDs of those with at least two exercises, handling nullable ExerciseTemplateId
+        var filteredTemplateIds = await context.Exercises
+            .Where(e => e.ExerciseTemplateId.HasValue && templateIds.Contains(e.ExerciseTemplateId.Value)) // Handle nullable ExerciseTemplateId
+            .GroupBy(e => e.ExerciseTemplateId)
+            .Where(g => g.Count() >= 2) // Filter groups with at least two exercises
+            .Select(g => g.Key.Value) // Select the non-null ExerciseTemplateId
+            .ToListAsync();
+
+        // Now load the ExerciseTemplates with their related data
+        var resultTemplates = await context.ExerciseTemplates
+            .Where(et => filteredTemplateIds.Contains(et.Id))
+            .ToListAsync();
+
+        return resultTemplates;
     }
 }

@@ -1,8 +1,8 @@
 ﻿using RTMS.CoreBusiness;
-using RTMS.UseCases.ActiveWorkouts.Interfaces;
 using RTMS.UseCases.PluginInterfaces;
+using RTMS.UseCases.WorkoutHistory.Interfaces;
 
-namespace RTMS.UseCases.ActiveWorkouts;
+namespace RTMS.UseCases.WorkoutHistory;
 
 public class ViewWorkoutHistoryByUserIdUseCase(IWorkoutHistoryRepository workoutRepository) : IViewWorkoutHistoryByUserIdUseCase
 {

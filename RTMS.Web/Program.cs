@@ -9,8 +9,12 @@ using RTMS.Plugins.PostgreEFCore;
 using RTMS.UseCases.ActiveWorkouts;
 using RTMS.UseCases.ActiveWorkouts.Interfaces;
 using RTMS.UseCases.PluginInterfaces;
+using RTMS.UseCases.Reports;
+using RTMS.UseCases.Reports.Interfaces;
 using RTMS.UseCases.Users;
 using RTMS.UseCases.Users.Interfaces;
+using RTMS.UseCases.WorkoutHistory;
+using RTMS.UseCases.WorkoutHistory.Interfaces;
 using RTMS.UseCases.Workouts;
 using RTMS.UseCases.Workouts.Interfaces;
 using RTMS.UseCases.WorkoutTemplates;
@@ -25,7 +29,6 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddMudServices();
-
 
 builder.Services.AddAuth0WebAppAuthentication(options =>
 {
@@ -68,15 +71,18 @@ builder.Services.AddDbContextFactory<RTMSDBContext>(options =>
 
 builder.Services.AddBlazoredLocalStorage();
 
+// Services
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<WorkoutTimerService>();
 builder.Services.AddScoped<RestTimerService>();
 builder.Services.AddSingleton<ActiveWorkoutService>();
 
+// Repositories
 builder.Services.AddSingleton<IWorkoutTemplateRepository, WorkoutTemplateRepositoryPostgreEFCore>();
 builder.Services.AddSingleton<IWorkoutHistoryRepository, WorkoutHistoryRepositoryPostgreEFCore>();
 builder.Services.AddSingleton<IUserRepositoryPostgreEFCore, UserRepositoryPostgreEFCore>();
 
+// Templates
 builder.Services.AddTransient<IAddWorkoutTemplateUseCase, AddWorkoutTemplateUseCase>();
 builder.Services.AddTransient<IEditWorkoutTemplateUseCase, EditWorkoutTemplateUseCase>();
 builder.Services.AddTransient<IViewWorkoutTemplatesByUserIdUseCase, ViewWorkoutTemplatesByUserIdUseCase>();
@@ -85,13 +91,22 @@ builder.Services.AddTransient<IDeleteWorkoutTemplateUseCase, DeleteWorkoutTempla
 builder.Services.AddTransient<IAddClientWorkoutTemplateUseCase, AddClientWorkoutTemplateUseCase>();
 builder.Services.AddTransient<IViewClientWorkoutTemplatesUseCase, ViewClientWorkoutTemplatesUseCase>();
 builder.Services.AddTransient<IRemoveTrainerTemplateFromClientUseCase, RemoveTrainerTemplateFromClientUseCase>();
+builder.Services.AddTransient<IGetWorkoutTemplatesWithAtLeastTwoWorkoutsUseCase, GetWorkoutTemplatesWithAtLeastTwoWorkoutsUseCase>();
 
+// Active Workouts
 builder.Services.AddTransient<IAddWorkoutUseCase, AddWorkoutUseCase>();
 builder.Services.AddTransient<IGetActiveWorkoutByUserIdUseCase, GetActiveWorkoutByUserIdUseCase>();
 builder.Services.AddTransient<IViewActiveWorkoutByWorkoutAndUserIdUseCase, ViewActiveWorkoutByWorkoutAndUserIdUseCase>();
 builder.Services.AddTransient<IEndWorkoutUseCase, EndWorkoutUseCase>();
-builder.Services.AddTransient<IViewWorkoutHistoryByUserIdUseCase, ViewWorkoutHistoryByUserIdUseCase>();
 
+// Workout History
+builder.Services.AddTransient<IViewWorkoutHistoryByUserIdUseCase, ViewWorkoutHistoryByUserIdUseCase>();
+builder.Services.AddTransient<IGetDetailedWorkoutHistoryByWorkoutIdUseCase, GetDetailedWorkoutHistoryByWorkoutIdUseCase>();
+builder.Services.AddTransient<IGetDetailedWorkoutHistoryByTemplateIdUseCase, GetDetailedWorkoutHistoryByTemplateIdUseCase>();
+builder.Services.AddTransient<IGetDetailedExerciseHistoryByTemplateIdUseCase, GetDetailedExerciseHistoryByTemplateIdUseCase>();
+builder.Services.AddTransient<IGetExerciseTemplatesWithAtLeastTwoExercisesUseCase, GetExerciseTemplatesWithAtLeastTwoExercisesUseCase>();
+
+// User
 builder.Services.AddTransient<IGetOrCreateUserUseCase, GetOrCreateUserUseCase>();
 builder.Services.AddTransient<IAddTrainerClientRelationshipUseCase, AddTrainerClientRelationshipUseCase>();
 builder.Services.AddTransient<IGetUserIdByAuth0IdUseCase, GetUserIdByAuth0IdUseCase>();
@@ -102,6 +117,9 @@ builder.Services.AddTransient<IUpdateClientTrainersUseCase, UpdateClientTrainers
 builder.Services.AddTransient<IGetClientsAssignedToTrainerUseCase, GetClientsAssignedToTrainerUseCase>();
 builder.Services.AddTransient<IRemoveClientFromTrainerUseCase, RemoveClientFromTrainerUseCase>();
 builder.Services.AddTransient<IDeleteUserUseCase, DeleteUserUseCase>();
+
+// Reports 
+builder.Services.AddTransient<IGetAllDetailedWorkoutDataByUserId, GetAllDetailedWorkoutDataByUserId>();
 
 // Configure AutoMapper
 builder.Services.AddAutoMapper(cfg =>

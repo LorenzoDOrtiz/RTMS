@@ -1,0 +1,64 @@
+﻿@using ApexCharts
+
+@if (Exercises != null && Exercises.Any())
+{
+
+
+    <ApexChart TItem="Exercise"
+               Title="@($"{ExerciseName} - Workout Volume Progression")"
+               Options="@options">
+        <ApexPointSeries TItem="Exercise"
+                         Items="Exercises"
+                         Name="Volume"
+                         SeriesType="SeriesType.Line"
+                         XValue="@(e => e.Workout.StartTime.ToLocalTime().ToString("MM/dd/yyyy"))"
+                         YAggregate="@(e => e.Sum(e => (decimal)e.TotalExerciseVolume))"
+                         OrderBy="e=> e.Y"
+                         ShowDataLabels="true" />
+    </ApexChart>
+}
+else
+{
+    <MudProgressCircular Indeterminate />
+
+}
+@code {
+    [Parameter]
+    public List<Exercise> Exercises { get; set; }
+
+    private string ExerciseName => Exercises?.FirstOrDefault()?.Name ?? "No Workout";
+
+    private ApexChartOptions<Exercise> options;
+
+    protected override void OnInitialized()
+    {
+        var fileName = $"{ExerciseName.Replace(" ", "_")}_Report";
+
+        options = new ApexChartOptions<Exercise>
+            {
+                Theme = new Theme
+                {
+                    Mode = Mode.Dark,
+                    Palette = PaletteType.Palette1
+                },
+                Chart = new Chart
+                {
+                    Type = ApexCharts.ChartType.Line,
+                    Toolbar = new Toolbar
+                    {
+                        Export = new ExportOptions
+                        {
+                            Csv = new ExportCSV
+                            {
+                                Filename = fileName,
+                            }
+                        }
+                    }
+                },
+                Xaxis = new XAxis { Title = new AxisTitle { Text = "Session" } },
+                Yaxis = new List<YAxis> { new YAxis { Title = new AxisTitle { Text = "Volume" } } },
+                Tooltip = new Tooltip { Enabled = true },
+                Markers = new Markers { Size = 6 }
+            };
+    }
+}

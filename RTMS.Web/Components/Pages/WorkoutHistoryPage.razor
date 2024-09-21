@@ -1,16 +1,18 @@
 ﻿@page "/workout-history"
 @attribute [Authorize]
+@inject UserService  UserService
 <PageTitle>Workout History</PageTitle>
 
 @inject UserService UserContextService
 
-<WorkoutHistory UserID="@userId" />
+<WorkoutHistory Id="@userId" />
 
 @code {
     private Guid userId;
 
     protected override void OnInitialized()
     {
-        userId = UserContextService.UserId;
+        userId = UserService.UserId;
+
     }
 }
