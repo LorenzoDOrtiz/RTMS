@@ -1,11 +1,13 @@
+# GitLab CI/CD configuration for RTMS project
+
 variables:
-  # Define paths specific to your projects.
+  # Define paths specific to your projects
   CORE_BUSINESS_PROJECT: 'RTMS.CoreBusiness/RTMS.CoreBusiness.csproj'
   USE_CASES_PROJECT: 'RTMS.UseCases/RTMS.UseCases.csproj'
   WEBAPP_PROJECT: 'RTMS.Web/RTMS.Web.csproj'
   TEST_PROJECT: 'RTMS.Tests/RTMS.Tests.csproj'
-  PLUGIN_PROJECT: 'RTMS.Plugins.PostgreEFCore/RTMS.Plugins.PostgreEFCore.csproj'
-  EXE_RELEASE_FOLDER: 'RTMS.Web/bin/Release'
+  PLUGIN_PROJECT: 'RTMS.Plugins/RTMS.Plugins.PostgreEFCore/RTMS.Plugins.PostgreEFCore.csproj'
+  EXE_RELEASE_FOLDER: 'RTMS.Web/bin/Release/net8.0'
   TEST_DLL: 'RTMS.Tests/bin/Release/net8.0/RTMS.Tests.dll'
   DEPLOY_FOLDER: 'P:\Projects\RTMS\Builds'
 
@@ -19,26 +21,25 @@ build_job:
   only:
     - tags
   script:
-    - 'dotnet restore'  # Restore NuGet dependencies for the entire solution.
-    - 'dotnet build $CORE_BUSINESS_PROJECT --configuration Release'  # Build CoreBusiness project.
-    - 'dotnet build $USE_CASES_PROJECT --configuration Release'  # Build UseCases project.
-    - 'dotnet build $WEBAPP_PROJECT --configuration Release'  # Build Web app project.
-    - 'dotnet build $TEST_PROJECT --configuration Release'  # Build Test project.
-    - 'dotnet build $PLUGIN_PROJECT --configuration Release'  # Build Plugin project.
+    - 'dotnet restore'  # Restore NuGet packages for the entire solution
+    - 'dotnet build $CORE_BUSINESS_PROJECT --configuration Release'
+    - 'dotnet build $USE_CASES_PROJECT --configuration Release'
+    - 'dotnet build $WEBAPP_PROJECT --configuration Release'
+    - 'dotnet build $TEST_PROJECT --configuration Release'
+    - 'dotnet build $PLUGIN_PROJECT --configuration Release'
   artifacts:
     expire_in: 1 week
     paths:
-      - '$EXE_RELEASE_FOLDER/RTMS.Web.exe'
-      - '$TEST_DLL'  # Save the test project DLL for xUnit.
+      - '$EXE_RELEASE_FOLDER/RTMS.Web.dll'
+      - '$TEST_DLL'
 
 test_job:
   stage: test
   only:
     - tags
   script:
-    - 'dotnet tool install --global xunit.runner.console'
-    - '$env:Path += ";$env:USERPROFILE\.dotnet\tools"'
-    - 'xunit.console.exe "$TEST_DLL" -xml TestResult.xml -nologo -noappdomain'
+    - 'dotnet tool install --global dotnet-xunit-cli'
+    - 'dotnet xunit $TEST_DLL -xml TestResult.xml'
   artifacts:
     when: always
     expire_in: 1 week
@@ -54,7 +55,7 @@ deploy_job:
   script:
     - '$commitSubject = git log -1 --pretty=%s'
     - '$deployFolder = "$DEPLOY_FOLDER" + "\" + "$CI_COMMIT_TAG" + " - " + $commitSubject + "\"'
-    - 'xcopy /y "$EXE_RELEASE_FOLDER/RTMS.Web.exe" "$deployFolder"'
+    - 'xcopy /y "$EXE_RELEASE_FOLDER\RTMS.Web.dll" "$deployFolder"'
     - 'xcopy /y "TestResult.xml" "$deployFolder"'
   dependencies:
     - build_job
