@@ -55,7 +55,7 @@ deploy_job:
     - 'deployFolder="$DEPLOY_FOLDER/$CI_COMMIT_TAG - $commitSubject"'
     - 'mkdir -p "$deployFolder"'
     - 'cp "$EXE_RELEASE_FOLDER/RTMS.Web.dll" "$deployFolder/"'
-    - 'cp "$CI_PROJECT_DIR/TestResults.trx" "$deployFolder/"' 
+    - 'cp "$CI_PROJECT_DIR/RTMS.Tests/TestResults/TestResults.trx" "$deployFolder/"'
   dependencies:
     - build_job
     - test_job
