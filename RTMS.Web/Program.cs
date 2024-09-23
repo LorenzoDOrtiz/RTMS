@@ -26,10 +26,7 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (builder.Environment.IsProduction())
-{
-    builder.Configuration.AddEnvironmentVariables();
-}
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -71,7 +68,7 @@ builder.Services.AddSingleton(sp =>
 
 builder.Services.AddDbContextFactory<RTMSDBContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("AZURE_POSTGRESQL_CONNECTIONSTRING"));
+    options.UseNpgsql(builder.Configuration["AZURE:POSTGRESQL:CONNECTIONSTRING"]);
 });
 
 builder.Services.AddBlazoredLocalStorage();
@@ -150,6 +147,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
+    builder.Configuration.AddEnvironmentVariables();
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
