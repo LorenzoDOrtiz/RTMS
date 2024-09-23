@@ -22,6 +22,7 @@ using RTMS.UseCases.WorkoutTemplates.Interfaces;
 using RTMS.Web.Components;
 using RTMS.Web.MappingProfiles;
 using RTMS.Web.Services;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,6 +71,13 @@ builder.Services.AddDbContextFactory<RTMSDBContext>(options =>
 });
 
 builder.Services.AddBlazoredLocalStorage();
+
+// Logging 
+Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.Console()
+            .WriteTo.File("logs/rtms.txt", rollingInterval: RollingInterval.Day)
+            .CreateLogger();
 
 // Services
 builder.Services.AddScoped<UserService>();

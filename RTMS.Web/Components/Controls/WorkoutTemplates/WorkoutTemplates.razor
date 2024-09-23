@@ -10,6 +10,7 @@
 @inject UserService UserService
 @inject ActiveWorkoutService ActiveWorkoutService
 @inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
 
 <MudTable Items="@userWorkoutTemplates" Filter="new Func<WorkoutTemplate, bool>(FilterFunc1)" Virtualize>
     <ToolBarContent>
@@ -120,8 +121,17 @@
             workout.Id = 0;
             workout.UserId = userId;
 
-            var Id = await AddWorkoutUseCase.ExecuteAsync(workout);
-            NavigationManager.NavigateTo($"/workout-in-progress/{Id}");
+            try
+            {
+                var Id = await AddWorkoutUseCase.ExecuteAsync(workout);
+                NavigationManager.NavigateTo($"/workout-in-progress/{Id}");
+            }
+            catch (DbUpdateException ex)
+            {
+                Log.Error(ex, "Error saving workout");
+
+                Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+            }
         }
 
     }

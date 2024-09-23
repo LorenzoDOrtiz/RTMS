@@ -1,4 +1,5 @@
-﻿using RTMS.CoreBusiness;
+﻿using Microsoft.EntityFrameworkCore;
+using RTMS.CoreBusiness;
 using RTMS.UseCases.PluginInterfaces;
 using RTMS.UseCases.WorkoutTemplates.Interfaces;
 
@@ -7,7 +8,20 @@ public class AddWorkoutTemplateUseCase(IWorkoutTemplateRepository workoutReposit
 {
     public async Task ExecuteAsync(WorkoutTemplate workoutTemplate)
     {
-        workoutTemplate.CreatedAt = DateTime.UtcNow;
-        await workoutRepository.AddWorkoutTemplateAsync(workoutTemplate);
+        if (workoutTemplate == null)
+        {
+            throw new ArgumentNullException(nameof(workoutTemplate), "Workout Template cannot be null.");
+        }
+
+        try
+        {
+            workoutTemplate.CreatedAt = DateTime.UtcNow;
+            await workoutRepository.AddWorkoutTemplateAsync(workoutTemplate);
+        }
+        catch (DbUpdateException ex)
+        {
+            // Handle specific database update exception
+            throw new DbUpdateException("An error occurred while adding the workout template to the database.", ex);
+        }
     }
 }

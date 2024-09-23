@@ -1,4 +1,5 @@
-﻿using RTMS.CoreBusiness;
+﻿using Microsoft.EntityFrameworkCore;
+using RTMS.CoreBusiness;
 using RTMS.UseCases.PluginInterfaces;
 using RTMS.UseCases.Workouts.Interfaces;
 
@@ -8,9 +9,20 @@ namespace RTMS.UseCases.Workouts
     {
         public async Task<int> ExecuteAsync(Workout workout)
         {
-            var workoutId = await workoutRepository.AddWorkoutAsync(workout);
-
-            return workoutId;
+            if (workout == null)
+            {
+                throw new ArgumentNullException(nameof(workout), "Workout cannot be null.");
+            }
+            try
+            {
+                var workoutId = await workoutRepository.AddWorkoutAsync(workout);
+                return workoutId;
+            }
+            catch (DbUpdateException ex)
+            {
+                // Handle specific database update exception
+                throw new DbUpdateException("An error occurred while adding the workout to the database.", ex);
+            }
         }
 
         public async Task SaveWorkoutProgressAsync(Workout workout)

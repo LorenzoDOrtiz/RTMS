@@ -1,7 +1,9 @@
-﻿@inject IAddWorkoutTemplateUseCase AddWorkoutUseCase
+﻿
+@inject IAddWorkoutTemplateUseCase AddWorkoutUseCase
 @inject IMapper Mapper
 @inject NavigationManager NavigationManager
 @inject UserService UserService
+@inject ISnackbar Snackbar
 
 @if (_workoutTemplateViewModel != null)
 {
@@ -86,7 +88,17 @@
         {
             workoutTemplate.IsTrainerCreated = true;
         }
-        await AddWorkoutUseCase.ExecuteAsync(workoutTemplate);
-        NavigationManager.NavigateTo("/workouts");
+
+        try
+        {
+            await AddWorkoutUseCase.ExecuteAsync(workoutTemplate);
+            NavigationManager.NavigateTo("/workouts");
+        }
+        catch (DbUpdateException ex)
+        {
+            Log.Error(ex, "Error saving workout template");
+
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
     }
 }
