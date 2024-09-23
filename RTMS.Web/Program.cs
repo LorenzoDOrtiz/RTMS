@@ -26,8 +26,10 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddEnvironmentVariables();
-
+if (builder.Environment.IsProduction())
+{
+    builder.Configuration.AddEnvironmentVariables();
+}
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -35,8 +37,8 @@ builder.Services.AddMudServices();
 
 builder.Services.AddAuth0WebAppAuthentication(options =>
 {
-    options.Domain = builder.Configuration["Auth0_Domain"];
-    options.ClientId = builder.Configuration["Auth0_ClientId"];
+    options.Domain = builder.Configuration["Auth0:Domain"];
+    options.ClientId = builder.Configuration["Auth0:ClientId"];
     options.Scope = "openid profile email"; // Add the email scope
 });
 
@@ -51,7 +53,7 @@ builder.Services.AddHttpClient();
 // Register ManagementApiClient
 builder.Services.AddSingleton(sp =>
 {
-    var managementApiToken = builder.Configuration["Auth0_ManagementApiToken"];
+    var managementApiToken = builder.Configuration["Auth0:ManagementApiToken"];
     var managementApiUrl = new Uri("https://dev-njjrui7wcq7kliho.us.auth0.com/api/v2/");
     return new ManagementApiClient(managementApiToken, managementApiUrl);
 });
@@ -62,8 +64,8 @@ builder.Services.AddSingleton(sp =>
     var managementClient = sp.GetRequiredService<ManagementApiClient>();
     var httpClient = sp.GetRequiredService<HttpClient>();
     var getOrCreateUserUseCase = sp.GetRequiredService<IGetOrCreateUserUseCase>();
-    var auth0Domain = builder.Configuration["Auth0_Domain"];
-    var clientId = builder.Configuration["Auth0_ClientId"];
+    var auth0Domain = builder.Configuration["Auth0:Domain"];
+    var clientId = builder.Configuration["Auth0:ClientId"];
     return new Auth0UserService(managementClient, httpClient, getOrCreateUserUseCase, auth0Domain, clientId);
 });
 
