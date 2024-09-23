@@ -69,7 +69,7 @@ builder.Services.AddSingleton(sp =>
 
 builder.Services.AddDbContextFactory<RTMSDBContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration["AZURE_POSTGRESQL_CONNECTIONSTRING"]);
+    options.UseNpgsql(builder.Configuration["POSTGRESQLCONNSTR_AZURE_POSTGRESQL_CONNECTIONSTRING"]);
 });
 
 builder.Services.AddBlazoredLocalStorage();
