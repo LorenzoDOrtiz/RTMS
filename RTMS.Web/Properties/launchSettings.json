@@ -15,7 +15,8 @@
         "launchBrowser": true,
         "applicationUrl": "http://localhost:5271",
         "environmentVariables": {
-          "ASPNETCORE_ENVIRONMENT": "Development"
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "AZURE_POSTGRESQL_CONNECTIONSTRING": "Server=rtms-server.postgres.database.azure.com;Database=rtms-database;Port=5432;Ssl Mode=Require;User Id=cpuubwrwgl;Password=gLbOtScSyjRVg$mE;"
         }
       },
       "https": {
@@ -24,7 +25,9 @@
         "launchBrowser": true,
         "applicationUrl": "https://localhost:7029;http://localhost:5271",
         "environmentVariables": {
-          "ASPNETCORE_ENVIRONMENT": "Development"
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "AZURE_POSTGRESQL_CONNECTIONSTRING": "Server=rtms-server.postgres.database.azure.com;Database=rtms-database;Port=5432;Ssl Mode=Require;User Id=cpuubwrwgl;Password=gLbOtScSyjRVg$mE;"
+
         }
       },
       "IIS Express": {

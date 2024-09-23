@@ -26,15 +26,7 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (!builder.Environment.IsDevelopment())
-{
-    builder.Configuration.AddEnvironmentVariables();
-
-    builder.Services.AddHttpsRedirection(options =>
-    {
-        options.HttpsPort = 443;
-    });
-}
+builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddRazorComponents()
 .AddInteractiveServerComponents();
