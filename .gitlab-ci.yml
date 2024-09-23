@@ -10,7 +10,6 @@ variables:
   TEST_PROJECT: 'RTMS.Tests/RTMS.Tests.csproj'
   PLUGIN_PROJECT: 'RTMS.Plugins/RTMS.Plugins.PostgreEFCore/RTMS.Plugins.PostgreEFCore.csproj'
   EXE_RELEASE_FOLDER: 'RTMS.Web/bin/Release/net8.0'
-  TEST_DLL: 'RTMS.Tests/bin/Release/net8.0/RTMS.Tests.dll'
   DEPLOY_FOLDER: 'P:\Projects\RTMS\Builds'
 
 stages:
@@ -24,29 +23,23 @@ build_job:
     - tags
   script:
     - 'dotnet restore'  # Restore NuGet packages for the entire solution
-    - 'dotnet build $CORE_BUSINESS_PROJECT --configuration Release'
-    - 'dotnet build $USE_CASES_PROJECT --configuration Release'
-    - 'dotnet build $WEBAPP_PROJECT --configuration Release'
-    - 'dotnet build $TEST_PROJECT --configuration Release'
-    - 'dotnet build $PLUGIN_PROJECT --configuration Release'
+    - 'dotnet build --configuration Release'  # Build all projects in the solution
   artifacts:
     expire_in: 1 week
     paths:
-      - '$EXE_RELEASE_FOLDER/RTMS.Web.dll'
-      - '$TEST_DLL'
+      - '*/bin/Release/net8.0/'
 
 test_job:
   stage: test
   only:
     - tags
   script:
-    - 'dotnet tool install --global dotnet-xunit-cli'
-    - 'dotnet xunit $TEST_DLL -xml TestResult.xml'
+    - 'dotnet test $TEST_PROJECT --logger:"console;verbosity=detailed" --logger:"trx;LogFileName=TestResults.trx"'
   artifacts:
     when: always
+    reports:
+      junit: TestResults.trx
     expire_in: 1 week
-    paths:
-      - 'TestResult.xml'
   dependencies:
     - build_job
 
@@ -56,11 +49,11 @@ deploy_job:
     - tags
   script:
     - 'apt-get update && apt-get install -y git'  # Install git for commit message
-    - '$commitSubject = $(git log -1 --pretty=%s)'
-    - '$deployFolder = "$DEPLOY_FOLDER/$CI_COMMIT_TAG - $commitSubject"'
+    - 'commitSubject=$(git log -1 --pretty=%s)'
+    - 'deployFolder="$DEPLOY_FOLDER/$CI_COMMIT_TAG - $commitSubject"'
     - 'mkdir -p "$deployFolder"'
     - 'cp "$EXE_RELEASE_FOLDER/RTMS.Web.dll" "$deployFolder/"'
-    - 'cp "TestResult.xml" "$deployFolder/"'
+    - 'cp "TestResults.trx" "$deployFolder/"'
   dependencies:
     - build_job
     - test_job
