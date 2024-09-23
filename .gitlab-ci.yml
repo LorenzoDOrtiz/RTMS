@@ -35,7 +35,6 @@ test_job:
     - tags
   script:
     - 'dotnet test $TEST_PROJECT --logger:"console;verbosity=detailed" --logger:"trx;LogFileName=TestResults.trx"'
-    - 'ls -al'  # List files to verify TestResults.trx location
   artifacts:
     when: always
     reports:
@@ -54,7 +53,7 @@ deploy_job:
     - 'deployFolder="$DEPLOY_FOLDER/$CI_COMMIT_TAG - $commitSubject"'
     - 'mkdir -p "$deployFolder"'
     - 'cp "$EXE_RELEASE_FOLDER/RTMS.Web.dll" "$deployFolder/"'
-    - 'cp "TestResults.trx" "$deployFolder/"'
+    - 'cp "$CI_PROJECT_DIR/**/TestResults.trx" "$deployFolder/"'
   dependencies:
     - build_job
     - test_job
