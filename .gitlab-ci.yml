@@ -35,10 +35,11 @@ test_job:
     - tags
   script:
     - 'dotnet test $TEST_PROJECT --logger:"console;verbosity=detailed" --logger:"trx;LogFileName=TestResults.trx"'
+    - 'ls -al'  # List files to verify TestResults.trx location
   artifacts:
     when: always
     reports:
-      junit: TestResults.trx
+      junit: '**/TestResults.trx'
     expire_in: 1 week
   dependencies:
     - build_job
