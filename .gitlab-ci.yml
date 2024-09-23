@@ -54,7 +54,7 @@ deploy_job:
     - 'curl -sL https://aka.ms/InstallAzureCLIDeb | bash'  # Install Azure CLI
     - 'az login --service-principal -u $AZURE_APP_ID -p $AZURE_PASSWORD --tenant $AZURE_TENANT'  # Login to Azure
     - 'cd $EXE_RELEASE_FOLDER && zip -r RTMS.Web.zip ./'  # Create a zip of the entire release folder
-    - 'az webapp deploy --resource-group rtms-app_group --name rtms-app --src-path "$EXE_RELEASE_FOLDER/RTMS.Web.zip" --type zip'  # Deploy the app!
+    - 'az webapp deploy --resource-group rtms-app_group --name rtms-app --subscription aee5d6e9-323d-4d4d-a1aa-1e2228118012 --src-path "$EXE_RELEASE_FOLDER/RTMS.Web.zip" --type zip'  # Deploy the app!
     - 'commitSubject=$(git log -1 --pretty=%s)'
     - 'deployFolder="$DEPLOY_FOLDER/$CI_COMMIT_TAG - $commitSubject"'
     - 'mkdir -p "$deployFolder"'
