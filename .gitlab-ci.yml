@@ -1,5 +1,7 @@
 # GitLab CI/CD configuration for RTMS project
 
+image: mcr.microsoft.com/dotnet/sdk:8.0  # Use the .NET 8.0 SDK image
+
 variables:
   # Define paths specific to your projects
   CORE_BUSINESS_PROJECT: 'RTMS.CoreBusiness/RTMS.CoreBusiness.csproj'
@@ -53,10 +55,12 @@ deploy_job:
   only:
     - tags
   script:
-    - '$commitSubject = git log -1 --pretty=%s'
-    - '$deployFolder = "$DEPLOY_FOLDER" + "\" + "$CI_COMMIT_TAG" + " - " + $commitSubject + "\"'
-    - 'xcopy /y "$EXE_RELEASE_FOLDER\RTMS.Web.dll" "$deployFolder"'
-    - 'xcopy /y "TestResult.xml" "$deployFolder"'
+    - 'apt-get update && apt-get install -y git'  # Install git for commit message
+    - '$commitSubject = $(git log -1 --pretty=%s)'
+    - '$deployFolder = "$DEPLOY_FOLDER/$CI_COMMIT_TAG - $commitSubject"'
+    - 'mkdir -p "$deployFolder"'
+    - 'cp "$EXE_RELEASE_FOLDER/RTMS.Web.dll" "$deployFolder/"'
+    - 'cp "TestResult.xml" "$deployFolder/"'
   dependencies:
     - build_job
     - test_job
