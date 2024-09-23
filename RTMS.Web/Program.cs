@@ -180,4 +180,12 @@ app.MapGet("/Account/Logout", async (HttpContext httpContext) =>
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<RTMSDBContext>();
+
+    // Apply pending migrations automatically
+    dbContext.Database.Migrate();
+}
+
 app.Run();
