@@ -26,6 +26,8 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddEnvironmentVariables();
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -33,8 +35,8 @@ builder.Services.AddMudServices();
 
 builder.Services.AddAuth0WebAppAuthentication(options =>
 {
-    options.Domain = builder.Configuration["Auth0:Domain"];
-    options.ClientId = builder.Configuration["Auth0:ClientId"];
+    options.Domain = builder.Configuration["Auth0_Domain"];
+    options.ClientId = builder.Configuration["Auth0_ClientId"];
     options.Scope = "openid profile email"; // Add the email scope
 });
 
@@ -49,7 +51,7 @@ builder.Services.AddHttpClient();
 // Register ManagementApiClient
 builder.Services.AddSingleton(sp =>
 {
-    var managementApiToken = builder.Configuration["Auth0:ManagementApiToken"];
+    var managementApiToken = builder.Configuration["Auth0_ManagementApiToken"];
     var managementApiUrl = new Uri("https://dev-njjrui7wcq7kliho.us.auth0.com/api/v2/");
     return new ManagementApiClient(managementApiToken, managementApiUrl);
 });
@@ -60,14 +62,14 @@ builder.Services.AddSingleton(sp =>
     var managementClient = sp.GetRequiredService<ManagementApiClient>();
     var httpClient = sp.GetRequiredService<HttpClient>();
     var getOrCreateUserUseCase = sp.GetRequiredService<IGetOrCreateUserUseCase>();
-    var auth0Domain = builder.Configuration["Auth0:Domain"];
-    var clientId = builder.Configuration["Auth0:ClientId"];
+    var auth0Domain = builder.Configuration["Auth0_Domain"];
+    var clientId = builder.Configuration["Auth0_ClientId"];
     return new Auth0UserService(managementClient, httpClient, getOrCreateUserUseCase, auth0Domain, clientId);
 });
 
 builder.Services.AddDbContextFactory<RTMSDBContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("RTMSDB"));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("AZURE_POSTGRESQL_CONNECTIONSTRING"));
 });
 
 builder.Services.AddBlazoredLocalStorage();
