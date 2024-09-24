@@ -160,4 +160,18 @@ public class WorkoutHistoryRepositoryPostgreEFCore(IDbContextFactory<RTMSDBConte
             .Where(w => w.UserId == userId)
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<Exercise>> GetExercisesbyUserIdAsync(Guid userId)
+    {
+        using var context = contextFactory.CreateDbContext();
+
+        // Fetch distinct exercises associated with the specified userId through workouts
+        var exercises = await context.Workouts
+            .Where(workout => workout.UserId == userId) // Filter workouts by userId
+            .SelectMany(workout => workout.Exercises) // Flatten exercises from the workouts
+            .Distinct() // Get distinct exercises
+            .ToListAsync();
+
+        return exercises;
+    }
 }

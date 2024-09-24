@@ -12,4 +12,5 @@ public interface IWorkoutHistoryRepository
     Task<IEnumerable<Workout>> GetDetailedWorkoutHistoryByTemplateIdAsync(int templateId);
     Task<IEnumerable<Exercise>> GetDetailedExerciseHistoryByTemplateId(int templateId);
     Task<List<Workout>> GetAllDetailedWorkoutDataByUserIdAsync(Guid userId);
+    Task<IEnumerable<Exercise>> GetExercisesbyUserIdAsync(Guid userId);
 }

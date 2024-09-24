@@ -19,4 +19,6 @@ public class WorkoutViewModel
     public List<ExerciseViewModel> Exercises { get; set; } = new(); // List of exercises in the workout
 
     public bool IsCompleted { get; set; }  // Flag to indicate if the workout is completed
+
+    public bool ShowDetails { get; set; }
 }

@@ -1,0 +1,135 @@
+﻿@page "/reports"
+@inject IGetAllDetailedWorkoutDataByUserId GetAllDetailedWorkoutDataByUserId
+@inject IGetExercisesByUserIdUseCase GetExercisesByUserIdUseCase
+@inject UserService UserService
+@inject IMapper Mapper
+
+@attribute [Authorize]
+
+<PageTitle>Reports</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small">
+    <MudStack Spacing="4">
+        <MudDatePicker @bind-Date="selectedStartDate" Label="Select Start Date" />
+        <MudDatePicker @bind-Date="selectedEndDate" Label="Select End Date" />
+        @* <MudSelect T="int" @bind-SelectedValues="selectedExercises" Label="Select Exercises" MultiSelection="true">
+            @foreach (var exercise in exerciseOptions)
+            {
+                <MudSelectItem Value="@exercise.Id">@exercise.Name</MudSelectItem>
+            }
+        </MudSelect> *@
+        <MudButton Style="width:100px;" Variant="Variant.Filled" Color="Color.Primary" OnClick="FilterWorkouts">Filter</MudButton>
+    </MudStack>
+</MudContainer>
+
+<br />
+
+<MudTable Items="@filteredWorkouts" Breakpoint="Breakpoint.Sm" Dense>
+    <HeaderContent>
+        <MudTh>Workout Name</MudTh>
+        <MudTh>Start</MudTh>
+        <MudTh>End</MudTh>
+        <MudTh>Volume</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Workout Name">@context.Name</MudTd>
+        <MudTd DataLabel="Start">@context.StartTime.ToString("f")</MudTd>
+        <MudTd DataLabel="End">@(context.EndTime.HasValue ? @context.EndTime.Value.ToString("f") : "N/A")</MudTd>
+        <MudTd DataLabel="Volume">@(context.TotalWorkoutVolume)</MudTd>
+        <MudTd>
+            <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ToggleWorkoutDetails(context))">
+                @(IsWorkoutExpanded(context) ? "Hide" : "Show") Exercises
+            </MudButton>
+        </MudTd>
+    </RowTemplate>
+    <ChildRowContent>
+        @if (IsWorkoutExpanded(context))
+        {
+            <MudTable Class="ml-10" Items="@context.Exercises" Context="ExerciseContext" Dense>
+                <HeaderContent>
+                    <MudTh>Exercise Name</MudTh>
+                    <MudTh>Sets</MudTh>
+                    <MudTh>Volume</MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Date">@ExerciseContext.Name</MudTd>
+                    <MudTd DataLabel="Sets">@ExerciseContext.Sets.Count</MudTd>
+                    <MudTd DataLabel="Volume">@ExerciseContext.TotalExerciseVolume</MudTd>
+                    <MudTd>
+                        <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ToggleExerciseDetails(ExerciseContext))">
+                            @(IsExerciseExpanded(ExerciseContext) ? "Hide" : "Show") Sets
+                        </MudButton>
+                    </MudTd>
+                </RowTemplate>
+                <ChildRowContent>
+                    @if (IsExerciseExpanded(ExerciseContext))
+                    {
+                        <MudTable Class="ml-10" Items="@ExerciseContext.Sets" Context="ExerciseSetContext" Dense>
+                            <HeaderContent>
+                                <MudTh>Reps</MudTh>
+                                <MudTh>Weight</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="Reps">@ExerciseSetContext.Reps</MudTd>
+                                <MudTd DataLabel="Weight">@ExerciseSetContext.Weight</MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    }
+                </ChildRowContent>
+            </MudTable>
+        }
+    </ChildRowContent>
+</MudTable>
+
+<br />
+
+<DownloadWorkoutDataCSVButton FilteredWorkouts="@filteredWorkouts" />
+
+@code {
+    private DateTime? selectedStartDate;
+    private DateTime? selectedEndDate;
+    private IEnumerable<int> selectedExercises = new List<int>();
+    private List<Workout> filteredWorkouts = new List<Workout>();
+    //private IEnumerable<RTMS.CoreBusiness.Exercise> exerciseOptions = new List<RTMS.CoreBusiness.Exercise>();
+    private Dictionary<int, bool> expandedWorkouts = new Dictionary<int, bool>();
+    private Dictionary<int, bool> expandedExercises = new Dictionary<int, bool>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        //exerciseOptions = await GetExercisesByUserIdUseCase.ExecuteAsync(UserService.UserId);
+    }
+
+    private async Task FilterWorkouts()
+    {
+        var workouts = await GetAllDetailedWorkoutDataByUserId.ExecuteAsync(UserService.UserId);
+
+        filteredWorkouts = workouts.Where(workout =>
+            (!selectedStartDate.HasValue || workout.StartTime.Date >= selectedStartDate.Value.Date) &&
+            (!selectedEndDate.HasValue || workout.EndTime?.Date <= selectedEndDate.Value.Date) 
+        ).ToList();
+        // &&
+        //     (!selectedExercises.Any() || workout.Exercises.Any(ex => selectedExercises.Contains(ex.Id)))
+        // Reset expanded states when filtering
+        expandedWorkouts.Clear();
+        expandedExercises.Clear();
+    }
+
+    private void ToggleWorkoutDetails(Workout workout)
+    {
+        if (!expandedWorkouts.ContainsKey(workout.Id))
+            expandedWorkouts[workout.Id] = false;
+        expandedWorkouts[workout.Id] = !expandedWorkouts[workout.Id];
+    }
+
+    private void ToggleExerciseDetails(Exercise exercise)
+    {
+        if (!expandedExercises.ContainsKey(exercise.Id))
+            expandedExercises[exercise.Id] = false;
+        expandedExercises[exercise.Id] = !expandedExercises[exercise.Id];
+    }
+
+    private bool IsWorkoutExpanded(Workout workout) => expandedWorkouts.ContainsKey(workout.Id) && expandedWorkouts[workout.Id];
+    private bool IsExerciseExpanded(Exercise exercise) => expandedExercises.ContainsKey(exercise.Id) && expandedExercises[exercise.Id];
+}

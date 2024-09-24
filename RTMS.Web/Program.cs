@@ -124,6 +124,7 @@ builder.Services.AddTransient<IGetDetailedWorkoutHistoryByWorkoutIdUseCase, GetD
 builder.Services.AddTransient<IGetDetailedWorkoutHistoryByTemplateIdUseCase, GetDetailedWorkoutHistoryByTemplateIdUseCase>();
 builder.Services.AddTransient<IGetDetailedExerciseHistoryByTemplateIdUseCase, GetDetailedExerciseHistoryByTemplateIdUseCase>();
 builder.Services.AddTransient<IGetExerciseTemplatesWithAtLeastTwoExercisesUseCase, GetExerciseTemplatesWithAtLeastTwoExercisesUseCase>();
+builder.Services.AddTransient<IGetExercisesByUserIdUseCase, GetExercisesByUserIdUseCase>();
 
 // User
 builder.Services.AddTransient<IGetOrCreateUserUseCase, GetOrCreateUserUseCase>();

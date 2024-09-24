@@ -2,24 +2,27 @@
 @inject IGetAllDetailedWorkoutDataByUserId GetAllDetailedWorkoutDataByUserId
 @inject UserService UserService
 
-<MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="DownloadWorkoutData">
+<MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="DownloadWorkoutData" Disabled="@(FilteredWorkouts.Any() ? false : true)">
     Download Workout Data
 </MudButton>
 
 @code {
+    [Parameter]
+    public List<Workout> FilteredWorkouts { get; set; } // Pass this from the Reports page
+
+    public void SetFilteredWorkouts(List<Workout> workouts)
+    {
+        FilteredWorkouts = workouts;
+    }
+
     private async Task DownloadWorkoutData()
     {
-        var workouts = await FetchWorkoutDataAsync();
-        var csvContent = GenerateCsv(workouts);
+        // Use filtered workouts instead of all workouts
+        var csvContent = GenerateCsv(FilteredWorkouts);
         var fileName = $"Workout_Data_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
 
         // Call the JavaScript function to download the file
         await JSRuntime.InvokeVoidAsync("downloadCSV", fileName, csvContent);
-    }
-
-    private async Task<List<Workout>> FetchWorkoutDataAsync()
-    {
-        return await GetAllDetailedWorkoutDataByUserId.ExecuteAsync(UserService.UserId);
     }
 
     private string GenerateCsv(List<Workout> workouts)
@@ -33,7 +36,7 @@
             {
                 foreach (var exercise in workout.Exercises)
                 {
-                    var exerciseVolume = exercise.TotalExerciseVolume; 
+                    var exerciseVolume = exercise.TotalExerciseVolume;
                     foreach (var set in exercise.Sets)
                     {
                         var line = $"{workout.Id},{workout.Name},{workout.StartTime},{workout.EndTime}," +
@@ -52,5 +55,4 @@
 
         return csv.ToString();
     }
-
 }

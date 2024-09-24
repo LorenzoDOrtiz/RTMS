@@ -33,4 +33,6 @@ public class ExerciseViewModel
 
     public bool IsNotePopOverOpen { get; set; } = false;
 
+    public bool ShowDetails { get; set; }
+
 }
