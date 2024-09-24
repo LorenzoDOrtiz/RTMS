@@ -97,8 +97,13 @@
     private async Task SaveUser()
     {
         await Auth0UserService.UpdateUserRoleAsync(UserId, selectedRoleIds);
-        var selectedTrainerUserIds = await GetUserIdsByAuth0IdsUseCase.ExecuteAsync(selectedTrainerAuth0Ids);
-        await UpdateClientTrainersUseCase.ExecuteAsync(userId, selectedTrainerUserIds);
+
+        if (selectedTrainerAuth0Ids != null && selectedTrainerAuth0Ids.Any())
+        {
+            var selectedTrainerUserIds = await GetUserIdsByAuth0IdsUseCase.ExecuteAsync(selectedTrainerAuth0Ids);
+            await UpdateClientTrainersUseCase.ExecuteAsync(userId, selectedTrainerUserIds);
+        }
+        
         Navigation.NavigateTo("/user-management");
     }
 
