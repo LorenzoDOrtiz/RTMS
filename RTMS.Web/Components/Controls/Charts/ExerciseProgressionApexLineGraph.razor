@@ -11,7 +11,7 @@
                          Items="Exercises"
                          Name="Volume"
                          SeriesType="SeriesType.Line"
-                         XValue="@(e => e.Workout.StartTime.ToLocalTime().ToString("MM/dd/yyyy"))"
+                         XValue="@(e => e.Workout.StartTime.ToLocalTime().ToString("M/d/yy h:mm tt"))"
                          YAggregate="@(e => e.Sum(e => (decimal)e.TotalExerciseVolume))"
                          OrderBy="e=> e.Y"
                          ShowDataLabels="true" />

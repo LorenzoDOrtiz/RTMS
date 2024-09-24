@@ -269,7 +269,9 @@ else
                                 Sets = exercise.Sets.Select(set => new ExerciseSetTemplate
                                 {
                                     Id = set.SetTemplateId ?? 0, // Handle null IDs for new sets
-                                    ExerciseTemplateId = exercise.ExerciseTemplateId ?? 0
+                                    ExerciseTemplateId = exercise.ExerciseTemplateId ?? 0,
+                                    Reps = set.Reps,
+                                    Weight = set.Weight
                                 }).ToList(),
                                 Note = exercise.Note
                             }).ToList()

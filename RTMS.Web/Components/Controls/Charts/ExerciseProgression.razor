@@ -17,7 +17,7 @@
 
 <MudPopover Open="@_isPopoverOpen" AnchorOrigin="Origin.TopRight" TransformOrigin="Origin.TopRight" Duration="1000">
     <MudList T="WorkoutTemplate">
-        @foreach (var template in ExerciseTemplates)
+        @foreach (var template in exerciseTemplates)
         {
             <MudListItem OnClick="() => SelectExerciseTemplate(template)">
                 @template.Name
@@ -32,8 +32,8 @@
 
     public MudDynamicTabs DynamicTabs;
     private bool _isPopoverOpen;
-    private IEnumerable<ExerciseTemplate> ExerciseTemplates = new List<ExerciseTemplate>();
-
+    private IEnumerable<ExerciseTemplate> allTemplates = new List<ExerciseTemplate>();
+    private IEnumerable<ExerciseTemplate> exerciseTemplates = new List<ExerciseTemplate>();
     public class TabView
     {
         public string Label { get; set; }
@@ -47,13 +47,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var allTemplates = await GetExerciseTemplatesWithAtLeastTwoExercisesUseCase.ExecuteAsync(Id != Guid.Empty ? Id : UserService.UserId);
+        allTemplates = await GetExerciseTemplatesWithAtLeastTwoExercisesUseCase.ExecuteAsync(Id != Guid.Empty ? Id : UserService.UserId);
 
         // Get IDs of templates that are already in the UserTabs
         var usedTemplateIds = UserTabs.Select(tab => tab.Exercises.FirstOrDefault()?.ExerciseTemplateId).Where(id => id.HasValue).Select(id => id.Value).ToHashSet();
 
         // Filter WorkoutTemplates to exclude those that are already used in tabs
-        ExerciseTemplates = allTemplates.Where(template => !usedTemplateIds.Contains(template.Id)).ToList();
+        exerciseTemplates = allTemplates.Where(template => !usedTemplateIds.Contains(template.Id)).ToList();
         
         foreach (var template in allTemplates)
         {
@@ -97,7 +97,7 @@
         var usedTemplateIds = UserTabs.Select(tab => tab.Exercises.FirstOrDefault()?.ExerciseTemplateId).Where(id => id.HasValue).Select(id => id.Value).ToHashSet();
 
         // Filter WorkoutTemplates to exclude those that are already used in tabs
-        ExerciseTemplates = allTemplates.Where(template => !usedTemplateIds.Contains(template.Id)).ToList();
+        exerciseTemplates = allTemplates.Where(template => !usedTemplateIds.Contains(template.Id)).ToList();
     }
 
     private void CloseTabCallback(MudTabPanel panel) => RemoveTab((Guid)panel.ID);
@@ -108,6 +108,11 @@
         if (tabView is not null)
         {
             UserTabs.Remove(tabView);
+            // Get IDs of templates that are already in the UserTabs
+            var usedTemplateIds = UserTabs.Select(tab => tab.Exercises.FirstOrDefault()?.ExerciseTemplateId).Where(id => id.HasValue).Select(id => id.Value).ToHashSet();
+
+            // Filter WorkoutTemplates to exclude those that are already used in tabs
+            exerciseTemplates = allTemplates.Where(template => !usedTemplateIds.Contains(template.Id)).ToList();
             StateHasChanged();
         }
     }

@@ -17,7 +17,7 @@
 
 <MudPopover Open="@_isPopoverOpen" AnchorOrigin="Origin.TopRight" TransformOrigin="Origin.TopRight" Duration="1000">
     <MudList T="WorkoutTemplate">
-        @foreach (var template in WorkoutTemplates)
+        @foreach (var template in workoutTemplates)
         {
             <MudListItem OnClick="() => SelectWorkoutTemplate(template)">
                 @template.Name
@@ -32,7 +32,8 @@
 
     public MudDynamicTabs DynamicTabs;
     private bool _isPopoverOpen;
-    private IEnumerable<WorkoutTemplate> WorkoutTemplates = new List<WorkoutTemplate>();
+    private IEnumerable<WorkoutTemplate> allTemplates = new List<WorkoutTemplate>();
+    private IEnumerable<WorkoutTemplate> workoutTemplates = new List<WorkoutTemplate>();
 
     public class TabView
     {
@@ -47,13 +48,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var allTemplates = await GetWorkoutTemplatesWithAtLeastTwoWorkoutsUseCase.ExecuteAsync(Id != Guid.Empty ? Id : UserService.UserId);
+        allTemplates = await GetWorkoutTemplatesWithAtLeastTwoWorkoutsUseCase.ExecuteAsync(Id != Guid.Empty ? Id : UserService.UserId);
 
         // Get IDs of templates that are already in the UserTabs
         var usedTemplateIds = UserTabs.Select(tab => tab.Workouts.FirstOrDefault()?.WorkoutTemplateId).Where(id => id.HasValue).Select(id => id.Value).ToHashSet();
 
         // Filter WorkoutTemplates to exclude those that are already used in tabs
-        WorkoutTemplates = allTemplates.Where(template => !usedTemplateIds.Contains(template.Id)).ToList();
+        workoutTemplates = allTemplates.Where(template => !usedTemplateIds.Contains(template.Id)).ToList();
 
         // doing this for now so the data loads but in the future I will add a way to save the tabs the user opened in the past
         foreach (var template in allTemplates)
@@ -98,7 +99,7 @@
         var usedTemplateIds = UserTabs.Select(tab => tab.Workouts.FirstOrDefault()?.WorkoutTemplateId).Where(id => id.HasValue).Select(id => id.Value).ToHashSet();
 
         // Filter WorkoutTemplates to exclude those that are already used in tabs
-        WorkoutTemplates = allTemplates.Where(template => !usedTemplateIds.Contains(template.Id)).ToList();
+        workoutTemplates = allTemplates.Where(template => !usedTemplateIds.Contains(template.Id)).ToList();
     }
 
     private void CloseTabCallback(MudTabPanel panel) => RemoveTab((Guid)panel.ID);
@@ -109,6 +110,8 @@
         if (tabView is not null)
         {
             UserTabs.Remove(tabView);
+            var usedTemplateIds = UserTabs.Select(tab => tab.Workouts.FirstOrDefault()?.WorkoutTemplateId).Where(id => id.HasValue).Select(id => id.Value).ToHashSet();
+            workoutTemplates = allTemplates.Where(template => !usedTemplateIds.Contains(template.Id)).ToList();
             StateHasChanged();
         }
     }
