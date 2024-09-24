@@ -29,6 +29,7 @@
                                RestTimerUnit="@Exercise.RestTimerUnit"
                                OnRestTimerCancel="HandleRestTimerCancel"
                                OnRestTimerSet="@((args) => HandleRestTimerSet(args.Item1, args.Item2))" />
+
                 <NotePopover IsNotePopoverOpen="@Exercise.IsNotePopOverOpen" Note="@Exercise.Note" OnNoteSave="HandleNoteSave" OnFocusLost="HandleFocusLost" />
             </th>
         </tr>

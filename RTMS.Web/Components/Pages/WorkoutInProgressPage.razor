@@ -258,6 +258,7 @@ else
                             Id = _workout.WorkoutTemplateId.Value,
                             UserId = _workout.UserId,
                             Name = _workout.Name,
+                            CreatedAt = _workoutTemplate.CreatedAt,
                             Exercises = _workout.Exercises.Select(exercise => new ExerciseTemplate
                             {
                                 Id = exercise.ExerciseTemplateId ?? 0, // Handle null IDs for new exercises
