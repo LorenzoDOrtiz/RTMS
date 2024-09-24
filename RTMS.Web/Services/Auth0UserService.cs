@@ -147,7 +147,7 @@ string auth0Domain, string clientId)
             FirstName = firstName,
             LastName = lastName,
             FullName = fullName,
-            PhoneNumber = $"+1{phoneNumber}",
+            PhoneNumber = phoneNumber,
             Email = email,
             Password = GenerateRandomPassword(),
             Connection = "Username-Password-Authentication",
@@ -155,24 +155,40 @@ string auth0Domain, string clientId)
             VerifyEmail = false
         };
 
-        var createdUser = await managementClient.Users.CreateAsync(user);
-
-        // Assign a role to the user
-        if (!string.IsNullOrEmpty(roleId))
+        try
         {
-            await managementClient.Users.AssignRolesAsync(createdUser.UserId, new AssignRolesRequest
+            var createdUser = await managementClient.Users.CreateAsync(user);
+            // Assign a role to the user
+            if (!string.IsNullOrEmpty(roleId))
             {
-                Roles = [roleId]
-            });
+                await managementClient.Users.AssignRolesAsync(createdUser.UserId, new AssignRolesRequest
+                {
+                    Roles = [roleId]
+                });
+            }
+
+            // Send password reset email
+            await SendPasswordResetEmailAsync(email, "Username-Password-Authentication");
+
+            // Manually add the user to the database
+            await getOrCreateUserUseCase.ExecuteAsync(createdUser.UserId, createdUser.FirstName, createdUser.LastName, createdUser.Email);
+
+            return createdUser.UserId;
+
         }
-
-        // Send password reset email
-        await SendPasswordResetEmailAsync(email, "Username-Password-Authentication");
-
-        // Manually add the user to the database
-        await getOrCreateUserUseCase.ExecuteAsync(createdUser.UserId, createdUser.FirstName, createdUser.LastName, createdUser.Email);
-
-        return createdUser.UserId;
+        catch (Auth0.Core.Exceptions.ErrorApiException e)
+        {
+            if (e.ApiError != null && e.ApiError.Message.Contains("phone_number"))
+            {
+                // Handle specific invalid phone number case
+                throw new Exception("Invalid phone number. Please check the number and try again.");
+            }
+            else
+            {
+                // Handle other Auth0 errors (could be email, user creation, etc.)
+                throw new Exception($"An error occurred: {e.ApiError?.Message}");
+            }
+        }
     }
 
     private async Task SendPasswordResetEmailAsync(string email, string connection)

@@ -3,6 +3,7 @@
 @inject IAddTrainerClientRelationshipUseCase AddTrainerClientRelationshipUseCase
 @inject IGetUserIdByAuth0IdUseCase GetUserIdByAuth0IdUseCase
 @inject IGetUserIdsByAuth0IdsUseCase GetUserIdsByAuth0IdsUseCase
+@inject ISnackbar Snackbar
 @inject Auth0UserService Auth0UserService
 @inject NavigationManager NavigationManager
 @inject UserService UserService
@@ -15,7 +16,7 @@
             <MudTextField @bind-Value="lastName" Label="Last Name" Placeholder="Enter user last name" Required OnlyValidateIfDirty Validation="ValidateLastName" />
 
             <MudTextField Mask="@mask1" Label="Phone Number" HelperText="@mask1.Mask"
-                          @bind-Value="phoneNumber" Variant="@Variant.Text" Clearable Required InputType="InputType.Telephone" />
+                          @bind-Value="phoneNumber" Variant="@Variant.Text" Clearable Required InputType="InputType.Telephone" Validation="ValidatePhoneNumber" />
 
             <MudTextField Label="Email Address" HelperText="Ex. user@domain.com"
                           @bind-Value="email" Variant="@Variant.Text" Clearable Required OnlyValidateIfDirty InputType="InputType.Email" Validation="ValidateEmail" />
@@ -47,7 +48,7 @@
     private string fullName => $"{firstName} {lastName}";
     private string phoneNumber;
     private string email;
-    
+
     private string selectedRoleId;
     private IList<Role> Roles = new List<Role>();
     private IEnumerable<string> selectedTrainerAuth0Ids = new List<string>();
@@ -58,11 +59,22 @@
     private Func<string, bool> ValidateLastName = value => !string.IsNullOrWhiteSpace(value) && value.Length >= 2;
     private Func<string, bool> ValidateEmail = email =>
     {
-    // Basic regex for email validation
-    var emailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
-    return !string.IsNullOrWhiteSpace(email) && emailRegex.IsMatch(email);
+        // Basic regex for email validation
+        var emailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+        return !string.IsNullOrWhiteSpace(email) && emailRegex.IsMatch(email);
     };
-    public PatternMask mask1 = new PatternMask("XXX-XXX-XXXX")
+
+    private Func<string, bool> ValidatePhoneNumber = value =>
+    {
+        if (!value.StartsWith("+"))
+        {
+            value = "+" + value;
+        }
+        return Regex.IsMatch(value, @"^\+[1-9]\d{1,14}$");
+    };
+
+
+    public PatternMask mask1 = new PatternMask("X-XXX-XXX-XXXX")
         {
             MaskChars = new[] { new MaskChar('X', @"[0-9]") },
             Placeholder = '_',
@@ -83,30 +95,44 @@
 
     private async Task SendInvitation()
     {
-        // Create client user and get their Auth0 ID
-        var clientAuth0Id = await Auth0UserService.CreateUserAndSendResetEmailAsync(firstName, lastName, fullName, phoneNumber, email, selectedRoleId);
-
-        // Get the user's internal ID based on the Auth0 ID
-        var clientUserId = await GetUserIdByAuth0IdUseCase.ExecuteAsync(clientAuth0Id);
-
-        IEnumerable<Guid> trainerUserIds = Enumerable.Empty<Guid>(); // Default to an empty list
-
-        if (selectedTrainerAuth0Ids != null && selectedTrainerAuth0Ids.Any())
+        try
         {
-            trainerUserIds = await GetUserIdsByAuth0IdsUseCase.ExecuteAsync(selectedTrainerAuth0Ids);
-        }
+            // Ensure phone number starts with '+'
+            if (!phoneNumber.StartsWith("+"))
+            {
+                phoneNumber = "+" + phoneNumber;
+            }
 
-        // Add the trainer-client relationship if both IDs are valid
-        if (trainerUserIds.Any())
+            // Create client user and get their Auth0 ID
+            var clientAuth0Id = await Auth0UserService.CreateUserAndSendResetEmailAsync(firstName, lastName, fullName, phoneNumber, email, selectedRoleId);
+
+            // Get the user's internal ID based on the Auth0 ID
+            var clientUserId = await GetUserIdByAuth0IdUseCase.ExecuteAsync(clientAuth0Id);
+
+            IEnumerable<Guid> trainerUserIds = Enumerable.Empty<Guid>(); // Default to an empty list
+
+            if (selectedTrainerAuth0Ids != null && selectedTrainerAuth0Ids.Any())
+            {
+                trainerUserIds = await GetUserIdsByAuth0IdsUseCase.ExecuteAsync(selectedTrainerAuth0Ids);
+            }
+
+            // Add the trainer-client relationship if both IDs are valid
+            if (trainerUserIds.Any())
+            {
+                var trainerUserId = trainerUserIds.First(); // Use the first trainer ID for the relationship
+                await AddTrainerClientRelationshipUseCase.ExecuteAsync(clientUserId, trainerUserIds);
+            }
+
+            // Delay for a short duration so the changes can be reflected in Auth0
+            await Task.Delay(1000);
+
+            NavigationManager.NavigateTo("/user-management");
+        }
+        catch (Exception e)
         {
-            // Ensure you have a valid trainerUserId, which is likely from the first trainer in the list
-            var trainerUserId = trainerUserIds.First(); // Use the first trainer ID for the relationship
-            await AddTrainerClientRelationshipUseCase.ExecuteAsync(clientUserId, trainerUserIds);
+            // Show an error message in a Snackbar
+            Snackbar.Add($"Error: {e.Message}", Severity.Error);
         }
-        // Delay for a short duration so the changes can be reflected in auth0. Might be able to avoid this later by using the ServerData feature of the mud table
-        await Task.Delay(1000);
-
-        NavigationManager.NavigateTo("/user-management");
     }
 
     private void Cancel()
