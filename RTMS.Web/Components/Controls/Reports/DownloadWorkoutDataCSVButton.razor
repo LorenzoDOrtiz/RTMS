@@ -28,8 +28,7 @@
     private string GenerateCsv(List<Workout> workouts)
     {
         var csv = new StringBuilder();
-        csv.AppendLine("Workout ID,Workout Name,Start Time,End Time,Total Volume,Exercise Name,Reps,Weight,Exercise Volume");
-
+        csv.AppendLine("Workout ID,Workout Name,Start Time,End Time,Total Workout Volume,Exercise Name,Set Number,Reps,Weight,Exercise Volume");
         foreach (var workout in workouts)
         {
             if (workout.Exercises != null && workout.Exercises.Any())
@@ -37,22 +36,23 @@
                 foreach (var exercise in workout.Exercises)
                 {
                     var exerciseVolume = exercise.TotalExerciseVolume;
+                    int setNumber = 1;
                     foreach (var set in exercise.Sets)
                     {
                         var line = $"{workout.Id},{workout.Name},{workout.StartTime},{workout.EndTime}," +
                                    $"{workout.TotalWorkoutVolume}," +
-                                   $"{exercise.Name},{set.Reps},{set.Weight},{exerciseVolume}";
+                                   $"{exercise.Name},{setNumber},{set.Reps},{set.Weight},{exerciseVolume}";
                         csv.AppendLine(line);
+                        setNumber++;
                     }
                 }
             }
             else
             {
-                var line = $"{workout.Id},{workout.Name},{workout.StartTime},{workout.EndTime},{workout.TotalWorkoutVolume},,,,"; // Additional commas for exercise data
+                var line = $"{workout.Id},{workout.Name},{workout.StartTime},{workout.EndTime},{workout.TotalWorkoutVolume},,,,,"; // Additional commas for exercise data
                 csv.AppendLine(line);
             }
         }
-
         return csv.ToString();
     }
 }
