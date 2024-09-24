@@ -5,8 +5,8 @@ using RTMS.UseCases.WorkoutTemplates.Interfaces;
 namespace RTMS.UseCases.WorkoutTemplates;
 public class EditWorkoutTemplateUseCase(IWorkoutTemplateRepository workoutRepository) : IEditWorkoutTemplateUseCase
 {
-    public async Task ExecuteAsync(WorkoutTemplate workout)
+    public async Task<WorkoutTemplate> ExecuteAsync(WorkoutTemplate workoutTemplate)
     {
-        await workoutRepository.UpdateWorkoutTemplateAsync(workout);
+        return await workoutRepository.UpdateWorkoutTemplateAsync(workoutTemplate);
     }
 }

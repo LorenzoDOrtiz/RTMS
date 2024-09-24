@@ -26,7 +26,16 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddEnvironmentVariables();
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddEnvironmentVariables();
+
+    builder.Services.AddDbContextFactory<RTMSDBContext>(options =>
+    {
+        options.UseNpgsql(builder.Configuration["POSTGRESQLCONNSTR_AZURE_POSTGRESQL_CONNECTIONSTRING"]);
+    });
+}
+
 
 builder.Services.AddRazorComponents()
 .AddInteractiveServerComponents();
@@ -69,7 +78,7 @@ builder.Services.AddSingleton(sp =>
 
 builder.Services.AddDbContextFactory<RTMSDBContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration["POSTGRESQLCONNSTR_AZURE_POSTGRESQL_CONNECTIONSTRING"]);
+    options.UseNpgsql(builder.Configuration.GetConnectionString("RTMSLocalDB"));
 });
 
 builder.Services.AddBlazoredLocalStorage();

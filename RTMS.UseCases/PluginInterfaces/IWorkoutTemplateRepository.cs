@@ -11,6 +11,6 @@ public interface IWorkoutTemplateRepository
     Task<List<WorkoutTemplate>> GetWorkoutTemplatesByUserIdAsync(Guid userId);
     Task<List<WorkoutTemplate>> GetWorkoutTemplatesWithAtLeastTwoWorkoutsAsync(Guid userId);
     Task RemoveTrainerTemplateFromClientAsync(int workoutTemplateId, Guid clientId);
-    Task UpdateWorkoutTemplateAsync(WorkoutTemplate workoutTemplate);
+    Task<WorkoutTemplate> UpdateWorkoutTemplateAsync(WorkoutTemplate workoutTemplate);
     Task<List<WorkoutTemplate>> ViewClientWorkoutTemplatesAsync(Guid clientId);
 }

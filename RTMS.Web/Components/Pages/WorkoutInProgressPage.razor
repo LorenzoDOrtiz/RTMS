@@ -226,77 +226,105 @@ else
         // Map the current workout view model to the workout entity
         _workout = Mapper.Map<Workout>(_workoutViewModel);
 
-        // Check if the user is a non-trainer and the workout template was assigned by a trainer
-        if (!UserService.IsTrainer && _workoutTemplate.UserId != UserService.UserId)
+        // If the workout was created from another user's template, ensure ExerciseTemplateId and SetTempalteId is null
+        // so that the new exercise and sets aren't associated with a template
+        if (_workoutTemplate.UserId != UserService.UserId)
         {
-            // Set SetTemplateId to null for newly added sets only
             foreach (var exercise in _workout.Exercises)
             {
-                if (exercise.Id == 0) // Check if the set is new
-                {
-                    exercise.ExerciseTemplateId = null; // Ensure this is null for new sets
-                }
-                // Check if the exercise has a new set (Id is 0)
+                exercise.ExerciseTemplateId = null;
+
                 foreach (var set in exercise.Sets)
                 {
-                    if (set.Id == 0) // Check if the set is new
+                    set.SetTemplateId = null;
+                }
+            }
+        }
+
+        // if the person doing the workout owns the template it was created from give them the option to update the template
+        if (_workoutTemplate.UserId == UserService.UserId)
+        {
+            var changesPresent = WorkoutTemplateDiffersFromWorkout(_workoutTemplate, _workout);
+
+            if (changesPresent)
+            {
+                var dialogResult = await OpenDialogAsync();
+
+                if (!dialogResult.Canceled)
+                {
+                    // Create the updated workout template
+                    var _updatedWorkoutTemplate = new WorkoutTemplate
+                        {
+                            Id = _workout.WorkoutTemplateId.Value,
+                            UserId = _workout.UserId,
+                            Name = _workout.Name,
+                            Exercises = _workout.Exercises.Select(exercise => new ExerciseTemplate
+                            {
+                                Id = exercise.ExerciseTemplateId ?? 0, // Handle null IDs for new exercises
+                                WorkoutTemplateId = _workout.WorkoutTemplateId.Value,
+                                Name = exercise.Name,
+                                RestTimerValue = exercise.RestTimerValue,
+                                RestTimerUnit = exercise.RestTimerUnit,
+                                Sets = exercise.Sets.Select(set => new ExerciseSetTemplate
+                                {
+                                    Id = set.SetTemplateId ?? 0, // Handle null IDs for new sets
+                                    ExerciseTemplateId = exercise.ExerciseTemplateId ?? 0
+                                }).ToList(),
+                                Note = exercise.Note
+                            }).ToList()
+                        };
+
+                    // Execute the update for the workout template
+                    var updatedWorkoutTemplate = await EditWorkoutTemplateUseCase.ExecuteAsync(_updatedWorkoutTemplate);
+
+                    // Map updated exercise template IDs to the workout
+                    foreach (var exercise in _workout.Exercises)
                     {
-                        set.SetTemplateId = null; // Ensure this is null for new sets
+                        var updatedExercise = updatedWorkoutTemplate.Exercises.SingleOrDefault(e => e.Name == exercise.Name);
+                        if (updatedExercise != null)
+                        {
+                            exercise.ExerciseTemplateId = updatedExercise.Id;
+
+                            foreach (var set in exercise.Sets)
+                            {
+                                var updatedSet = updatedExercise.Sets.SingleOrDefault(s => s.Id == set.SetTemplateId);
+                                if (updatedSet != null)
+                                {
+                                    set.SetTemplateId = updatedSet.Id;
+                                }
+                                else
+                                {
+                                    // Ensure new sets are added correctly and have valid IDs
+                                    set.SetTemplateId = updatedExercise.Sets.FirstOrDefault()?.Id ?? 0;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // If the exercise is new, ensure it has a valid ExerciseTemplateId after update
+                            exercise.ExerciseTemplateId = updatedWorkoutTemplate.Exercises
+                                .FirstOrDefault(e => e.Name == exercise.Name)?.Id ?? 0;
+                        }
+                    }
+                }
+                // If they don't want to update the template and they own the exercise the template was created from, set the template id for exercise and set to null
+                // so the new exercise and sets are saved in workout history but aren't associated with any exercise or set templates
+                else 
+                {
+                    foreach (var exercise in _workout.Exercises)
+                    {
+                        exercise.ExerciseTemplateId = null;
+
+                        foreach (var set in exercise.Sets)
+                        {
+                            set.SetTemplateId = null;
+                        }
                     }
                 }
             }
-
-            // Non-trainers: end the workout without any update prompt
-            await EndWorkoutUseCase.ExecuteAsync(_workout);
-
-            // Clear local storage before resetting
-            await LocalStorage.RemoveItemAsync("rtms_active_workout");
-
-            ActiveWorkoutService.ActiveWorkout = null;
-
-            // Reset view model
-            _workoutViewModel = null;
-
-            // Navigate to workouts page
-            NavigationManager.NavigateTo("/workouts");
-            return; // Exit to prevent further processing
         }
 
-        // If the user is a trainer or the workout template belongs to them, check for changes
-        var changesPresent = WorkoutTemplateDiffersFromWorkout(_workoutTemplate, _workout);
-
-        if (changesPresent)
-        {
-            var dialogResult = await OpenDialogAsync();
-
-            if (!dialogResult.Canceled)
-            {
-                // Create the updated workout template to update the workout template in the database
-                var _updatedWorkoutTemplate = new WorkoutTemplate
-                    {
-                        Id = _workout.WorkoutTemplateId.Value,
-                        UserId = _workout.UserId,
-                        Name = _workout.Name,
-                        Exercises = _workout.Exercises.Select(exercise => new ExerciseTemplate
-                        {
-                            Id = exercise.ExerciseTemplateId.Value,
-                            WorkoutTemplateId = _workout.WorkoutTemplateId.Value,
-                            Name = exercise.Name,
-                            RestTimerValue = exercise.RestTimerValue,
-                            RestTimerUnit = exercise.RestTimerUnit,
-                            Sets = exercise.Sets.Select(set => new ExerciseSetTemplate
-                            {
-                                Id = set.SetTemplateId.Value,
-                                ExerciseTemplateId = exercise.ExerciseTemplateId.Value
-                            }).ToList(),
-                            Note = exercise.Note
-                        }).ToList()
-                    };
-
-                // Execute the update for the workout template
-                await EditWorkoutTemplateUseCase.ExecuteAsync(_updatedWorkoutTemplate);
-            }
-        }
+        // Finally, save the workout (whether the template was updated or not)
         await EndWorkoutUseCase.ExecuteAsync(_workout);
 
         // Clear local storage before resetting
@@ -304,7 +332,6 @@ else
 
         ActiveWorkoutService.ActiveWorkout = null;
 
-        // Reset view model
         _workoutViewModel = null;
 
         // Navigate to workouts page

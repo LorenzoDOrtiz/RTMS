@@ -93,7 +93,7 @@ public class WorkoutTemplateRepositoryPostgreEFCore(IDbContextFactory<RTMSDBCont
     }
 
     // EF core doesn't track changes in exercise or sets since we go to and from view models so we have to do this monstrosity
-    public async Task UpdateWorkoutTemplateAsync(WorkoutTemplate workoutTemplate)
+    public async Task<WorkoutTemplate> UpdateWorkoutTemplateAsync(WorkoutTemplate workoutTemplate)
     {
         using var context = contextFactory.CreateDbContext();
 
@@ -171,7 +171,10 @@ public class WorkoutTemplateRepositoryPostgreEFCore(IDbContextFactory<RTMSDBCont
             }
 
             await context.SaveChangesAsync();
+
+            return existingTemplate;
         }
+        return null;
     }
 
     public async Task<List<WorkoutTemplate>> GetWorkoutTemplatesWithAtLeastTwoWorkoutsAsync(Guid userId)
