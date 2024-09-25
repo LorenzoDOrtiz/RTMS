@@ -19,8 +19,6 @@ stages:
 
 build_job:
   stage: build
-  only:
-    - tags
   script:
     - 'dotnet restore'  # Restore NuGet packages for the entire solution
     - 'dotnet build --configuration Release'  # Build all projects in the solution
@@ -31,8 +29,6 @@ build_job:
 
 test_job:
   stage: test
-  only:
-    - tags
   script:
     - 'dotnet test $TEST_PROJECT --logger:"console;verbosity=detailed" --logger:"trx;LogFileName=TestResults.trx"'
   artifacts:
@@ -47,12 +43,10 @@ test_job:
 
 deploy_job:
   stage: deploy
-  only:
-    - tags
   script:
     - 'apt-get update && apt-get install -y git zip'  # Install git and zip for commit message and zipping files
     - 'commitSubject=$(git log -1 --pretty=%s)'
-    - 'deployFolder="$DEPLOY_FOLDER/$CI_COMMIT_TAG - $commitSubject"'  # Define the deploy folder first
+    - 'deployFolder="$DEPLOY_FOLDER/$CI_COMMIT_REF_NAME - $commitSubject"'  # Use branch name
     - 'mkdir -p "$deployFolder"'  # Then create the folder
     - 'cp "$EXE_RELEASE_FOLDER/RTMS.Web.dll" "$deployFolder/"'  # Copy the DLL
     - 'cp "$CI_PROJECT_DIR/RTMS.Tests/TestResults/TestResults.trx" "$deployFolder/"'  # Copy test results
