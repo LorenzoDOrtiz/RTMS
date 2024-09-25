@@ -54,7 +54,7 @@ deploy_job:
     - 'az login --service-principal -u $AZURE_APP_ID -p $AZURE_PASSWORD --tenant $AZURE_TENANT'  # Login to Azure
     - 'cd $EXE_RELEASE_FOLDER'  # Change to the release folder
     - 'zip -r ./RTMS.Web.zip ./'  # Zip the contents of the release folder
-    - 'az webapp deploy --resource-group rtms --name rtms-app --subscription aee5d6e9-323d-4d4d-a1aa-1e2228118012 --src-path "./RTMS.Web.zip" --type zip'  # Deploy the app!
+    - 'az webapp deploy --resource-group $AZURE_RESOURCE_GROUP --name $AZURE_APP_NAME --subscription $AZURE_SUBSCRIPTION_ID --src-path "./RTMS.Web.zip" --type zip'  # Deploy the app!
   dependencies:
     - build_job
     - test_job
