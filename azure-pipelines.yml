@@ -65,4 +65,4 @@ stages:
           - download: 'buildPipeline'
             name: 'DownloadBuildArtifacts'            
             displayName: 'Download build artifacts'
-            artifact: 'AzureTestProject'
+            artifact: 'RTMS'
