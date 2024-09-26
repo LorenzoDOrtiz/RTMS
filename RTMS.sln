@@ -13,7 +13,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RTMS.Plugins", "RTMS.Plugin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RTMS.Plugins.PostgreEFCore", "RTMS.Plugins\RTMS.Plugins.PostgreEFCore\RTMS.Plugins.PostgreEFCore.csproj", "{2598E225-80C9-4A09-8AEA-F860D158363D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTMS.Tests", "RTMS.Tests\RTMS.Tests.csproj", "{A7178A5D-8FC1-4AB0-A66D-BA5AF25E5EB9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RTMS.Tests", "RTMS.Tests\RTMS.Tests.csproj", "{A7178A5D-8FC1-4AB0-A66D-BA5AF25E5EB9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E64D2531-DE20-4594-B19E-6D3E0D72BD1A}"
+	ProjectSection(SolutionItems) = preProject
+		readme.md = readme.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
