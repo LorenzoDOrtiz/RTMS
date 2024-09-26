@@ -16,6 +16,7 @@ variables:
   buildConfiguration: 'Release'
   solution: '**/RTMS.sln'
   project: '**/RTMS.Web.csproj'
+  test-project: '**/RTMS.Tests.csproj'
 
 steps:
 - task: NuGetToolInstaller@1
@@ -35,7 +36,7 @@ steps:
   displayName: 'Run tests'
   inputs:
     command: 'test'
-    projects: '$(solution)'
+    projects: '$(test-project)'
     arguments: '--configuration $(BuildConfiguration)'
 
 - task: DotNetCoreCLI@2
